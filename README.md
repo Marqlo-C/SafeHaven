@@ -54,3 +54,45 @@ Features are activated in `app.js` using the following pattern:
 *   **Lean Core**: The `main` file remains as small as possible, acting only as a librarian that calls external modules.
 *   **Fail-Safe**: If a feature is disabled in `config.json`, no part of its code executes, ensuring unfinished features cannot compromise the production environment.
 *   **Singleton Pattern**: By requiring `config.js` across different files, the application uses a cached, single instance of settings, optimizing performance for your hardware.
+
+## 4. Collaborative Git Workflow
+Collaborators must follow these steps for all feature development:
+
+### I. Branch Creation
+Every time you create a new feature, start by creating a dedicated branch:
+```bash
+git checkout -b feature/feature_name
+```
+
+### II. Development and Upstream Push
+When your changes are ready to be pushed to the remote repository:
+```bash
+git add feature_name.js
+git commit -m "brief description of feature"
+git push origin feature/feature_name
+```
+
+### III. Pull Request (PR)
+Go to GitHub and open a Pull Request to merge your feature branch into the `main` branch. This is the only way to integrate code into the stable codebase.
+
+### IV. Continuous Development
+Keep your local feature branch alive during the PR review process. To start a different feature, return to the `main` branch and repeat the creation process:
+```bash
+git checkout main
+```
+
+### V. Branch Cleanup
+Once features are successfully implemented in `origin/main` (i.e., the PR is approved and validated as working), delete your local branch:
+```bash
+# Standard safe delete
+git branch -d feature/feature_name
+
+# Force delete (Use only if absolutely necessary; ask Lead before using)
+git branch -D feature/feature_name
+```
+
+## 5. Design Principles
+*   **Lean Core**: The `main` file remains as small as possible, acting only as a librarian that calls external modules.
+*   **Fail-Safe**: If a feature is disabled in `config.json`, no part of its code executes, ensuring unfinished features cannot compromise the production environment.
+*   **Singleton Pattern**: By requiring `config.js` across different files, the application uses a cached, single instance of settings, optimizing performance for our development environments.
+
