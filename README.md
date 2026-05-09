@@ -95,25 +95,32 @@ HackDavis 2026/
     ├── models/
     │   └── User.js            ← Mongoose schema: username, bcrypt hashes, display name.
     ├── lib/
-    │   └── db.js              ← Cached Mongoose connection (survives hot reloads).
+    │   ├── db.js              ← Cached Mongoose connection (survives hot reloads).
+    │   ├── withAuth.js        ← getServerSideProps wrapper — protects pages.
+    │   └── requireAuth.js     ← API route wrapper — enforces auth on endpoints.
     ├── middleware/
     │   └── securityHeaders.js ← Cache-prevention + security headers for auth routes.
     ├── hooks/
-    │   └── usePrivacyMode.js  ← SW registration, history lock, session wipe on hide.
+    │   ├── usePrivacyMode.js  ← SW registration, history lock, session wipe on hide.
+    │   └── useChat.js         ← Socket.io client hook: connect, join room, messages.
     ├── components/
-    │   └── PanicExit.jsx      ← Always-on quick-exit (Escape / triple-tap / button).
+    │   ├── PanicExit.jsx      ← Always-on quick-exit (Escape / triple-tap / button).
+    │   └── ChatRoom.jsx       ← Anonymous real-time chat UI.
     ├── pages/
     │   ├── _app.jsx           ← Global CSS import.
     │   ├── index.jsx          ← Landing page: describes app, links to 3 PWA installs.
-    │   └── app/
-    │       └── [theme].jsx    ← App shell for calculator | news | weather.
-    │           └── api/auth/
-    │               ├── register.js
-    │               ├── login.js
-    │               └── logout.js
+    │   ├── login.jsx          ← Login / Register page (toggles between modes).
+    │   ├── app/
+    │   │   └── [theme].jsx    ← Auth-gated app shell for calculator | news | weather.
+    │   └── api/auth/
+    │       ├── register.js
+    │       ├── login.js
+    │       └── logout.js
     └── styles/
-        ├── globals.css        ← CSS custom properties, resets. Updated at Figma handoff.
-        └── Landing.module.css ← Scoped landing page styles. Updated at Figma handoff.
+        ├── globals.css           ← CSS custom properties, resets. Updated at Figma handoff.
+        ├── Landing.module.css    ← Landing page styles. Updated at Figma handoff.
+        ├── Login.module.css      ← Login/Register page styles. Updated at Figma handoff.
+        └── ChatRoom.module.css   ← Chat UI styles. Updated at Figma handoff.
 ```
 
 ---
@@ -191,6 +198,49 @@ Each user can optionally set a second password. When the duress password is used
 - The JWT payload carries `{ duressMode: true }`.
 - The client can use this to silently wipe sensitive content or show a decoy screen.
 - The abuser sees a normal-looking app. The survivor gets a safe view.
+
+### Protecting pages — `withAuth`
+
+Wrap `getServerSideProps` on any page that requires a valid session:
+
+```javascript
+const { withAuth } = require('../../lib/withAuth');
+
+export const getServerSideProps = withAuth(async (context, session) => {
+  // session = { sub, displayName, duressMode }
+  return { props: { anything: true } };
+});
+```
+
+Redirects to `/login` if the cookie is missing or expired. On expiry, clears the stale cookie automatically.
+
+### Protecting API routes — `requireAuth`
+
+Wrap any API route handler that needs a verified session:
+
+```javascript
+const { requireAuth } = require('../../../lib/requireAuth');
+
+export default requireAuth(async (req, res) => {
+  const { sub, displayName } = req.session;
+  res.json({ displayName });
+});
+```
+
+Returns `401` with a JSON error if the token is missing or invalid.
+
+### User flow
+
+```
+/ (landing)
+  └── /app/[theme]  →  withAuth check
+        ↓ no valid cookie
+      /login  →  POST /api/auth/login  →  cookie set
+        ↓ success
+      /app/[theme]  (authenticated)
+```
+
+The login page also skips itself if a valid cookie already exists (redirects straight to `/app/calculator`).
 
 ---
 
@@ -274,13 +324,53 @@ git branch -D feature/feature_name          # force delete — ask Lead first
 
 ---
 
+## Anonymous Chat
+
+The chat system is live end-to-end. Rooms are ephemeral — they exist only while sockets are connected and no messages are persisted.
+
+### How it works
+
+| Layer | File | Responsibility |
+|---|---|---|
+| Server events | `src/features/chat_feature.js` | `join_room`, `send_message`, `disconnect` handlers |
+| Client hook | `src/hooks/useChat.js` | Socket.io connection, room join, message state |
+| UI component | `src/components/ChatRoom.jsx` | Message list, composer, own/other bubble detection |
+
+### Socket events
+
+| Direction | Event | Payload |
+|---|---|---|
+| Client → Server | `join_room` | `{ roomId }` |
+| Client → Server | `send_message` | `{ roomId, message }` |
+| Server → Client | `receive_message` | `{ senderId, message, timestamp }` |
+| Server → Client | `user_joined` | `{ roomId }` |
+
+Message ownership is determined by comparing `msg.senderId` to the socket's own ephemeral `socket.id`. No persistent user identity is used.
+
+### Using ChatRoom in a page
+
+```jsx
+import ChatRoom from '../components/ChatRoom';
+
+// session.displayName comes from withAuth → JWT payload
+<ChatRoom roomId="general" displayName={session.displayName} />
+```
+
+Room IDs are arbitrary strings. Future features (resource directory, crisis escalation) will use specific room IDs per resource or counselor session.
+
+---
+
 ## UI / Design Handoff
 
-The landing page (`src/pages/index.jsx`) and app shell (`src/pages/app/[theme].jsx`) are placeholder implementations. When the Figma/Open Design handoff arrives:
+All pages and components are functional placeholders. When the Figma/Open Design handoff arrives:
 
-1. Replace `src/styles/globals.css` with the design system tokens.
-2. Replace `src/styles/Landing.module.css` with the scoped landing page styles.
-3. Update `src/pages/index.jsx` content/markup to match the design.
-4. Add cover-identity UI components inside `[theme].jsx` (the placeholder section is clearly marked).
+| File to replace | What changes |
+|---|---|
+| `src/styles/globals.css` | Design system tokens (colors, typography, spacing) |
+| `src/styles/Landing.module.css` | Landing page layout and visual design |
+| `src/styles/Login.module.css` | Login/Register form visual design |
+| `src/styles/ChatRoom.module.css` | Chat UI visual design |
+| `src/pages/index.jsx` | Content/copy and markup structure |
+| `src/pages/app/[theme].jsx` | Cover UI (calculator/news/weather disguise screens) |
 
-The HTML structure uses semantic elements with meaningful class names — designed to minimize rework at handoff.
+All React component logic, hooks, and API calls survive the handoff unchanged. Only CSS modules and markup structure get updated.
