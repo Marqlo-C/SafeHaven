@@ -1,21 +1,9 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const GEOLOCATION_OPTIONS = {
   enableHighAccuracy: true,
-  timeout: 10000,
   maximumAge: 0,
 };
-
-function getBrowserPosition() {
-  return new Promise((resolve, reject) => {
-    if (typeof navigator === 'undefined' || !navigator.geolocation) {
-      reject(new Error('Location is not available in this browser.'));
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(resolve, reject, GEOLOCATION_OPTIONS);
-  });
-}
 
 async function parseError(response) {
   try {
@@ -30,17 +18,11 @@ export function useGeolocation() {
   const [location, setLocation] = useState(null);
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState('');
+  const [isWatching, setIsWatching] = useState(false);
+  const watcherIdRef = useRef(null);
 
-  const fetchAndStoreLocation = useCallback(async () => {
-    setStatus('requesting');
-    setError('');
-
-    try {
-      const position = await getBrowserPosition();
-      const { coords, timestamp } = position;
-
-      setStatus('saving');
-
+  const storePosition = useCallback(async (position) => {
+    const { coords, timestamp } = position;
       const response = await fetch('/api/geolocation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -62,13 +44,58 @@ export function useGeolocation() {
 
       const body = await response.json();
       setLocation(body.location);
-      setStatus('saved');
-      return body.location;
-    } catch (err) {
+    return body.location;
+  }, []);
+
+  const startLiveLocation = useCallback(() => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
       setStatus('error');
-      setError(err.message || 'Unable to access location.');
-      return null;
+      setError('Location is not available in this browser.');
+      return false;
     }
+
+    if (watcherIdRef.current !== null) {
+      return true;
+    }
+
+    setStatus('requesting');
+    setError('');
+    setIsWatching(true);
+
+    watcherIdRef.current = navigator.geolocation.watchPosition(
+      async (position) => {
+        try {
+          setStatus('saving');
+          await storePosition(position);
+          setStatus('live');
+        } catch (err) {
+          setStatus('error');
+          setError(err.message || 'Unable to save live location.');
+        }
+      },
+      (err) => {
+        setStatus('error');
+        setError(err.message || 'Unable to access live location.');
+        setIsWatching(false);
+        if (watcherIdRef.current !== null) {
+          navigator.geolocation.clearWatch(watcherIdRef.current);
+        }
+        watcherIdRef.current = null;
+      },
+      GEOLOCATION_OPTIONS
+    );
+
+    return true;
+  }, [storePosition]);
+
+  const stopLiveLocation = useCallback(() => {
+    if (watcherIdRef.current !== null && typeof navigator !== 'undefined') {
+      navigator.geolocation.clearWatch(watcherIdRef.current);
+      watcherIdRef.current = null;
+    }
+
+    setIsWatching(false);
+    setStatus((currentStatus) => (currentStatus === 'live' ? 'saved' : currentStatus));
   }, []);
 
   const loadStoredLocation = useCallback(async () => {
@@ -93,6 +120,7 @@ export function useGeolocation() {
   }, []);
 
   const clearStoredLocation = useCallback(async () => {
+    stopLiveLocation();
     setStatus('clearing');
     setError('');
 
@@ -110,13 +138,17 @@ export function useGeolocation() {
       setError(err.message || 'Unable to clear location.');
       return false;
     }
-  }, []);
+  }, [stopLiveLocation]);
+
+  useEffect(() => stopLiveLocation, [stopLiveLocation]);
 
   return {
     location,
     status,
     error,
-    fetchAndStoreLocation,
+    isWatching,
+    startLiveLocation,
+    stopLiveLocation,
     loadStoredLocation,
     clearStoredLocation,
   };
