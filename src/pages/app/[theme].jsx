@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import PanicExit from '../../components/PanicExit';
+import LoginButton from '../../components/LoginButton';
 import ChatRoom from '../../components/ChatRoom';
 import CalculatorCover from '../../components/CalculatorCover';
 import NewsCover from '../../components/NewsCover';
@@ -91,6 +92,7 @@ export default function AppShell({ themeKey, appName, manifestUrl, themeColor, a
       </main>
 
       <PanicExit />
+      <LoginButton />
     </>
   );
 }
