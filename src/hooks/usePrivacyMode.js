@@ -65,11 +65,12 @@ export function usePrivacyMode() {
 export function triggerPanicExit() {
   const safeUrl = process.env.NEXT_PUBLIC_SAFE_EXIT_URL || 'https://www.google.com';
 
-  // Order matters: clear local state before navigating.
   sessionStorage.clear();
   postToSW({ type: 'PANIC' });
 
-  // replace() removes the current history entry — no back-button escape.
+  // keepalive ensures the request completes even as the page navigates away.
+  fetch('/api/auth/logout', { method: 'POST', keepalive: true }).catch(() => {});
+
   window.location.replace(safeUrl);
 }
 

@@ -289,10 +289,11 @@ Chrome distinguishes the three as separate installed apps via the `"id"` field i
 | Panic exit — Escape key | Single keypress redirects immediately |
 | Panic exit — triple-tap | Three taps within 600ms on any touch surface |
 | Panic exit — corner button | Discreet fixed `✕` button, bottom-right |
-| Panic redirect | `window.location.replace(NEXT_PUBLIC_SAFE_EXIT_URL)` — removes history entry |
+| Panic redirect | Calls `POST /api/auth/logout` (`keepalive: true`) to clear the auth cookie, then `window.location.replace(NEXT_PUBLIC_SAFE_EXIT_URL)` — removes history entry |
 | No indexing | `<meta name="robots" content="noindex, nofollow">` on app shell pages |
 | No referrer leakage | `Referrer-Policy: no-referrer` site-wide |
 | No autofill | `autocomplete="off"` / `autocomplete="new-password"` on all auth inputs |
+| Password visibility toggle | Show/Hide button on each password field — no clipboard or autofill exposure |
 
 > **Location tracking**: Not blocked by default. Geolocation will be needed for the panic/report feature. Decision deferred to the safety alert feature implementation.
 
