@@ -20,7 +20,7 @@ const { initFeatures } = require('./src/app');
 
 const dev = process.env.NODE_ENV !== 'production';
 const port = parseInt(process.env.PORT || '3000', 10);
-const hostname = process.env.HOSTNAME || (dev ? 'localhost' : '0.0.0.0');
+const hostname = dev ? 'localhost' : '0.0.0.0';
 
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
