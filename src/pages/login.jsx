@@ -10,6 +10,8 @@ export default function LoginPage() {
 
   const [mode, setMode] = useState('login');
   const [fields, setFields] = useState({ username: '', password: '', duressPassword: '' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showDuress, setShowDuress] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(false);
@@ -108,16 +110,26 @@ export default function LoginPage() {
 
             <div className={styles.field}>
               <label htmlFor="password" className={styles.label}>Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                value={fields.password}
-                onChange={update}
-                className={styles.input}
-                autoComplete="new-password"
-                required
-              />
+              <div className={styles.inputWrapper}>
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={fields.password}
+                  onChange={update}
+                  className={styles.input}
+                  autoComplete="new-password"
+                  required
+                />
+                <button
+                  type="button"
+                  className={styles.revealBtn}
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
             </div>
 
             {mode === 'register' && (
@@ -130,15 +142,25 @@ export default function LoginPage() {
                   A second password that activates a discreet safe view when used to sign in.
                   Must differ from your primary password.
                 </p>
-                <input
-                  id="duressPassword"
-                  name="duressPassword"
-                  type="password"
-                  value={fields.duressPassword}
-                  onChange={update}
-                  className={styles.input}
-                  autoComplete="new-password"
-                />
+                <div className={styles.inputWrapper}>
+                  <input
+                    id="duressPassword"
+                    name="duressPassword"
+                    type={showDuress ? 'text' : 'password'}
+                    value={fields.duressPassword}
+                    onChange={update}
+                    className={styles.input}
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    className={styles.revealBtn}
+                    onClick={() => setShowDuress((v) => !v)}
+                    aria-label={showDuress ? 'Hide safety password' : 'Show safety password'}
+                  >
+                    {showDuress ? 'Hide' : 'Show'}
+                  </button>
+                </div>
               </div>
             )}
 
