@@ -2,24 +2,28 @@ import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import PanicExit from '../../components/PanicExit';
 import ChatRoom from '../../components/ChatRoom';
+import CalculatorCover from '../../components/CalculatorCover';
 import { usePrivacyMode } from '../../hooks/usePrivacyMode';
 
 const { withAuth } = require('../../lib/withAuth');
 
 const THEMES = {
   calculator: {
+    themeKey: 'calculator',
     appName: 'Calculator Pro',
     manifestUrl: '/manifests/calculator.json',
     themeColor: '#1a1a2e',
     appleTouchIcon: '/resources/images/logos/calculator_icon_192x192.png',
   },
   news: {
+    themeKey: 'news',
     appName: 'Daily News Reader',
     manifestUrl: '/manifests/news.json',
     themeColor: '#0d1b2a',
     appleTouchIcon: '/resources/images/logos/news_icon_192x192.png',
   },
   weather: {
+    themeKey: 'weather',
     appName: 'Weather Now',
     manifestUrl: '/manifests/weather.json',
     themeColor: '#0c2340',
@@ -27,7 +31,7 @@ const THEMES = {
   },
 };
 
-export default function AppShell({ appName, manifestUrl, themeColor, appleTouchIcon, session }) {
+export default function AppShell({ themeKey, appName, manifestUrl, themeColor, appleTouchIcon, session }) {
   usePrivacyMode();
 
   const [installPrompt, setInstallPrompt] = useState(null);
@@ -76,7 +80,11 @@ export default function AppShell({ appName, manifestUrl, themeColor, appleTouchI
         {/* ── Real app content ── */}
         {/* Cover UI (calculator/news/weather disguise) goes here at Figma handoff. */}
         {/* ChatRoom is the functional core until cover UIs are designed.           */}
-        <ChatRoom roomId="general" displayName={session.displayName} />
+        {themeKey === 'calculator' ? (
+          <CalculatorCover />
+        ) : (
+          <ChatRoom roomId="general" displayName={session.displayName} />
+        )}
       </main>
 
       <PanicExit />
