@@ -4,6 +4,7 @@ import PanicExit from '../../components/PanicExit';
 import ChatRoom from '../../components/ChatRoom';
 import CalculatorCover from '../../components/CalculatorCover';
 import NewsCover from '../../components/NewsCover';
+import LocationCapture from '../../components/LocationCapture';
 import { usePrivacyMode } from '../../hooks/usePrivacyMode';
 
 const { withAuth } = require('../../lib/withAuth');
@@ -32,7 +33,15 @@ const THEMES = {
   },
 };
 
-export default function AppShell({ themeKey, appName, manifestUrl, themeColor, appleTouchIcon, session }) {
+export default function AppShell({
+  themeKey,
+  appName,
+  manifestUrl,
+  themeColor,
+  appleTouchIcon,
+  session,
+  geolocationEnabled,
+}) {
   usePrivacyMode();
 
   const [installPrompt, setInstallPrompt] = useState(null);
@@ -81,6 +90,7 @@ export default function AppShell({ themeKey, appName, manifestUrl, themeColor, a
         {/* ── Real app content ── */}
         {/* Cover UI (calculator/news/weather disguise) goes here at Figma handoff. */}
         {/* ChatRoom is the functional core until cover UIs are designed.           */}
+        {geolocationEnabled && <LocationCapture />}
         {themeKey === 'calculator' ? (
           <CalculatorCover />
         ) : themeKey === 'news' ? (
@@ -98,10 +108,16 @@ export default function AppShell({ themeKey, appName, manifestUrl, themeColor, a
 // ── Auth-gated data fetching ──────────────────────────────────────────────────
 
 export const getServerSideProps = withAuth(async (context) => {
+  const config = require('../../config/config');
   const { params } = context;
   const theme = THEMES[params.theme];
   if (!theme) return { notFound: true };
-  return { props: theme };
+  return {
+    props: {
+      ...theme,
+      geolocationEnabled: Boolean(config.features.enable_geolocation),
+    },
+  };
 });
 
 // ── Inline styles (non-design, structural only) ───────────────────────────────
