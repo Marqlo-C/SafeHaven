@@ -54,9 +54,15 @@
   line-height: 1.5;
 }
 
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 .input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 10px 44px 10px 12px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -68,6 +74,21 @@
 
 .input:focus {
   border-color: var(--color-accent);
+}
+
+.revealBtn {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* ── Feedback ────────────────────────────────────────────────────────────── */

@@ -18,6 +18,12 @@ const User = require('../models/User');
 
 const JWT_EXPIRY = '24h'; // Server-side safety net; the session cookie expires first.
 
+const DB_ERROR_NAMES = new Set([
+  'MongooseError', 'MongoServerError', 'MongoNetworkError',
+  'MongoNetworkTimeoutError', 'MongoTopologyClosedError', 'ValidationError',
+]);
+const isDbError = (err) => DB_ERROR_NAMES.has(err.name) || err.name?.startsWith('Mongo');
+
 class AuthFeature {
   static init() {
     if (!config.env.JWT_SECRET) {
@@ -104,24 +110,32 @@ class AuthFeature {
       return res.status(400).json({ error: 'Duress password must differ from primary password.' });
     }
 
-    await connectDB();
+    try {
+      await connectDB();
 
-    const existing = await User.findOne({ username: username.toLowerCase().trim() });
-    if (existing) {
-      return res.status(409).json({ error: 'Username already taken.' });
+      const existing = await User.findOne({ username: username.toLowerCase().trim() });
+      if (existing) {
+        return res.status(409).json({ error: 'Username already taken.' });
+      }
+
+      const user = new User({
+        username,
+        passwordHash: password,
+        ...(duressPassword ? { duressPasswordHash: duressPassword } : {}),
+      });
+      await user.save();
+
+      return res.status(201).json({
+        message: 'Account created.',
+        displayName: user.anonymousDisplayName,
+      });
+    } catch (err) {
+      console.error('[AuthFeature] register error:', err.name, err.message);
+      if (isDbError(err)) {
+        return res.status(503).json({ error: 'Database unavailable. Try again shortly.' });
+      }
+      return res.status(500).json({ error: 'Registration failed. Please try again.' });
     }
-
-    const user = new User({
-      username,
-      passwordHash: password,
-      ...(duressPassword ? { duressPasswordHash: duressPassword } : {}),
-    });
-    await user.save();
-
-    return res.status(201).json({
-      message: 'Account created.',
-      displayName: user.anonymousDisplayName,
-    });
   }
 
   /**
@@ -139,37 +153,45 @@ class AuthFeature {
       return res.status(400).json({ error: 'Username and password are required.' });
     }
 
-    await connectDB();
+    try {
+      await connectDB();
 
-    // Explicitly select the fields hidden by default (select: false on the schema).
-    const user = await User
-      .findOne({ username: username.toLowerCase().trim() })
-      .select('+username +passwordHash +duressPasswordHash');
+      // Explicitly select the fields hidden by default (select: false on the schema).
+      const user = await User
+        .findOne({ username: username.toLowerCase().trim() })
+        .select('+username +passwordHash +duressPasswordHash');
 
-    // Use a constant-time response to prevent username enumeration.
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials.' });
+      // Use a constant-time response to prevent username enumeration.
+      if (!user) {
+        return res.status(401).json({ error: 'Invalid credentials.' });
+      }
+
+      const primaryMatch = await user.verifyPassword(password);
+      const duressMatch = !primaryMatch && await user.verifyDuressPassword(password);
+
+      if (!primaryMatch && !duressMatch) {
+        return res.status(401).json({ error: 'Invalid credentials.' });
+      }
+
+      const token = AuthFeature._signToken({
+        sub: user._id.toString(),
+        displayName: user.anonymousDisplayName,
+        ...(duressMatch ? { duressMode: true } : {}),
+      });
+
+      res.setHeader('Set-Cookie', AuthFeature._makeAuthCookie(token));
+
+      return res.status(200).json({
+        displayName: user.anonymousDisplayName,
+        duressMode: duressMatch,
+      });
+    } catch (err) {
+      console.error('[AuthFeature] login error:', err.name, err.message);
+      if (isDbError(err)) {
+        return res.status(503).json({ error: 'Database unavailable. Try again shortly.' });
+      }
+      return res.status(500).json({ error: 'Sign in failed. Please try again.' });
     }
-
-    const primaryMatch = await user.verifyPassword(password);
-    const duressMatch = !primaryMatch && await user.verifyDuressPassword(password);
-
-    if (!primaryMatch && !duressMatch) {
-      return res.status(401).json({ error: 'Invalid credentials.' });
-    }
-
-    const token = AuthFeature._signToken({
-      sub: user._id.toString(),
-      displayName: user.anonymousDisplayName,
-      ...(duressMatch ? { duressMode: true } : {}),
-    });
-
-    res.setHeader('Set-Cookie', AuthFeature._makeAuthCookie(token));
-
-    return res.status(200).json({
-      displayName: user.anonymousDisplayName,
-      duressMode: duressMatch,
-    });
   }
 
   /**

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import PanicExit from '../../components/PanicExit';
 import ChatRoom from '../../components/ChatRoom';
 import CalculatorCover from '../../components/CalculatorCover';
+import NewsCover from '../../components/NewsCover';
 import { usePrivacyMode } from '../../hooks/usePrivacyMode';
 
 const { withAuth } = require('../../lib/withAuth');
@@ -82,6 +83,8 @@ export default function AppShell({ themeKey, appName, manifestUrl, themeColor, a
         {/* ChatRoom is the functional core until cover UIs are designed.           */}
         {themeKey === 'calculator' ? (
           <CalculatorCover />
+        ) : themeKey === 'news' ? (
+          <NewsCover />
         ) : (
           <ChatRoom roomId="general" displayName={session.displayName} />
         )}
