@@ -39,8 +39,8 @@ export default function LoginPage() {
             ...(fields.duressPassword ? { duressPassword: fields.duressPassword } : {}),
           }),
         });
-        const data = await res.json();
-        if (!res.ok) { setError(data.error || 'Registration failed.'); return; }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { setError(data.error || `Registration failed (${res.status}).`); return; }
 
         // Auto-sign in after registration.
         setNotice('Account created — signing you in…');
@@ -54,13 +54,13 @@ export default function LoginPage() {
         credentials: 'same-origin',
         body: JSON.stringify({ username: fields.username, password: fields.password }),
       });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error || 'Sign in failed.'); return; }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { setError(data.error || `Sign in failed (${res.status}).`); return; }
 
       // Cookie is set server-side. Navigate into the app.
       router.replace(returnTo);
-    } catch {
-      setError('Network error. Please try again.');
+    } catch (err) {
+      setError(err?.message || 'Network error. Please try again.');
     } finally {
       setLoading(false);
     }
