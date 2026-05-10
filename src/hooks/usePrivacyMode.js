@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import config from '../config/config.json';
 
 /**
  * usePrivacyMode
@@ -9,9 +10,10 @@ import { useEffect } from 'react';
 export function usePrivacyMode() {
   useEffect(() => {
     // ── Shake Detection Implementation ───────────────────────────────────────
-    const config = require('../config/config.json');
     const SHAKE_THRESHOLD = 25; // Adjusted for "violent" shake
-    let lastX, lastY, lastZ;
+    let lastX = 0;
+    let lastY = 0;
+    let lastZ = 0;
     let lastTime = 0;
 
     const onMotion = (event) => {
