@@ -179,7 +179,10 @@ export default function LandingPage() {
 
         <footer className={styles.footer}>
           <div className={styles.footerContent}>
-            <div className={styles.brand}>Safe Harbor</div>
+            <div className={styles.brand}>
+              <img src="/resources/images/logos/safe_harbor_logo.png" alt="" className={styles.logo} />
+              Safe Harbor
+            </div>
             <p className={styles.footerDisclaimer}>
               <strong>Note:</strong> If you are in immediate danger, please use a safe device 
               to call local emergency services or the National Hotline at 1-800-799-7233.
