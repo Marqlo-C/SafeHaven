@@ -2,36 +2,26 @@ import { useEffect, useRef } from 'react';
 import { triggerPanicExit } from '../hooks/usePrivacyMode';
 
 /**
- * PanicExit — always-on quick-exit system.
+ * PanicExit - always-on quick-exit system.
  *
  * Triggers on:
- *  1. Escape key (single press)
- *  2. Rapid triple-tap anywhere on a touch screen (within 600ms)
- *  3. Click/tap of the visible quick-exit button in the corner
- *
- * On trigger:
- *  - Clears sessionStorage
- *  - Tells the Service Worker to purge all caches
- *  - Calls window.location.replace(safeUrl) — removes history entry
- *
- * The visible button is intentionally small and low-contrast so it
- * doesn't draw attention on a shared or monitored device, but is
- * reachable in an emergency.
+ *  1. Escape key
+ *  2. Rapid triple-tap anywhere on a touch screen
+ *  3. Click/tap of the visible quick-exit button when shown
  */
-export default function PanicExit() {
+export default function PanicExit({ showButton = true }) {
   const tapCount = useRef(0);
   const tapTimer = useRef(null);
 
-  // ── Keyboard: Escape ────────────────────────────────────────────────────────
   useEffect(() => {
-    const onKeyDown = (e) => {
-      if (e.key === 'Escape') triggerPanicExit();
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') triggerPanicExit();
     };
+
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
-  // ── Touch: triple-tap anywhere ───────────────────────────────────────────────
   useEffect(() => {
     const onTouchEnd = () => {
       tapCount.current += 1;
@@ -56,8 +46,11 @@ export default function PanicExit() {
     };
   }, []);
 
+  if (!showButton) return null;
+
   return (
     <button
+      type="button"
       onClick={triggerPanicExit}
       aria-label="Quick exit"
       title="Quick exit"
@@ -82,7 +75,7 @@ export default function PanicExit() {
         WebkitTapHighlightColor: 'transparent',
       }}
     >
-      ✕
+      x
     </button>
   );
 }

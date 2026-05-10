@@ -3,8 +3,8 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 /**
  * useChat — connects to the Socket.io server and manages a single chat room.
  *
- * @param {string} roomId  - Room to join on connect.
- * @returns {{ messages, connected, mySocketId, sendMessage }}
+ * @param {string} roomId  - Accepted Friend relationship ID to join on connect.
+ * @returns {{ messages, connected, currentUserId, error, sendMessage }}
  *
  * Uses dynamic import of socket.io-client so this hook is safe to import
  * in files that are also rendered server-side by Next.js.
@@ -13,7 +13,8 @@ export function useChat(roomId) {
   const socketRef = useRef(null);
   const [messages, setMessages]     = useState([]);
   const [connected, setConnected]   = useState(false);
-  const [mySocketId, setMySocketId] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!roomId) return;
@@ -26,13 +27,22 @@ export function useChat(roomId) {
 
       socket.on('connect', () => {
         setConnected(true);
-        setMySocketId(socket.id);
+        setError('');
         socket.emit('join_room', { roomId });
       });
 
       socket.on('disconnect', () => {
         setConnected(false);
-        setMySocketId(null);
+        setCurrentUserId(null);
+      });
+
+      socket.on('chat_history', ({ messages: history, currentUserId: userId }) => {
+        setMessages(Array.isArray(history) ? history : []);
+        setCurrentUserId(userId || null);
+      });
+
+      socket.on('chat_error', ({ error: chatError }) => {
+        setError(chatError || 'Chat unavailable.');
       });
 
       socket.on('receive_message', (msg) => {
@@ -45,7 +55,8 @@ export function useChat(roomId) {
       socketRef.current = null;
       setMessages([]);
       setConnected(false);
-      setMySocketId(null);
+      setCurrentUserId(null);
+      setError('');
     };
   }, [roomId]);
 
@@ -58,5 +69,5 @@ export function useChat(roomId) {
     [roomId]
   );
 
-  return { messages, connected, mySocketId, sendMessage };
+  return { messages, connected, currentUserId, error, sendMessage };
 }

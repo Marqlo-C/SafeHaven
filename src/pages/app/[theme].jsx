@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import PanicExit from '../../components/PanicExit';
 import Button from '../../components/Button';
-import ChatRoom from '../../components/ChatRoom';
 import CalculatorCover from '../../components/CalculatorCover';
 import NewsCover from '../../components/NewsCover';
+import PrivateModeShell from '../../components/PrivateModeShell';
 import WeatherCover from '../../components/WeatherCover';
 import LocationCapture from '../../components/LocationCapture';
 import { usePrivacyMode } from '../../hooks/usePrivacyMode';
@@ -110,7 +110,10 @@ export default function AppShell({
   const [showModal, setShowModal] = useState(false);
   const [platform, setPlatform] = useState('other');
   const [showChat, setShowChat] = useState(false);
+  const [installed, setInstalled] = useState(false);
+  const [showPrivateMode, setShowPrivateMode] = useState(false);
 
+  // Platform detection effect
   useEffect(() => {
     // Check platform
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -120,29 +123,47 @@ export default function AppShell({
     if (router.query.install === 'true') {
       setShowModal(true);
     }
+  }, [router.query.install]);
 
-    const onPrompt = (e) => { 
-      e.preventDefault(); 
-      setInstallPrompt(e); 
+  // Install prompt event listeners effect
+  useEffect(() => {
+    const onPrompt = (event) => {
+      event.preventDefault();
+      setInstallPrompt(event);
+    };
+
+    const onInstalled = () => {
+      setInstalled(true);
+      setInstallPrompt(null);
+      setShowModal(false);
     };
 
     window.addEventListener('beforeinstallprompt', onPrompt);
-    window.addEventListener('appinstalled', () => { 
-      setShowModal(false);
-      setInstallPrompt(null); 
-    });
-
-    return () => window.removeEventListener('beforeinstallprompt', onPrompt);
-  }, [router.query.install]);
+    window.addEventListener('appinstalled', onInstalled);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onPrompt);
+      window.removeEventListener('appinstalled', onInstalled);
+    };
+  }, []);
 
   const triggerNativeInstall = async () => {
     if (!installPrompt) return;
+
     installPrompt.prompt();
     const { outcome } = await installPrompt.userChoice;
     if (outcome === 'accepted') {
       setInstallPrompt(null);
       setShowModal(false);
     }
+  };
+
+  const handleInstall = triggerNativeInstall;
+
+  const renderCover = () => {
+    if (themeKey === 'calculator') return <CalculatorCover />;
+    if (themeKey === 'news') return <NewsCover />;
+    if (themeKey === 'weather') return <WeatherCover />;
+    return <PrivateModeShell displayName={session.displayName} />;
   };
 
   return (
@@ -170,23 +191,32 @@ export default function AppShell({
           appName={appName}
         />
 
-        {/* ── Disguise Content ── */}
-        {geolocationEnabled && <LocationCapture />}
-        {showChat ? (
+        {/* ── Installation Banner ── */}
+        {installPrompt && !installed && !showPrivateMode && (
+          <div style={bannerStyle}>
+            <span>Add {appName} to your home screen.</span>
+            <button type="button" onClick={handleInstall} style={installBtnStyle}>
+              Install
+            </button>
+          </div>
+        )}
+
+        {/* ── Main Content ── */}
+        {showPrivateMode ? (
+          <PrivateModeShell displayName={session.displayName} />
+        ) : showChat ? (
           <ChatRoom roomId="sos" displayName={session.displayName} />
-        ) : themeKey === 'calculator' ? (
-          <CalculatorCover />
-        ) : themeKey === 'news' ? (
-          <NewsCover />
-        ) : themeKey === 'weather' ? (
-          <WeatherCover />
         ) : (
-          <ChatRoom roomId="general" displayName={session.displayName} />
+          <>
+            {geolocationEnabled && <LocationCapture />}
+            {renderCover()}
+          </>
         )}
       </main>
 
-      <PanicExit />
-      {!showChat && <Button onClick={() => setShowChat(true)} />}
+      <PanicExit showButton={!showPrivateMode} />
+      {!showPrivateMode && !showChat && <Button onClick={() => setShowChat(true)} />}
+      {!showPrivateMode && showChat && <Button onClick={() => setShowPrivateMode(true)} />}
 
       {/* Persistent Install Trigger for non-PWA mode */}
       {installPrompt && !showModal && (
@@ -198,8 +228,6 @@ export default function AppShell({
     </>
   );
 }
-
-// ── Auth-gated data fetching ──────────────────────────────────────────────────
 
 export const getServerSideProps = withAuth(async (context) => {
   const config = require('../../config/config');

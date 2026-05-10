@@ -69,7 +69,7 @@ A healthy boot prints this sequence to the terminal:
 ```
 [PwaFeature] PWA ready. Safe-exit URL: ...
 [AuthFeature] Zero-trace auth system initialized.
-[ChatFeature] Anonymous chat enabled.
+[ChatFeature] Friend-gated persistent chat enabled.
 [JournalFeature] Private evidence journal initialized.
 [JournalFeature] Attachment storage: MongoDB GridFS (journal_attachments).
 [AiChatFeature] AI support chat initialized.
@@ -429,39 +429,54 @@ git branch -D feature/feature_name          # force delete — ask Lead first
 
 ---
 
-## Anonymous Chat
+## Friend-Gated Chat
 
-The chat system is live end-to-end. Rooms are ephemeral — they exist only while sockets are connected and no messages are persisted.
+The chat system is live end-to-end and persistent. A user can only join a chat when the `roomId` is an accepted `Friend` relationship ID that includes their authenticated account.
+
+Socket auth uses the existing HTTP-only `auth_token` cookie. Real usernames are never sent through chat payloads; messages use anonymous display names and user IDs.
 
 ### How it works
 
 | Layer | File | Responsibility |
 |---|---|---|
-| Server events | `src/features/chat_feature.js` | `join_room`, `send_message`, `disconnect` handlers |
-| Client hook | `src/hooks/useChat.js` | Socket.io connection, room join, message state |
+| Server events | `src/features/chat_feature.js` | Authenticates sockets, checks accepted friendship, persists messages |
+| Model | `src/models/ChatMessage.js` | MongoDB message history by friend relationship |
+| Client hook | `src/hooks/useChat.js` | Socket.io connection, friend-room join, history state |
 | UI component | `src/components/ChatRoom.jsx` | Message list, composer, own/other bubble detection |
 
 ### Socket events
 
 | Direction | Event | Payload |
 |---|---|---|
-| Client → Server | `join_room` | `{ roomId }` |
-| Client → Server | `send_message` | `{ roomId, message }` |
-| Server → Client | `receive_message` | `{ senderId, message, timestamp }` |
+| Client → Server | `join_room` | `{ roomId: friendRelationshipId }` |
+| Client → Server | `send_message` | `{ roomId: friendRelationshipId, message }` |
+| Server → Client | `chat_history` | `{ roomId, currentUserId, messages }` |
+| Server → Client | `receive_message` | `{ id, senderId, senderDisplayName, message, timestamp }` |
 | Server → Client | `user_joined` | `{ roomId }` |
+| Server → Client | `chat_error` | `{ error }` |
 
-Message ownership is determined by comparing `msg.senderId` to the socket's own ephemeral `socket.id`. No persistent user identity is used.
+Message ownership is determined by comparing `msg.senderId` to `currentUserId` from `chat_history`.
+
+### Persistence
+
+| Data | Location |
+|---|---|
+| Message text | MongoDB `chatmessages` collection |
+| Friend gate | Accepted `Friend` document |
+| History loaded on join | Latest 100 messages, oldest first |
+
+The server rechecks the accepted friendship before every send. If the friend relationship is removed or no longer accepted, the socket cannot send into that room.
 
 ### Using ChatRoom in a page
 
 ```jsx
 import ChatRoom from '../components/ChatRoom';
 
-// session.displayName comes from withAuth → JWT payload
-<ChatRoom roomId="general" displayName={session.displayName} />
+// friend.id comes from GET /api/friends and must have status: "accepted"
+<ChatRoom roomId={friend.id} displayName={session.displayName} />
 ```
 
-Room IDs are arbitrary strings. Future features (resource directory, crisis escalation) will use specific room IDs per resource or counselor session.
+Arbitrary chat rooms such as `general` or `sos` are rejected by the socket server unless they match an accepted friend relationship.
 
 ---
 

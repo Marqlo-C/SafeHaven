@@ -18,6 +18,7 @@ const { AiChatFeature } = require('./features/ai_chat_feature');
 const { BookmarkFeature } = require('./features/bookmark_feature');
 const { ButtonFeature } = require('./features/button_feature');
 const { GeolocationFeature } = require('./features/geolocation_feature');
+const { FriendingFeature } = require('./features/friending_feature');
 
 /**
  * @param {import('socket.io').Server} io  - Socket.io server instance from server.js
@@ -53,6 +54,10 @@ function initFeatures(io) {
 
   if (config.features.enable_geolocation) {
     GeolocationFeature.init();
+  }
+
+  if (config.features.enable_friending) {
+    FriendingFeature.init();
   }
 
   // Template for adding the next feature:
