@@ -5,6 +5,7 @@ import Button from '../../components/Button';
 import ChatRoom from '../../components/ChatRoom';
 import CalculatorCover from '../../components/CalculatorCover';
 import NewsCover from '../../components/NewsCover';
+import WeatherCover from '../../components/WeatherCover';
 import { usePrivacyMode } from '../../hooks/usePrivacyMode';
 
 const { withAuth } = require('../../lib/withAuth');
@@ -89,6 +90,8 @@ export default function AppShell({ themeKey, appName, manifestUrl, themeColor, a
           <CalculatorCover />
         ) : themeKey === 'news' ? (
           <NewsCover />
+        ) : themeKey === 'weather' ? (
+          <WeatherCover />
         ) : (
           <ChatRoom roomId="general" displayName={session.displayName} />
         )}

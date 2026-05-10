@@ -1,0 +1,157 @@
+.page {
+  min-height: 100dvh;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: calc(env(safe-area-inset-top) + 24px) 20px calc(env(safe-area-inset-bottom) + 24px);
+  background:
+    linear-gradient(180deg, rgba(14, 62, 116, 0.08), rgba(5, 21, 42, 0.22)),
+    linear-gradient(155deg, #1174b8 0%, #51a9d8 46%, #c8e6ef 100%);
+  color: #fff;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.sky {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sun {
+  position: absolute;
+  top: 12%;
+  right: 14%;
+  width: clamp(88px, 18vw, 160px);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: #ffd15c;
+  box-shadow: 0 0 70px rgba(255, 209, 92, 0.72);
+}
+
+.cloudOne,
+.cloudTwo {
+  position: absolute;
+  width: clamp(160px, 34vw, 300px);
+  height: clamp(54px, 11vw, 94px);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.54);
+  filter: blur(0.2px);
+}
+
+.cloudOne::before,
+.cloudOne::after,
+.cloudTwo::before,
+.cloudTwo::after {
+  position: absolute;
+  border-radius: 999px;
+  background: inherit;
+  content: "";
+}
+
+.cloudOne {
+  top: 24%;
+  left: -36px;
+}
+
+.cloudOne::before {
+  left: 32px;
+  bottom: 22px;
+  width: 42%;
+  height: 112%;
+}
+
+.cloudOne::after {
+  right: 38px;
+  bottom: 16px;
+  width: 34%;
+  height: 86%;
+}
+
+.cloudTwo {
+  right: -80px;
+  bottom: 24%;
+  opacity: 0.72;
+}
+
+.cloudTwo::before {
+  left: 28px;
+  bottom: 18px;
+  width: 38%;
+  height: 94%;
+}
+
+.cloudTwo::after {
+  right: 44px;
+  bottom: 12px;
+  width: 32%;
+  height: 78%;
+}
+
+.shell {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 420px);
+  display: grid;
+  justify-items: center;
+  padding: 34px 22px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 28px;
+  background: rgba(7, 35, 70, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 24px 70px rgba(7, 35, 70, 0.28);
+  backdrop-filter: blur(18px);
+}
+
+.location {
+  margin: 0 0 8px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.temperature {
+  margin: 0;
+  font-size: clamp(88px, 25vw, 132px);
+  font-weight: 200;
+  letter-spacing: 0;
+  line-height: 0.9;
+}
+
+.summary {
+  margin: 12px 0 28px;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.forecastLink {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.forecastLink:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.52);
+  outline-offset: 3px;
+}
+
+@media (max-width: 420px) {
+  .shell {
+    border-radius: 22px;
+  }
+}
