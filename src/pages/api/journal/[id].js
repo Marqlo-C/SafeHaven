@@ -58,21 +58,13 @@ export default requireAuth(async (req, res) => {
     return res.status(200).json({ entry });
   }
 
-  // ── DELETE /api/journal/[id] — remove entry and all its attachments ───────
+  // ── DELETE /api/journal/[id] — remove entry ───────
   if (req.method === 'DELETE') {
     const entry = await JournalEntry.findOne({ _id: id, userId });
     if (!entry) return res.status(404).json({ error: 'Entry not found.' });
 
-    // Delete every file from GridFS before removing the entry document.
-    if (entry.attachments.length > 0) {
-      const bucket = getAttachmentBucket();
-      await Promise.allSettled(
-        entry.attachments.map((a) => bucket.delete(a.fileId))
-      );
-    }
-
     await entry.deleteOne();
-    return res.status(200).json({ message: 'Entry and all attachments deleted.' });
+    return res.status(200).json({ message: 'Entry deleted.' });
   }
 
   return res.status(405).json({ error: 'Method not allowed.' });

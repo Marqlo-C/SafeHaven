@@ -46,7 +46,7 @@ export default requireAuth(async (req, res) => {
 
   // ── POST /api/journal — create a new entry ────────────────────────────────
   if (req.method === 'POST') {
-    const { title, content, incidentDate, isPrivate } = req.body ?? {};
+    const { title, content, incidentDate, isPrivate, mediaData, mediaType, mediaName } = req.body ?? {};
 
     if (!content || typeof content !== 'string' || !content.trim()) {
       return res.status(400).json({ error: 'content is required.' });
@@ -61,6 +61,9 @@ export default requireAuth(async (req, res) => {
       content: content.trim(),
       incidentDate: incidentDate ? new Date(incidentDate) : null,
       isPrivate: config.features.enable_journal_privacy ? Boolean(isPrivate) : false,
+      mediaData,
+      mediaType,
+      mediaName,
     });
 
     return res.status(201).json({ entry });

@@ -1,16 +1,5 @@
 const mongoose = require('mongoose');
 
-const attachmentSchema = new mongoose.Schema(
-  {
-    fileId: { type: mongoose.Schema.Types.ObjectId, required: true },
-    originalName: { type: String, required: true, maxlength: 255 },
-    mimetype: { type: String, required: true },
-    size: { type: Number, required: true },
-    uploadedAt: { type: Date, default: Date.now },
-  },
-  { _id: false }
-);
-
 const journalEntrySchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -40,11 +29,21 @@ const journalEntrySchema = new mongoose.Schema({
     default: null,
   },
 
-  // References to files stored in GridFS (journal_attachments bucket).
-  // Images, video, audio, PDFs — evidence of abuse.
-  attachments: {
-    type: [attachmentSchema],
-    default: [],
+  // Base64 media storage for simplicity and reliability.
+  // Stores images, audio (as data URLs).
+  mediaData: {
+    type: String,
+    default: null,
+  },
+
+  mediaType: {
+    type: String,
+    default: null,
+  },
+
+  mediaName: {
+    type: String,
+    default: null,
   },
 
   isPrivate: {

@@ -38,25 +38,67 @@ export default requireAuth(async (req, res) => {
       (a) => a.fileId.toString() === fileId
     );
 
+    if (!attachment) {
+      return res.status(404).json({ error: 'Attachment metadata not found in entry.' });
+    }
+
     const bucket = getAttachmentBucket();
 
     // Verify the file exists in GridFS before streaming.
     const files = await bucket.find({ _id: fileObjectId }).toArray();
     if (!files.length) {
+      console.error(`[Journal Attachment] File ${fileId} not found in GridFS`);
       return res.status(404).json({ error: 'File not found in storage.' });
     }
+    const fileMetadata = files[0];
 
+    // Basic headers
     res.setHeader('Content-Type', attachment.mimetype);
-    res.setHeader('Content-Length', attachment.size);
-    // Force download rather than inline rendering — reduces browser history traces.
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="${encodeURIComponent(attachment.originalName)}"`
-    );
+    res.setHeader('Accept-Ranges', 'bytes');
+    
+    const isInline = req.query.inline === 'true';
+    if (isInline) {
+      res.setHeader('Content-Disposition', 'inline');
+    } else {
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${encodeURIComponent(attachment.originalName)}"`
+      );
+    }
 
+    // Handle Range Requests for media seeking (Safari/Chrome requirement)
+    const range = req.headers.range;
+    if (range) {
+      const parts = range.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileMetadata.length - 1;
+      const chunksize = (end - start) + 1;
+
+      res.status(206);
+      res.setHeader('Content-Range', `bytes ${start}-${end}/${fileMetadata.length}`);
+      res.setHeader('Content-Length', chunksize);
+
+      const downloadStream = bucket.openDownloadStream(fileObjectId, {
+        start,
+        end: end + 1 // GridFS end is exclusive
+      });
+      
+      downloadStream.pipe(res);
+      downloadStream.on('error', (err) => {
+        console.error('[Journal Attachment] Stream error:', err);
+        if (!res.headersSent) res.status(500).end();
+      });
+      return;
+    }
+
+    // Standard non-range request
+    res.setHeader('Content-Length', fileMetadata.length);
     const downloadStream = bucket.openDownloadStream(fileObjectId);
     downloadStream.pipe(res);
-    downloadStream.on('error', () => res.status(500).end());
+    downloadStream.on('error', (err) => {
+      console.error('[Journal Attachment] Stream error:', err);
+      if (!res.headersSent) res.status(500).end();
+    });
     return;
   }
 
