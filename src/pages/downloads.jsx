@@ -6,19 +6,19 @@ const APPS = [
   {
     theme: 'calculator',
     name: 'Calculator Pro',
-    description: 'A clean, fast calculator for everyday math.',
+    description: 'Fully functional calculator. Hides your journal and chat behind your PIN.',
     icon: '/resources/images/logos/calculator_icon.png',
   },
   {
     theme: 'news',
     name: 'Daily News Reader',
-    description: 'Curated headlines from trusted sources, updated live.',
+    description: 'Live daily headlines. Safety tools hidden in the settings menu.',
     icon: '/resources/images/logos/news_icon.png',
   },
   {
     theme: 'weather',
     name: 'Weather Now',
-    description: 'Real-time forecasts and alerts for your location.',
+    description: 'Real-time local forecasts. A disguised safe space.',
     icon: '/resources/images/logos/weather_icon.png',
   },
 ];
@@ -27,42 +27,39 @@ export default function Downloads() {
   return (
     <>
       <Head>
-        <title>Download Safe Harbor Apps</title>
+        <title>Select Your Disguise</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
       <div className={styles.page}>
         <header className={styles.header}>
-          <Link href="/" className={styles.backLink}>← Back</Link>
-          <span className={styles.logo}>Download</span>
+          <Link href="/" className={styles.backLink}>← Back to Home</Link>
+          <span className={styles.headerTitle}>Setup Setup</span>
         </header>
 
         <main className={styles.main}>
           <section className={styles.hero}>
-            <h1 className={styles.heroTitle}>Get Started</h1>
-            <p className={styles.heroSubtitle}>Choose an app to install. Each app hides your real support tools.</p>
+            <h1 className={styles.heroTitle}>Choose your shield.</h1>
+            <p className={styles.heroSubtitle}>
+              Select how Safe Harbor will appear on your device. Once installed, the app functions exactly like the utility you choose. Your safety tools are hidden until you unlock them.
+            </p>
           </section>
 
-          <section aria-label="Available apps">
-            <p className={styles.appsHeading}>Choose an app</p>
-            <div className={styles.appGrid}>
-              {APPS.map((app) => (
-                <Link key={app.theme} href={`/app/${app.theme}`} className={styles.appCard}>
-                  <img src={app.icon} alt={`${app.name} icon`} className={styles.appIcon} />
-                  <div className={styles.appInfo}>
-                    <p className={styles.appName}>{app.name}</p>
-                    <p className={styles.appDesc}>{app.description}</p>
-                  </div>
-                  <span className={styles.installChip}>Install</span>
-                </Link>
-              ))}
-            </div>
+          <section className={styles.appList}>
+            {APPS.map((app) => (
+              <Link key={app.theme} href={`/app/${app.theme}`} className={styles.pillCard}>
+                <img src={app.icon} alt="" className={styles.pillIcon} />
+                <div className={styles.pillInfo}>
+                  <h2 className={styles.pillName}>{app.name}</h2>
+                  <p className={styles.pillDesc}>{app.description}</p>
+                </div>
+                <div className={styles.pillAction}>
+                  <span className={styles.installBtn}>Install</span>
+                </div>
+              </Link>
+            ))}
           </section>
         </main>
-
-        <footer className={styles.footer}>
-          <p>Safe and private. Your data stays with you.</p>
-        </footer>
       </div>
     </>
   );

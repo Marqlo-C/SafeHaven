@@ -1,103 +1,301 @@
-/* Minimal marketing styles — conservative modern look, minimal impact */
+/* Safe Harbor - Comprehensive Marketing Redesign */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 .page {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: var(--color-bg);
-  color: var(--color-text-primary);
+  background-color: #f8fafc; /* Very light cool grey */
+  color: #0f172a;
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
 }
 
+/* ── Header ──────────────────────────────────────────────────────────────── */
 .header {
-  padding: 20px 24px;
+  padding: 24px 48px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--color-border);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
 }
 
 .brand {
   font-weight: 700;
-  font-size: 18px;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  color: #1e293b;
 }
 
-.navLink {
-  color: var(--color-text-secondary);
-  text-decoration: none;
+.navButton {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  padding: 10px 20px;
+  border-radius: 100px;
+  font-size: 14px;
   font-weight: 600;
+  color: #0f172a;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
+.navButton:hover {
+  background: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Main Layout ─────────────────────────────────────────────────────────── */
 .main {
-  padding: 48px 24px;
-  max-width: 1100px;
-  margin: 0 auto;
+  flex: 1;
   width: 100%;
 }
 
-.hero {
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 24px;
-  align-items: center;
-  margin-bottom: 32px;
-}
-
-.heroLeft {}
-
-.title {
-  font-size: clamp(28px, 6vw, 40px);
-  margin: 0 0 12px 0;
-}
-
-.subtitle {
-  color: var(--color-text-secondary);
-  max-width: 560px;
-  margin-bottom: 18px;
-}
-
-.ctaRow {
+/* ── Soft Gradient Hero (Medical-Websites.png Vibe) ──────────────────────── */
+.heroSection {
+  min-height: 90vh;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 24px 80px;
+  background: radial-gradient(circle at top right, #e0f2fe, transparent 60%),
+              radial-gradient(circle at bottom left, #ede9fe, transparent 60%);
+  background-color: #f8fafc;
+  position: relative;
+  overflow: hidden;
+}
+
+.heroContent {
+  max-width: 800px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.badge {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  padding: 6px 16px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3b82f6;
+  margin-bottom: 24px;
+  backdrop-filter: blur(4px);
+}
+
+.heroTitle {
+  font-size: clamp(48px, 8vw, 72px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  margin: 0 0 24px 0;
+  color: #0f172a;
+}
+
+.textGradient {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.heroSubtitle {
+  font-size: clamp(16px, 2vw, 20px);
+  line-height: 1.6;
+  color: #475569;
+  max-width: 640px;
+  margin-bottom: 40px;
+}
+
+.heroActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 12px;
 }
 
-.primary {
-  background: var(--color-accent);
-  color: #000;
-  padding: 10px 16px;
-  border-radius: 10px;
+.primaryCta {
+  background: #3b82f6;
+  color: white;
+  padding: 16px 36px;
+  border-radius: 100px;
+  font-size: 16px;
+  font-weight: 600;
   text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+}
+
+.primaryCta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.4);
+  background: #2563eb;
+}
+
+.secondaryText {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ── Ticker / Marquee ────────────────────────────────────────────────────── */
+.tickerContainer {
+  background: #2563eb;
+  color: white;
+  padding: 16px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.tickerTrack {
+  display: inline-flex;
+  gap: 24px;
+  animation: scrollTicker 30s linear infinite;
+  font-weight: 500;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dot {
+  opacity: 0.5;
+}
+
+@keyframes scrollTicker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── Bento Grid Section ──────────────────────────────────────────────────── */
+.bentoSection {
+  padding: 100px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.sectionHeader {
+  margin-bottom: 48px;
+}
+
+.sectionLabel {
+  color: #3b82f6;
+  font-size: 12px;
   font-weight: 700;
-}
-
-.secondary {
-  color: var(--color-text-secondary);
-  padding: 10px 16px;
-  text-decoration: none;
-}
-
-.logoImg {
-  width: 100%;
-  max-width: 280px;
-  border-radius: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   display: block;
+  margin-bottom: 12px;
 }
 
-.info {
-  padding-top: 20px;
+.sectionTitle {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  margin: 0;
 }
 
-.h2 {
+.bentoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  grid-auto-rows: minmax(240px, auto);
+}
+
+.bentoCard {
+  background: white;
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 10px 15px -3px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.bentoCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+}
+
+.bentoCard h3 {
+  font-size: 20px;
+  font-weight: 700;
   margin: 0 0 12px 0;
+  color: #0f172a;
 }
 
-.bullets {
-  list-style: disc inside;
-  color: var(--color-text-secondary);
+.bentoCard p {
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0;
 }
 
+.cardLarge {
+  grid-column: span 2;
+  background: linear-gradient(to bottom right, #f8fafc, #e2e8f0);
+}
+
+.cardAccent {
+  background: #3b82f6;
+  color: white;
+}
+
+.cardAccent h3, .cardAccent p {
+  color: white;
+}
+
+@media (max-width: 900px) {
+  .bentoGrid { grid-template-columns: 1fr 1fr; }
+  .cardLarge { grid-column: span 2; }
+}
+
+@media (max-width: 600px) {
+  .bentoGrid { grid-template-columns: 1fr; }
+  .cardLarge { grid-column: span 1; }
+  .header { padding: 20px; }
+  .bentoSection { padding: 60px 20px; }
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
 .footer {
-  padding: 20px 24px;
-  border-top: 1px solid var(--color-border);
+  background: #0f172a;
+  color: white;
+  padding: 60px 24px;
+}
+
+.footerContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  color: var(--color-text-secondary);
+  gap: 24px;
+}
+
+.footer .brand {
+  color: white;
+  opacity: 0.8;
+}
+
+.footerDisclaimer {
+  color: #94a3b8;
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 500px;
 }
