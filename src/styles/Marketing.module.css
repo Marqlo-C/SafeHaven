@@ -76,7 +76,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 160px 24px 120px;
+  padding: 120px 24px 60px;
   background: radial-gradient(circle at 50% -20%, rgba(201, 125, 87, 0.1), transparent 70%),
               radial-gradient(circle at 80% 80%, rgba(74, 109, 90, 0.04), transparent 50%);
   background-color: var(--color-bg);
