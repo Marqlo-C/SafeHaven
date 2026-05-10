@@ -1285,11 +1285,65 @@ button.emptyFriendState:hover {
   gap: 8px;
 }
 
+.trustedSummary {
+  padding: 12px;
+  border: 1px solid var(--pm-accent);
+  border-radius: 16px;
+  background: oklch(0.96 0.04 80);
+  color: var(--pm-accent-strong);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.trustedSummaryIcon {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.trustedSummary strong,
+.trustedSummary span {
+  display: block;
+  line-height: 1.35;
+}
+
+.trustedSummary strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.trustedSummary span {
+  margin-top: 2px;
+  font-size: 11px;
+  opacity: 0.82;
+}
+
 .friendRow {
   padding: 12px;
   border: 1px solid var(--pm-border);
   border-radius: var(--pm-radius-lg);
   background: var(--pm-card);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.acceptedFriendRow {
+  padding: 12px;
+  border: 1px solid var(--pm-border);
+  border-radius: var(--pm-radius-lg);
+  background: var(--pm-card);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.acceptedFriendRowTrusted {
+  border-color: var(--pm-accent);
+  box-shadow: 0 8px 20px rgba(124, 84, 45, 0.08);
+}
+
+.acceptedFriendMain {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1309,10 +1363,96 @@ button.emptyFriendState:hover {
   font-weight: 700;
 }
 
+.friendNameLine {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: visible;
+  white-space: normal;
+}
+
+.friendNameLine strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trustedPill {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: oklch(0.78 0.14 75 / 0.3);
+  color: var(--pm-accent-strong);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.trustedPillIcon {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+}
+
 .friendActions {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
+}
+
+.trustedSwitch {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  border: 0;
+  border-radius: 999px;
+  background: oklch(0.82 0.04 75);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background-color 0.16s ease;
+}
+
+.trustedSwitch span {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 4px rgba(71, 52, 40, 0.18);
+  transition: transform 0.16s ease;
+}
+
+.trustedSwitchOn {
+  background: var(--pm-accent);
+}
+
+.trustedSwitchOn span {
+  transform: translateX(18px);
+}
+
+.trustedFooter {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--pm-border);
+  color: var(--pm-muted-foreground);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.trustedFooterIcon {
+  width: 12px;
+  height: 12px;
   flex-shrink: 0;
 }
 

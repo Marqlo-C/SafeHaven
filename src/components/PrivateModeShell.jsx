@@ -394,16 +394,44 @@ const BOT_CHAT = {
 };
 
 const SEED_FRIENDS = [
-  { id: 'f1', displayName: 'QuietRiver', emoji: 'QR', status: 'accepted', mutuals: 3 },
-  { id: 'f2', displayName: 'MorningLark', emoji: 'ML', status: 'accepted', mutuals: 1 },
-  { id: 'f3', displayName: 'PaperKite', emoji: 'PK', status: 'accepted' },
-  { id: 'f4', displayName: 'SilverPine', emoji: 'SP', status: 'incoming' },
-  { id: 'f5', displayName: 'BlueHarbor', emoji: 'BH', status: 'incoming' },
-  { id: 'f6', displayName: 'EmberMoth', emoji: 'EM', status: 'outgoing' },
+  { id: 'demo-f1', displayName: 'QuietRiver', emoji: 'QR', status: 'accepted', mutuals: 3, isTrusted: true },
+  { id: 'demo-f2', displayName: 'MorningLark', emoji: 'ML', status: 'accepted', mutuals: 1 },
+  { id: 'demo-f3', displayName: 'PaperKite', emoji: 'PK', status: 'accepted', isTrusted: true },
+  { id: 'demo-f4', displayName: 'BlueHarbor', emoji: 'BH', status: 'accepted' },
+  { id: 'demo-f5', displayName: 'SilverPine', emoji: 'SP', status: 'incoming' },
+  { id: 'demo-f6', displayName: 'EmberMoth', emoji: 'EM', status: 'outgoing' },
 ];
 
 const MY_HANDLE = 'SoftFern';
 const MY_AVATAR = 'SF';
+const MONGO_ID_PATTERN = /^[a-f0-9]{24}$/i;
+
+function initialsForName(displayName) {
+  return String(displayName || 'Friend')
+    .replace(/[^a-z0-9]/gi, '')
+    .slice(0, 2)
+    .toUpperCase() || 'FR';
+}
+
+function normalizeFriend(apiFriend, trustedFriendIds = new Set()) {
+  const isPending = apiFriend.status === 'pending';
+
+  return {
+    id: apiFriend.id,
+    displayName: apiFriend.friend?.displayName || 'Anonymous',
+    emoji: initialsForName(apiFriend.friend?.displayName),
+    status: apiFriend.status === 'accepted'
+      ? 'accepted'
+      : apiFriend.direction === 'incoming' && isPending
+        ? 'incoming'
+        : 'outgoing',
+    isTrusted: trustedFriendIds.has(apiFriend.id),
+  };
+}
+
+function isPersistedFriendId(id) {
+  return MONGO_ID_PATTERN.test(String(id));
+}
 
 const SEED_THREADS = {
   bot: [
@@ -414,7 +442,7 @@ const SEED_THREADS = {
       time: 'now',
     },
   ],
-  f1: [
+  'demo-f1': [
     {
       id: '1',
       from: 'them',
@@ -434,8 +462,9 @@ const SEED_THREADS = {
       time: '9:41 PM',
     },
   ],
-  f2: [{ id: '1', from: 'them', text: 'You are not alone in this.', time: '8:12 PM' }],
-  f3: [{ id: '1', from: 'them', text: 'I went through something similar last year.', time: 'Yesterday' }],
+  'demo-f2': [{ id: '1', from: 'them', text: 'You are not alone in this.', time: '8:12 PM' }],
+  'demo-f3': [{ id: '1', from: 'them', text: 'I went through something similar last year.', time: 'Yesterday' }],
+  'demo-f4': [{ id: '1', from: 'them', text: 'The trusted contact toggle helped me make a plan.', time: 'Yesterday' }],
 };
 
 const BOT_REPLIES = [
@@ -454,6 +483,43 @@ function ChatPanel() {
   const replyTimer = useRef(null);
 
   useEffect(() => () => window.clearTimeout(replyTimer.current), []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadFriends() {
+      try {
+        const [friendsResponse, trustedResponse] = await Promise.all([
+          fetch('/api/friends'),
+          fetch('/api/trusted-contacts'),
+        ]);
+
+        if (!friendsResponse.ok) return;
+
+        const friendsBody = await friendsResponse.json();
+        const trustedBody = trustedResponse.ok ? await trustedResponse.json() : {};
+        const trustedFriendIds = new Set(
+          (trustedBody.trustedContacts || []).map((contact) => contact.friendRelationshipId)
+        );
+
+        const nextFriends = (friendsBody.friends || [])
+          .filter((friend) => friend.status === 'accepted' || friend.status === 'pending')
+          .map((friend) => normalizeFriend(friend, trustedFriendIds));
+
+        if (!cancelled && nextFriends.length > 0) {
+          setFriends(nextFriends);
+        }
+      } catch {
+        // Keep the design-seed friends when auth or local MongoDB is unavailable.
+      }
+    }
+
+    loadFriends();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const chats = useMemo(() => {
     const friendChats = friends
@@ -674,6 +740,7 @@ function FriendsPanel({ friends, setFriends }) {
   const incoming = friends.filter((friend) => friend.status === 'incoming');
   const outgoing = friends.filter((friend) => friend.status === 'outgoing');
   const accepted = friends.filter((friend) => friend.status === 'accepted');
+  const trustedCount = accepted.filter((friend) => friend.isTrusted).length;
 
   const accept = (id) => {
     setFriends((current) => current.map((friend) => (
@@ -685,7 +752,33 @@ function FriendsPanel({ friends, setFriends }) {
     setFriends((current) => current.filter((friend) => friend.id !== id));
   };
 
-  const sendRequest = () => {
+  const toggleTrusted = async (id, value) => {
+    setFriends((current) => current.map((friend) => (
+      friend.id === id ? { ...friend, isTrusted: value } : friend
+    )));
+
+    if (!isPersistedFriendId(id)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/friends/${id}/trusted`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trusted: value }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Unable to update trusted contact.');
+      }
+    } catch {
+      setFriends((current) => current.map((friend) => (
+        friend.id === id ? { ...friend, isTrusted: !value } : friend
+      )));
+    }
+  };
+
+  const sendRequest = async () => {
     const handle = query.trim();
     if (!handle) return;
 
@@ -695,16 +788,36 @@ function FriendsPanel({ friends, setFriends }) {
 
     if (exists) return;
 
+    const optimisticId = `pending-${Date.now()}`;
     setFriends((current) => [
       ...current,
       {
-        id: String(Date.now()),
+        id: optimisticId,
         displayName: handle,
-        emoji: handle.slice(0, 2).toUpperCase(),
+        emoji: initialsForName(handle),
         status: 'outgoing',
       },
     ]);
     setQuery('');
+
+    try {
+      const response = await fetch('/api/friends', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ anonymousDisplayName: handle }),
+      });
+
+      if (!response.ok) return;
+
+      const body = await response.json();
+      if (!body.friend) return;
+
+      setFriends((current) => current.map((friend) => (
+        friend.id === optimisticId ? normalizeFriend(body.friend) : friend
+      )));
+    } catch {
+      // Keep the optimistic pending row for offline UI comparison.
+    }
   };
 
   return (
@@ -792,6 +905,18 @@ function FriendsPanel({ friends, setFriends }) {
         </FriendSection>
       )}
 
+      {accepted.length > 0 && (
+        <div className={styles.trustedSummary}>
+          <Shield className={styles.trustedSummaryIcon} aria-hidden="true" />
+          <div>
+            <strong>
+              {trustedCount} trusted contact{trustedCount === 1 ? '' : 's'}
+            </strong>
+            <span>Trusted friends receive your live location when you tap SOS.</span>
+          </div>
+        </div>
+      )}
+
       <FriendSection title={`Friends - ${accepted.length}`}>
         {accepted.length === 0 ? (
           <div className={styles.emptyFriendState}>
@@ -803,11 +928,11 @@ function FriendsPanel({ friends, setFriends }) {
           </div>
         ) : (
           accepted.map((friend) => (
-            <FriendRow key={friend.id} friend={friend}>
-              {friend.mutuals ? (
-                <span className={styles.friendMutedText}>{friend.mutuals} mutual</span>
-              ) : null}
-            </FriendRow>
+            <AcceptedFriendRow
+              key={friend.id}
+              friend={friend}
+              onToggle={(value) => toggleTrusted(friend.id, value)}
+            />
           ))
         )}
       </FriendSection>
@@ -821,6 +946,47 @@ function FriendSection({ title, children }) {
       <div className={styles.peerSectionLabel}>{title}</div>
       <div className={styles.friendRows}>{children}</div>
     </section>
+  );
+}
+
+function AcceptedFriendRow({ friend, onToggle }) {
+  const trusted = Boolean(friend.isTrusted);
+
+  return (
+    <div className={`${styles.acceptedFriendRow} ${trusted ? styles.acceptedFriendRowTrusted : ''}`}>
+      <div className={styles.acceptedFriendMain}>
+        <span className={styles.friendAvatar} aria-hidden="true">{friend.emoji}</span>
+        <span className={styles.friendInfo}>
+          <span className={styles.friendNameLine}>
+            <strong>{friend.displayName}</strong>
+            {trusted && (
+              <span className={styles.trustedPill}>
+                <Shield className={styles.trustedPillIcon} aria-hidden="true" />
+                Trusted
+              </span>
+            )}
+          </span>
+          <span>{friend.mutuals ? `${friend.mutuals} mutual - ` : ''}Anonymous</span>
+        </span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={trusted}
+          aria-label={`Mark ${friend.displayName} as trusted contact`}
+          className={`${styles.trustedSwitch} ${trusted ? styles.trustedSwitchOn : ''}`}
+          onClick={() => onToggle(!trusted)}
+        >
+          <span aria-hidden="true" />
+        </button>
+      </div>
+
+      {trusted && (
+        <div className={styles.trustedFooter}>
+          <MapPin className={styles.trustedFooterIcon} aria-hidden="true" />
+          <span>Will see your live location during SOS</span>
+        </div>
+      )}
+    </div>
   );
 }
 
