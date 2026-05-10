@@ -2,11 +2,17 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle,
   BookLock,
+  Bot,
   Camera,
   Check,
+  ChevronLeft,
+  ChevronRight,
+  Circle,
   Clock,
   Cloud,
   FileImage,
+  Heart,
+  Home,
   LifeBuoy,
   Lock,
   Map,
@@ -14,6 +20,7 @@ import {
   MessageCircle,
   Mic,
   Phone,
+  Search,
   Send,
   Shield,
   Siren,
@@ -25,6 +32,7 @@ import { triggerPanicExit } from '../hooks/usePrivacyMode';
 import styles from '../styles/PrivateModeShell.module.css';
 
 const TABS = [
+  { id: 'home', title: 'Home', label: 'Home', Icon: Home },
   { id: 'sos', title: 'SOS', label: 'SOS', Icon: Siren },
   { id: 'chat', title: 'Chat', label: 'Chat', Icon: MessageCircle },
   { id: 'journal', title: 'Journal', label: 'Journal', Icon: BookLock },
@@ -32,10 +40,10 @@ const TABS = [
 ];
 
 export default function PrivateModeShell({ displayName }) {
-  const [activeTab, setActiveTab] = useState('sos');
+  const [activeTab, setActiveTab] = useState('home');
 
   const activeTitle = useMemo(
-    () => TABS.find((tab) => tab.id === activeTab)?.title || 'SOS',
+    () => TABS.find((tab) => tab.id === activeTab)?.title || 'Home',
     [activeTab]
   );
 
@@ -57,30 +65,21 @@ export default function PrivateModeShell({ displayName }) {
         </header>
 
         <main className={styles.content}>
-          <div
-            className={`${styles.panel} ${activeTab === 'sos' ? styles.panelActive : styles.panelHidden}`}
-            aria-hidden={activeTab !== 'sos'}
-          >
+          <Panel active={activeTab === 'home'}>
+            <HomePanel onNavigate={setActiveTab} />
+          </Panel>
+          <Panel active={activeTab === 'sos'}>
             <SosPanel />
-          </div>
-          <div
-            className={`${styles.panel} ${activeTab === 'chat' ? styles.panelActive : styles.panelHidden}`}
-            aria-hidden={activeTab !== 'chat'}
-          >
+          </Panel>
+          <Panel active={activeTab === 'chat'}>
             <ChatPanel displayName={displayName} />
-          </div>
-          <div
-            className={`${styles.panel} ${activeTab === 'journal' ? styles.panelActive : styles.panelHidden}`}
-            aria-hidden={activeTab !== 'journal'}
-          >
+          </Panel>
+          <Panel active={activeTab === 'journal'}>
             <JournalPanel />
-          </div>
-          <div
-            className={`${styles.panel} ${activeTab === 'aid' ? styles.panelActive : styles.panelHidden}`}
-            aria-hidden={activeTab !== 'aid'}
-          >
+          </Panel>
+          <Panel active={activeTab === 'aid'}>
             <AidPanel />
-          </div>
+          </Panel>
         </main>
 
         <nav className={styles.tabBar} aria-label="Private mode sections">
@@ -106,6 +105,105 @@ export default function PrivateModeShell({ displayName }) {
   );
 }
 
+function Panel({ active, children }) {
+  return (
+    <div
+      className={`${styles.panel} ${active ? styles.panelActive : styles.panelHidden}`}
+      aria-hidden={!active}
+    >
+      {children}
+    </div>
+  );
+}
+
+function HomePanel({ onNavigate }) {
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+
+  return (
+    <div className={styles.homePanel}>
+      <div className={styles.homeIntro}>
+        <div className={styles.homeGreeting}>{greeting}</div>
+        <h1>You&apos;re safe here.</h1>
+        <p>Take a breath. Everything in this space is private.</p>
+      </div>
+
+      <button type="button" className={styles.homeSosCard} onClick={() => onNavigate('sos')}>
+        <span className={styles.homeSosIcon} aria-hidden="true">
+          <Siren />
+        </span>
+        <span className={styles.homeSosCopy}>
+          <strong>Send an SOS</strong>
+          <span>Alert your trusted contacts in one tap</span>
+        </span>
+        <ChevronRight className={styles.homeChevron} aria-hidden="true" />
+      </button>
+
+      <div className={styles.setupCard}>
+        <div className={styles.setupHeader}>
+          <Shield className={styles.smallIcon} aria-hidden="true" />
+          <span>Your safety setup</span>
+        </div>
+        <div className={styles.miniGrid}>
+          <Mini label="Contacts" value="2" />
+          <Mini label="Location" value="Off" />
+          <Mini label="Backup" value="0" />
+        </div>
+      </div>
+
+      <div>
+        <div className={styles.actionHeading}>Quick actions</div>
+        <div className={styles.actionGrid}>
+          <ActionCard
+            icon={<MessageCircle />}
+            title="Talk to an advocate"
+            subtitle="Available now"
+            onClick={() => onNavigate('chat')}
+          />
+          <ActionCard
+            icon={<BookLock />}
+            title="Add to journal"
+            subtitle="Save evidence"
+            onClick={() => onNavigate('journal')}
+          />
+          <ActionCard
+            icon={<LifeBuoy />}
+            title="Find help nearby"
+            subtitle="Shelters and aid"
+            onClick={() => onNavigate('aid')}
+          />
+          <ActionCard
+            icon={<Heart />}
+            title="A moment for you"
+            subtitle="Quotes and breathing"
+          />
+        </div>
+      </div>
+
+      <p className={styles.homeFooter}>You are not alone. Help is one tap away.</p>
+    </div>
+  );
+}
+
+function Mini({ label, value }) {
+  return (
+    <div className={styles.miniCard}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function ActionCard({ icon, title, subtitle, onClick }) {
+  return (
+    <button type="button" className={styles.actionCard} onClick={onClick}>
+      <span className={styles.actionIcon} aria-hidden="true">{icon}</span>
+      <strong>{title}</strong>
+      <span>{subtitle}</span>
+    </button>
+  );
+}
+
 function SosPanel() {
   const [status, setStatus] = useState('ready');
   const [locationOn, setLocationOn] = useState(false);
@@ -124,7 +222,7 @@ function SosPanel() {
   const heroLabel = status === 'sent'
     ? 'Alert Sent'
     : status === 'sending'
-      ? 'Sending alert'
+      ? 'Sending alert...'
       : status === 'error'
         ? 'Unable to send. Try again.'
         : 'Ready to alert your contacts';
@@ -155,7 +253,7 @@ function SosPanel() {
           {status === 'sent'
             ? 'SOS Sent'
             : status === 'sending'
-              ? 'Sending'
+              ? 'Sending...'
               : 'Send SOS'}
         </span>
       </button>
@@ -183,10 +281,7 @@ function SosPanel() {
 
       <div className={styles.notice}>
         <AlertTriangle className={styles.noticeIcon} aria-hidden="true" />
-        <span>
-          Alerts are sent without the app name. Your contacts will not see the
-          private tool name anywhere in the message.
-        </span>
+        <span>Alerts are sent without the app name. Your contacts will not see SafeHaven anywhere in the message.</span>
       </div>
     </div>
   );
@@ -280,55 +375,158 @@ function LocationPreview({ sent }) {
   );
 }
 
-const INITIAL_MESSAGES = [
+const PEERS = [
   {
-    id: '1',
-    from: 'them',
-    text: 'Hi, I am Mara, a peer advocate. You are safe here. How can I support you tonight?',
-    time: '9:42 PM',
+    id: 'bot',
+    handle: 'SafeBot',
+    emoji: 'SB',
+    status: 'online',
+    lastMsg: 'I am here anytime. Try "I feel anxious".',
+    time: 'now',
+    isBot: true,
   },
   {
-    id: '2',
-    from: 'me',
-    text: 'I just need someone to talk to. Things are bad at home.',
-    time: '9:43 PM',
+    id: 'p1',
+    handle: 'QuietRiver',
+    emoji: 'QR',
+    status: 'online',
+    lastMsg: 'I hear you. Take your time.',
+    time: '2m',
+    unread: 2,
   },
   {
-    id: '3',
-    from: 'them',
-    text: 'I hear you. Take your time. I am not going anywhere.',
-    time: '9:43 PM',
+    id: 'p2',
+    handle: 'MorningLark',
+    emoji: 'ML',
+    status: 'online',
+    lastMsg: 'You are not alone in this.',
+    time: '14m',
+  },
+  {
+    id: 'p3',
+    handle: 'PaperKite',
+    emoji: 'PK',
+    status: 'away',
+    lastMsg: 'I went through something similar last year.',
+    time: '1h',
+  },
+  {
+    id: 'p4',
+    handle: 'SilverPine',
+    emoji: 'SP',
+    status: 'away',
+    lastMsg: 'Sending strength your way.',
+    time: '3h',
   },
 ];
 
+const SEED_THREADS = {
+  bot: [
+    {
+      id: 'b1',
+      from: 'them',
+      text: 'Hi, I am SafeBot. I can help with grounding exercises, safety planning, or just listen. What is on your mind?',
+      time: 'now',
+    },
+  ],
+  p1: [
+    {
+      id: '1',
+      from: 'them',
+      text: 'Hey, glad you reached out. You are safe here. We are both anonymous.',
+      time: '9:40 PM',
+    },
+    {
+      id: '2',
+      from: 'me',
+      text: 'Thanks. I am not sure where to start.',
+      time: '9:41 PM',
+    },
+    {
+      id: '3',
+      from: 'them',
+      text: 'I hear you. Take your time.',
+      time: '9:41 PM',
+    },
+  ],
+  p2: [{ id: '1', from: 'them', text: 'You are not alone in this.', time: '8:12 PM' }],
+  p3: [{ id: '1', from: 'them', text: 'I went through something similar last year. Happy to share if it helps.', time: 'Yesterday' }],
+  p4: [{ id: '1', from: 'them', text: 'Sending strength your way.', time: 'Yesterday' }],
+};
+
+const BOT_REPLIES = [
+  'That sounds really hard. I am glad you are telling me.',
+  'Let us try a quick grounding exercise. Name 5 things you can see right now.',
+  'You are doing the right thing by reaching out. Want me to suggest a peer to talk to?',
+  'Take a slow breath in for 4, hold for 4, and out for 6. I am right here.',
+];
+
 function ChatPanel({ displayName }) {
-  const [messages, setMessages] = useState(INITIAL_MESSAGES);
+  const [openId, setOpenId] = useState(null);
+  const [threads, setThreads] = useState(SEED_THREADS);
   const [draft, setDraft] = useState('');
+  const replyTimer = useRef(null);
+
+  useEffect(() => () => window.clearTimeout(replyTimer.current), []);
+
+  const openPeer = openId ? PEERS.find((peer) => peer.id === openId) : null;
+  const messages = openId ? threads[openId] || [] : [];
 
   const send = () => {
-    const nextMessage = draft.trim();
-    if (!nextMessage) return;
+    if (!openId || !draft.trim()) return;
 
-    setMessages((current) => [
+    const text = draft.trim();
+    setThreads((current) => ({
       ...current,
-      {
-        id: String(Date.now()),
-        from: 'me',
-        text: nextMessage,
-        time: 'now',
-      },
-    ]);
+      [openId]: [
+        ...(current[openId] || []),
+        { id: String(Date.now()), from: 'me', text, time: 'now' },
+      ],
+    }));
     setDraft('');
+
+    window.clearTimeout(replyTimer.current);
+    replyTimer.current = window.setTimeout(() => {
+      const replyText = openPeer?.isBot
+        ? BOT_REPLIES[Math.floor(Math.random() * BOT_REPLIES.length)]
+        : 'Thanks for sharing that with me. I am listening.';
+
+      setThreads((current) => ({
+        ...current,
+        [openId]: [
+          ...(current[openId] || []),
+          { id: String(Date.now() + 1), from: 'them', text: replyText, time: 'now' },
+        ],
+      }));
+    }, 900);
   };
+
+  if (!openPeer) {
+    return <ChatList peers={PEERS} onOpen={setOpenId} displayName={displayName} />;
+  }
 
   return (
     <div className={styles.chatPanel}>
+      <div className={styles.threadHeader}>
+        <button type="button" className={styles.backButton} onClick={() => setOpenId(null)} aria-label="Back to chats">
+          <ChevronLeft className={styles.threadBackIcon} aria-hidden="true" />
+        </button>
+        <Avatar peer={openPeer} />
+        <div className={styles.threadTitle}>
+          <div>
+            <strong>{openPeer.handle}</strong>
+            {openPeer.isBot && <Bot className={styles.botIcon} aria-hidden="true" />}
+          </div>
+          <span>
+            <Circle className={openPeer.status === 'online' ? styles.onlineDot : styles.awayDot} aria-hidden="true" />
+            {openPeer.status === 'online' ? 'Online' : 'Away'} - Anonymous
+          </span>
+        </div>
+      </div>
+
       <div className={styles.chatNotice}>
         <Lock className={styles.noticeIcon} aria-hidden="true" />
-        <span>
-          This chat is private and not stored on your device.
-          {displayName ? ` You are signed in as ${displayName}.` : ''}
-        </span>
+        <span>Both of you are anonymous. Nothing is stored on your device.</span>
       </div>
 
       <div className={styles.messages} aria-live="polite">
@@ -357,7 +555,7 @@ function ChatPanel({ displayName }) {
             onKeyDown={(event) => {
               if (event.key === 'Enter') send();
             }}
-            placeholder="Type a message"
+            placeholder={openPeer.isBot ? 'Ask SafeBot anything...' : `Message ${openPeer.handle}...`}
             className={styles.messageInput}
             aria-label="Type a message"
           />
@@ -373,6 +571,69 @@ function ChatPanel({ displayName }) {
         </div>
       </div>
     </div>
+  );
+}
+
+function ChatList({ peers, onOpen, displayName }) {
+  const [query, setQuery] = useState('');
+  const filtered = peers.filter((peer) => peer.handle.toLowerCase().includes(query.toLowerCase()));
+
+  return (
+    <div className={styles.chatListPanel}>
+      <div className={styles.chatNotice}>
+        <Lock className={styles.noticeIcon} aria-hidden="true" />
+        <span>
+          Everyone here is anonymous. Your handle is randomized each session.
+          {displayName ? ` Signed in as ${displayName}.` : ''}
+        </span>
+      </div>
+
+      <label className={styles.searchField}>
+        <Search className={styles.smallIcon} aria-hidden="true" />
+        <input
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Search people"
+          aria-label="Search people"
+        />
+      </label>
+
+      <div className={styles.peerSectionLabel}>Always available</div>
+      {filtered.filter((peer) => peer.isBot).map((peer) => (
+        <PeerRow key={peer.id} peer={peer} onOpen={onOpen} />
+      ))}
+
+      <div className={styles.peerSectionLabel}>People online</div>
+      {filtered.filter((peer) => !peer.isBot).map((peer) => (
+        <PeerRow key={peer.id} peer={peer} onOpen={onOpen} />
+      ))}
+    </div>
+  );
+}
+
+function PeerRow({ peer, onOpen }) {
+  return (
+    <button type="button" className={styles.peerRow} onClick={() => onOpen(peer.id)}>
+      <Avatar peer={peer} />
+      <span className={styles.peerCopy}>
+        <span className={styles.peerNameLine}>
+          <strong>{peer.handle}</strong>
+          {peer.isBot && <Bot className={styles.botIcon} aria-hidden="true" />}
+          <span>{peer.time}</span>
+        </span>
+        <span>{peer.lastMsg}</span>
+      </span>
+      {peer.unread ? <span className={styles.unreadBadge}>{peer.unread}</span> : null}
+    </button>
+  );
+}
+
+function Avatar({ peer }) {
+  return (
+    <span className={styles.avatar}>
+      <span className={peer.isBot ? styles.botAvatar : ''}>{peer.emoji}</span>
+      <span className={peer.status === 'online' ? styles.avatarOnline : styles.avatarAway} />
+    </span>
   );
 }
 

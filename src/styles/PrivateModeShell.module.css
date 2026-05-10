@@ -58,8 +58,12 @@
 
 .exitButton,
 .tabButton,
+.homeSosCard,
+.actionCard,
 .sosButton,
 .switch,
+.backButton,
+.peerRow,
 .sendButton,
 .uploadButton,
 .filterButton,
@@ -108,15 +112,213 @@
   display: none;
 }
 
+.homePanel,
 .sosPanel,
 .journalPanel,
-.aidPanel {
+.aidPanel,
+.chatListPanel {
   height: 100%;
   overflow-y: auto;
   padding: 16px 16px 112px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.homeIntro {
+  padding-top: 8px;
+}
+
+.homeGreeting {
+  color: var(--pm-muted-foreground);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.homeIntro h1 {
+  margin-top: 2px;
+  color: var(--pm-foreground);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.12;
+}
+
+.homeIntro p {
+  margin-top: 6px;
+  color: var(--pm-muted-foreground);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.homeSosCard {
+  width: 100%;
+  padding: 20px;
+  border: 0;
+  border-radius: var(--pm-radius-xl);
+  background: linear-gradient(135deg, oklch(0.38 0.08 35), oklch(0.28 0.06 40));
+  color: oklch(0.95 0.04 80);
+  box-shadow: 0 10px 24px rgba(71, 52, 40, 0.12);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.homeSosIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--pm-accent);
+  color: oklch(0.25 0.05 40);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.homeSosIcon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.homeSosCopy {
+  min-width: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.homeSosCopy strong {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.homeSosCopy span {
+  font-size: 12px;
+  line-height: 1.35;
+  opacity: 0.85;
+}
+
+.homeChevron {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  opacity: 0.72;
+}
+
+.setupCard {
+  padding: 16px;
+  border: 1px solid var(--pm-border);
+  border-radius: var(--pm-radius-lg);
+  background: var(--pm-card);
+}
+
+.setupHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--pm-muted-foreground);
+  font-size: 13px;
+}
+
+.miniGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.miniCard {
+  padding: 12px;
+  border-radius: 14px;
+  background: oklch(0.94 0.025 80);
+}
+
+.miniCard span,
+.actionHeading {
+  color: var(--pm-muted-foreground);
+  font-size: 11px;
+}
+
+.miniCard strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--pm-foreground);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.actionHeading {
+  margin: 0 0 8px 4px;
+  font-size: 13px;
+}
+
+.actionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.actionCard {
+  min-height: 144px;
+  padding: 16px;
+  border: 1px solid var(--pm-border);
+  border-radius: var(--pm-radius-lg);
+  background: var(--pm-card);
+  color: var(--pm-foreground);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.16s ease;
+}
+
+.actionCard:hover {
+  background: rgba(234, 228, 216, 0.48);
+}
+
+.actionIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: oklch(0.92 0.04 80);
+  color: oklch(0.4 0.08 45);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.actionCard strong {
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.actionCard > span:last-child {
+  color: var(--pm-muted-foreground);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.homeFooter {
+  margin-top: 2px;
+  color: var(--pm-muted-foreground);
+  text-align: center;
+  font-size: 12px;
 }
 
 .heroCard {
@@ -479,9 +681,242 @@
   overflow: hidden;
 }
 
+.threadHeader {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--pm-border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.backButton {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--pm-foreground);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.backButton:hover {
+  background: var(--pm-muted);
+}
+
+.threadBackIcon {
+  width: 20px;
+  height: 20px;
+}
+
+.threadTitle {
+  min-width: 0;
+  flex: 1;
+}
+
+.threadTitle div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.threadTitle strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.threadTitle > span {
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--pm-muted-foreground);
+  font-size: 11px;
+}
+
+.botIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--pm-muted-foreground);
+}
+
+.onlineDot,
+.awayDot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  fill: currentColor;
+}
+
+.onlineDot {
+  color: #059669;
+}
+
+.awayDot {
+  color: #d97706;
+}
+
 .chatPanel .chatNotice {
   margin: 12px 16px 0;
   flex-shrink: 0;
+}
+
+.searchField {
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid var(--pm-border);
+  border-radius: 999px;
+  background: var(--pm-card);
+  color: var(--pm-muted-foreground);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.searchField input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--pm-foreground);
+  font: inherit;
+  font-size: 14px;
+}
+
+.searchField input::placeholder {
+  color: var(--pm-muted-foreground);
+}
+
+.peerSectionLabel {
+  margin: 4px 4px -4px;
+  color: var(--pm-muted-foreground);
+  font-size: 12px;
+}
+
+.peerRow {
+  width: 100%;
+  min-height: 72px;
+  padding: 12px;
+  border: 1px solid var(--pm-border);
+  border-radius: var(--pm-radius-lg);
+  background: var(--pm-card);
+  color: var(--pm-foreground);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.16s ease;
+}
+
+.peerRow:hover {
+  background: rgba(234, 228, 216, 0.48);
+}
+
+.peerCopy {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.peerNameLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.peerNameLine strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.peerNameLine > span:last-child {
+  margin-left: auto;
+  color: var(--pm-muted-foreground);
+  font-size: 11px;
+}
+
+.peerCopy > span:last-child {
+  overflow: hidden;
+  color: var(--pm-muted-foreground);
+  font-size: 12px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.unreadBadge {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: oklch(0.5 0.13 35);
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.avatar {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.avatar > span:first-child {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: oklch(0.92 0.04 80);
+  color: var(--pm-foreground);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.avatar > span.botAvatar {
+  background: var(--pm-accent);
+}
+
+.avatarOnline,
+.avatarAway {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--pm-card);
+  border-radius: 50%;
+}
+
+.avatarOnline {
+  background: #10b981;
+}
+
+.avatarAway {
+  background: #f59e0b;
 }
 
 .messages {
@@ -830,8 +1265,12 @@
 
 .exitButton:focus-visible,
 .tabButton:focus-visible,
+.homeSosCard:focus-visible,
+.actionCard:focus-visible,
 .sosButton:focus-visible,
 .switch:focus-visible,
+.backButton:focus-visible,
+.peerRow:focus-visible,
 .sendButton:focus-visible,
 .uploadButton:focus-visible,
 .filterButton:focus-visible,
@@ -862,7 +1301,9 @@
 }
 
 @media (max-width: 360px) {
+  .homePanel,
   .sosPanel,
+  .chatListPanel,
   .journalPanel,
   .aidPanel {
     padding-inline: 12px;

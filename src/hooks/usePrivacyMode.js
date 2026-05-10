@@ -3,39 +3,43 @@ import { useEffect } from 'react';
 /**
  * usePrivacyMode
  *
- * Mounts once in the app shell to enforce incognito-style behaviour:
- *
- *  1. History lock — prevents the back button from revealing a previous state.
- *     Uses pushState so the browser has nowhere to go back to.
- *
- *  2. Session wipe on hide — when the user switches tabs, backgrounds the app,
- *     or the screen locks, sessionStorage is cleared and the SW is told to
- *     purge all caches. Leaves no forensic residue between glances.
- *
- *  3. Service worker registration — registers /sw.js on first mount.
- *     The SW enforces the network-only fetch strategy and responds to PANIC.
+ * Production keeps the privacy service worker enabled. Development removes it
+ * so localhost never gets stuck serving stale/blank Next.js chunks.
  */
 export function usePrivacyMode() {
-  // ── 1. Service Worker registration ──────────────────────────────────────────
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js', { scope: '/' })
-        .then((reg) => console.debug('[SW] Registered', reg.scope))
-        .catch((err) => console.error('[SW] Registration failed', err));
+    if (!('serviceWorker' in navigator)) return undefined;
 
-      // Listen for the SW telling us to panic-redirect.
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data?.type === 'PANIC_REDIRECT') {
-          triggerPanicExit();
-        }
-      });
+    if (process.env.NODE_ENV !== 'production') {
+      navigator.serviceWorker
+        .getRegistrations()
+        .then((registrations) => Promise.all(registrations.map((reg) => reg.unregister())))
+        .then(() => purgeBrowserCaches())
+        .catch((err) => console.debug('[SW] Dev cleanup failed', err));
+      return undefined;
     }
+
+    let active = true;
+
+    navigator.serviceWorker
+      .register('/sw.js', { scope: '/' })
+      .then((reg) => console.debug('[SW] Registered', reg.scope))
+      .catch((err) => console.error('[SW] Registration failed', err));
+
+    const onMessage = (event) => {
+      if (active && event.data?.type === 'PANIC_REDIRECT') {
+        triggerPanicExit();
+      }
+    };
+
+    navigator.serviceWorker.addEventListener('message', onMessage);
+    return () => {
+      active = false;
+      navigator.serviceWorker.removeEventListener('message', onMessage);
+    };
   }, []);
 
-  // ── 2. History lock ──────────────────────────────────────────────────────────
   useEffect(() => {
-    // Replace the current history entry so there's nothing behind it.
     window.history.replaceState(null, '', window.location.href);
 
     const lockHistory = () => {
@@ -46,7 +50,6 @@ export function usePrivacyMode() {
     return () => window.removeEventListener('popstate', lockHistory);
   }, []);
 
-  // ── 3. Wipe on tab hide / background ────────────────────────────────────────
   useEffect(() => {
     const handleVisibility = () => {
       if (document.visibilityState === 'hidden') {
@@ -60,15 +63,12 @@ export function usePrivacyMode() {
   }, []);
 }
 
-// ─── Shared utilities (also imported by PanicExit) ────────────────────────────
-
 export function triggerPanicExit() {
   const safeUrl = process.env.NEXT_PUBLIC_SAFE_EXIT_URL || 'https://www.google.com';
 
   sessionStorage.clear();
   postToSW({ type: 'PANIC' });
 
-  // keepalive ensures the request completes even as the page navigates away.
   fetch('/api/auth/logout', { method: 'POST', keepalive: true }).catch(() => {});
 
   window.location.replace(safeUrl);
@@ -78,4 +78,11 @@ function postToSW(message) {
   if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage(message);
   }
+}
+
+function purgeBrowserCaches() {
+  if (!('caches' in window)) return Promise.resolve();
+  return caches
+    .keys()
+    .then((keys) => Promise.all(keys.map((key) => caches.delete(key))));
 }
