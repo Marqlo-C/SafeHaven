@@ -9,11 +9,11 @@ import styles from '../styles/ChatRoom.module.css';
  *   roomId      {string}  Socket.io room to join.
  *   displayName {string}  Anonymous name shown for the current user's messages.
  *
- * Message ownership is determined by comparing msg.senderId to the socket's
- * own ephemeral ID (mySocketId). No persistent user identity is involved.
+ * Message ownership is determined by comparing msg.senderId to the current
+ * authenticated user ID returned by the friend-gated chat socket.
  */
 export default function ChatRoom({ roomId, displayName }) {
-  const { messages, connected, mySocketId, sendMessage } = useChat(roomId);
+  const { messages, connected, currentUserId, error, sendMessage } = useChat(roomId);
   const [draft, setDraft] = useState('');
   const bottomRef = useRef(null);
 
@@ -46,14 +46,14 @@ export default function ChatRoom({ roomId, displayName }) {
       <ul className={styles.messages} aria-live="polite" aria-label="Messages">
         {messages.length === 0 && (
           <li className={styles.empty}>
-            {connected ? 'No messages yet. Say hello.' : 'Connecting…'}
+            {error || (connected ? 'No messages yet. Say hello.' : 'Connecting…')}
           </li>
         )}
         {messages.map((msg) => {
-          const isOwn = msg.senderId === mySocketId;
+          const isOwn = msg.senderId === currentUserId;
           return (
             <li
-              key={`${msg.senderId}-${msg.timestamp}`}
+              key={msg.id || `${msg.senderId}-${msg.timestamp}`}
               className={`${styles.row} ${isOwn ? styles.rowOwn : styles.rowOther}`}
             >
               <span className={`${styles.bubble} ${isOwn ? styles.bubbleOwn : styles.bubbleOther}`}>
