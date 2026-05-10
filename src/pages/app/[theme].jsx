@@ -2,9 +2,9 @@ import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import PanicExit from '../../components/PanicExit';
 import Button from '../../components/Button';
-import ChatRoom from '../../components/ChatRoom';
 import CalculatorCover from '../../components/CalculatorCover';
 import NewsCover from '../../components/NewsCover';
+import PrivateModeShell from '../../components/PrivateModeShell';
 import WeatherCover from '../../components/WeatherCover';
 import { usePrivacyMode } from '../../hooks/usePrivacyMode';
 
@@ -34,26 +34,53 @@ const THEMES = {
   },
 };
 
-export default function AppShell({ themeKey, appName, manifestUrl, themeColor, appleTouchIcon, session }) {
+export default function AppShell({
+  themeKey,
+  appName,
+  manifestUrl,
+  themeColor,
+  appleTouchIcon,
+  session,
+}) {
   usePrivacyMode();
 
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installed, setInstalled] = useState(false);
-  const [showChat, setShowChat] = useState(false);
+  const [showPrivateMode, setShowPrivateMode] = useState(false);
 
   useEffect(() => {
-    const onPrompt = (e) => { e.preventDefault(); setInstallPrompt(e); };
+    const onPrompt = (event) => {
+      event.preventDefault();
+      setInstallPrompt(event);
+    };
+
+    const onInstalled = () => {
+      setInstalled(true);
+      setInstallPrompt(null);
+    };
+
     window.addEventListener('beforeinstallprompt', onPrompt);
-    window.addEventListener('appinstalled', () => { setInstalled(true); setInstallPrompt(null); });
-    return () => window.removeEventListener('beforeinstallprompt', onPrompt);
+    window.addEventListener('appinstalled', onInstalled);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onPrompt);
+      window.removeEventListener('appinstalled', onInstalled);
+    };
   }, []);
 
   const handleInstall = async () => {
     if (!installPrompt) return;
+
     installPrompt.prompt();
     const { outcome } = await installPrompt.userChoice;
     if (outcome === 'accepted') setInstalled(true);
     setInstallPrompt(null);
+  };
+
+  const renderCover = () => {
+    if (themeKey === 'calculator') return <CalculatorCover />;
+    if (themeKey === 'news') return <NewsCover />;
+    if (themeKey === 'weather') return <WeatherCover />;
+    return <PrivateModeShell displayName={session.displayName} />;
   };
 
   return (
@@ -74,36 +101,29 @@ export default function AppShell({ themeKey, appName, manifestUrl, themeColor, a
       </Head>
 
       <main>
-        {installPrompt && !installed && (
+        {installPrompt && !installed && !showPrivateMode && (
           <div style={bannerStyle}>
             <span>Add {appName} to your home screen.</span>
-            <button onClick={handleInstall} style={installBtnStyle}>Install</button>
+            <button type="button" onClick={handleInstall} style={installBtnStyle}>
+              Install
+            </button>
           </div>
         )}
 
-        {/* ── Real app content ── */}
-        {/* Cover UI (calculator/news/weather disguise) goes here at Figma handoff. */}
-        {/* ChatRoom is the functional core until cover UIs are designed.           */}
-        {showChat ? (
-          <ChatRoom roomId="sos" displayName={session.displayName} />
-        ) : themeKey === 'calculator' ? (
-          <CalculatorCover />
-        ) : themeKey === 'news' ? (
-          <NewsCover />
-        ) : themeKey === 'weather' ? (
-          <WeatherCover />
+        {showPrivateMode ? (
+          <PrivateModeShell displayName={session.displayName} />
         ) : (
-          <ChatRoom roomId="general" displayName={session.displayName} />
+          renderCover()
         )}
       </main>
 
-      <PanicExit />
-      {!showChat && <Button onClick={() => setShowChat(true)} />}
+      <PanicExit showButton={!showPrivateMode} />
+      {!showPrivateMode && (
+        <Button onClick={() => setShowPrivateMode(true)} />
+      )}
     </>
   );
 }
-
-// ── Auth-gated data fetching ──────────────────────────────────────────────────
 
 export const getServerSideProps = withAuth(async (context) => {
   const { params } = context;
@@ -111,8 +131,6 @@ export const getServerSideProps = withAuth(async (context) => {
   if (!theme) return { notFound: true };
   return { props: theme };
 });
-
-// ── Inline styles (non-design, structural only) ───────────────────────────────
 
 const bannerStyle = {
   display: 'flex',

@@ -1,17 +1,17 @@
 /**
- * Button - discrete in-app switch from a disguise screen to SOS chat.
+ * Button - discrete in-app switch from a disguise screen to private tools.
  *
  * The control stays small, unlabeled, and low-contrast so the cover identity
  * remains the primary visible experience until the user intentionally opens
- * the chat.
+ * the private safety tools.
  */
 
 export default function Button({ onClick }) {
   return (
     <button
       type="button"
-      aria-label="Open SOS chat"
-      title="Open SOS chat"
+      aria-label="Open private safety tools"
+      title="Open private safety tools"
       onClick={onClick}
       style={{
         position: 'fixed',
