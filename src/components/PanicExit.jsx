@@ -12,7 +12,7 @@ import { triggerPanicExit } from '../hooks/usePrivacyMode';
 const config = require('../config/config.json');
 
 export default function PanicExit({ showButton = true }) {
-  const touchStart = useRef({ x: 0, y: 0 });
+  const touchStart = useRef({ x: 0, y: 0, time: 0 });
 
   useEffect(() => {
     const onKeyDown = (event) => {
@@ -25,14 +25,17 @@ export default function PanicExit({ showButton = true }) {
 
   useEffect(() => {
     const handleTouchStart = (e) => {
+      if (e.touches.length !== 1) return;
       touchStart.current = {
         x: e.touches[0].clientX,
         y: e.touches[0].clientY,
+        time: Date.now(),
       };
     };
 
     const handleTouchEnd = (e) => {
       if (!config.features.enable_swipe_panic) return;
+      if (e.changedTouches.length !== 1) return;
 
       // Disable swipe if keyboard is likely up (input/textarea is focused)
       const activeEl = document.activeElement;
@@ -41,19 +44,26 @@ export default function PanicExit({ showButton = true }) {
 
       const deltaX = e.changedTouches[0].clientX - touchStart.current.x;
       const deltaY = e.changedTouches[0].clientY - touchStart.current.y;
+      const deltaTime = Date.now() - touchStart.current.time;
 
-      // Horizontal swipe threshold: > 100px horizontal, < 50px vertical deviation
-      const minDistance = 150;
-      const maxVerticalDev = 100;
+      // Refined thresholds for better responsiveness
+      const minDistance = 100; // Reduced from 150
+      const maxVerticalDev = 150; // Increased from 100 (more forgiving for diagonal swipes)
+      const maxTime = 500; // Swipe must be completed within 0.5s
 
-      if (Math.abs(deltaX) > minDistance && Math.abs(deltaY) < maxVerticalDev) {
+      if (
+        Math.abs(deltaX) > minDistance &&
+        Math.abs(deltaY) < maxVerticalDev &&
+        deltaTime < maxTime
+      ) {
         console.debug('[Swipe] Horizontal swipe detected');
         triggerPanicExit();
       }
     };
 
-    window.addEventListener('touchstart', handleTouchStart);
-    window.addEventListener('touchend', handleTouchEnd);
+    // Use passive: true for performance, except if we needed to preventDefault
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     return () => {
       window.removeEventListener('touchstart', handleTouchStart);
