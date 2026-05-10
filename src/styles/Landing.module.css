@@ -1,136 +1,170 @@
-/*
- * Landing page styles — placeholder.
- *
- * This file will be replaced with output from the Figma/Open Design handoff.
- * Structure is intentionally semantic and uses CSS custom properties so
- * the design system can be applied by swapping variables.
- */
-
-/* ── Layout ──────────────────────────────────────────────────────────────── */
+/* Disguise Setup Page - Ultra Clean "Pill" Aesthetic */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 .page {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  background-color: var(--color-bg);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
 }
 
+/* ── Header ──────────────────────────────────────────────────────────────── */
 .header {
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--color-border);
+  padding: 24px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.logo {
-  font-size: 15px;
+.backLink {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.backLink:hover {
+  color: var(--color-foreground);
+}
+
+.headerTitle {
+  font-size: 14px;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--color-text-primary);
+  color: var(--color-foreground);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
+/* ── Main Layout ─────────────────────────────────────────────────────────── */
 .main {
   flex: 1;
-  padding: 48px 24px 64px;
-  max-width: 480px;
+  max-width: 600px;
   margin: 0 auto;
   width: 100%;
-}
-
-.footer {
-  padding: 20px 24px;
-  border-top: 1px solid var(--color-border);
-  text-align: center;
-  font-size: 12px;
-  color: var(--color-text-secondary);
+  padding: 64px 24px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── Hero ────────────────────────────────────────────────────────────────── */
-
 .hero {
   margin-bottom: 48px;
   text-align: center;
 }
 
 .heroTitle {
-  font-size: clamp(24px, 6vw, 32px);
+  font-size: clamp(36px, 6vw, 48px);
   font-weight: 700;
-  line-height: 1.25;
-  margin-bottom: 12px;
+  letter-spacing: -0.04em;
+  margin: 0 0 16px 0;
+  color: var(--color-foreground);
 }
 
 .heroSubtitle {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.6;
-  color: var(--color-text-secondary);
+  color: var(--color-muted);
 }
 
-/* ── App cards ───────────────────────────────────────────────────────────── */
-
-.appsHeading {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-  margin-bottom: 16px;
-}
-
-.appGrid {
+/* ── Pill Cards ──────────────────────────────────────────────────────────── */
+.appList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
-.appCard {
+.pillCard {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-card);
+  border-radius: 100px; /* Gives it the distinct pill shape */
+  padding: 16px 24px;
   text-decoration: none;
   color: inherit;
-  transition: background 0.15s ease;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
 }
 
-.appCard:hover,
-.appCard:focus-visible {
-  background: rgba(255, 255, 255, 0.06);
-  outline: none;
+.pillCard:hover {
+  background: white;
+  border-color: var(--color-accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
-.appIcon {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  flex-shrink: 0;
+.pillIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
   object-fit: cover;
+  margin-right: 20px;
+  background: white;
+  padding: 4px;
+  box-shadow: var(--shadow-sm);
 }
 
-.appInfo {
+.pillInfo {
   flex: 1;
   min-width: 0;
 }
 
-.appName {
-  font-size: 15px;
+.pillName {
+  font-size: 18px;
   font-weight: 600;
-  margin-bottom: 3px;
+  margin: 0 0 4px 0;
+  color: var(--color-foreground);
 }
 
-.appDesc {
-  font-size: 13px;
-  color: var(--color-text-secondary);
+.pillDesc {
+  font-size: 14px;
+  color: var(--color-muted);
   line-height: 1.4;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.installChip {
-  flex-shrink: 0;
-  font-size: 12px;
+.pillAction {
+  margin-left: 20px;
+}
+
+.installBtn {
+  background: var(--color-accent);
+  color: white;
+  padding: 10px 24px;
+  border-radius: 100px;
+  font-size: 14px;
   font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 20px;
-  border: 1px solid var(--color-accent);
-  color: var(--color-accent);
-  background: transparent;
   white-space: nowrap;
+  transition: background 0.2s ease;
+}
+
+.pillCard:hover .installBtn {
+  background: #b56c49;
+}
+
+@media (max-width: 600px) {
+  .pillCard {
+    border-radius: var(--radius-lg); /* Less extreme on mobile so text fits */
+    padding: 16px;
+  }
+  
+  .pillIcon {
+    width: 48px;
+    height: 48px;
+    margin-right: 16px;
+  }
+  
+  .pillDesc {
+    white-space: normal; /* Allow wrapping on small screens */
+  }
+  
+  .pillAction {
+    display: none; /* Hide button on mobile to save space, the card is clickable anyway */
+  }
 }

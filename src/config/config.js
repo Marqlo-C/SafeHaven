@@ -20,6 +20,7 @@ const config = {
     PORT: process.env.PORT || '3000',
     MONGODB_URI: process.env.MONGODB_URI,
     JWT_SECRET: process.env.JWT_SECRET,
+    CLAUDE_API_KEY: process.env.CLAUDE_API_KEY,
     NEWSAPI_AI_KEY: process.env.NEWSAPI_AI_KEY,
     ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN,
   },

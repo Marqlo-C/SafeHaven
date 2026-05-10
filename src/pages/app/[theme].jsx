@@ -6,6 +6,7 @@ import CalculatorCover from '../../components/CalculatorCover';
 import NewsCover from '../../components/NewsCover';
 import PrivateModeShell from '../../components/PrivateModeShell';
 import WeatherCover from '../../components/WeatherCover';
+import LocationCapture from '../../components/LocationCapture';
 import { usePrivacyMode } from '../../hooks/usePrivacyMode';
 
 const { withAuth } = require('../../lib/withAuth');
@@ -41,6 +42,7 @@ export default function AppShell({
   themeColor,
   appleTouchIcon,
   session,
+  geolocationEnabled,
 }) {
   usePrivacyMode();
 
@@ -113,7 +115,10 @@ export default function AppShell({
         {showPrivateMode ? (
           <PrivateModeShell displayName={session.displayName} />
         ) : (
-          renderCover()
+          <>
+            {geolocationEnabled && <LocationCapture />}
+            {renderCover()}
+          </>
         )}
       </main>
 
@@ -126,10 +131,16 @@ export default function AppShell({
 }
 
 export const getServerSideProps = withAuth(async (context) => {
+  const config = require('../../config/config');
   const { params } = context;
   const theme = THEMES[params.theme];
   if (!theme) return { notFound: true };
-  return { props: theme };
+  return {
+    props: {
+      ...theme,
+      geolocationEnabled: Boolean(config.features.enable_geolocation),
+    },
+  };
 });
 
 const bannerStyle = {

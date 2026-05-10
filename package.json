@@ -8,6 +8,7 @@
     "start": "NODE_ENV=production node server.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.95.1",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.0",
     "jsonwebtoken": "^9.0.0",
