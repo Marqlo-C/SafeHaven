@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import PanicExit from '../../components/PanicExit';
 import Button from '../../components/Button';
+import ChatRoom from '../../components/ChatRoom';
 import CalculatorCover from '../../components/CalculatorCover';
 import NewsCover from '../../components/NewsCover';
 import PrivateModeShell from '../../components/PrivateModeShell';
@@ -225,7 +226,7 @@ export default function AppShell({
 
       <PanicExit showButton={!showPrivateMode} />
       {!showPrivateMode && !showChat && <Button onClick={() => setShowChat(true)} />}
-      {!showPrivateMode && showChat && <Button onClick={() => setShowPrivateMode(true)} />}
+      {!showPrivateMode && showChat && <Button onClick={() => setShowChat(false)} />}
 
       {/* Persistent Install Trigger for non-PWA mode */}
       {installPrompt && !showModal && (
