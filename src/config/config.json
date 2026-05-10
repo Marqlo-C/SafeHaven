@@ -9,6 +9,7 @@
     "enable_button": true,
     "enable_geolocation": true,
     "enable_friending": true,
+    "enable_trusted_contacts": true,
     "enable_safety_alert": false,
     "enable_resource_directory": false,
     "enable_crisis_escalation": false
