@@ -30,6 +30,7 @@ import {
   X,
 } from 'lucide-react';
 import HomePanel from './private-mode/HomePanel';
+import AidPanel from './private-mode/AidPanel';
 import { triggerPanicExit } from '../hooks/usePrivacyMode';
 import styles from '../styles/PrivateModeShell.module.css';
 
@@ -1198,90 +1199,6 @@ function NoteComposer({ value, onChange, onCancel, onSave }) {
             Save note
           </button>
         </div>
-      </div>
-    </div>
-  );
-}
-
-const FILTERS = [
-  { key: 'shelter', label: 'Shelters' },
-  { key: 'legal', label: 'Legal Aid' },
-  { key: 'financial', label: 'Financial' },
-  { key: 'counseling', label: 'Counseling' },
-];
-
-const RESOURCES = {
-  shelter: [
-    { name: "Safe Harbor Women's Shelter", meta: '0.8 mi - Open 24 hours' },
-    { name: 'Hope House Emergency Refuge', meta: '1.4 mi - Open until 9 PM' },
-    { name: 'Riverside Family Center', meta: '2.6 mi - Open 24 hours' },
-  ],
-  legal: [
-    { name: 'Community Legal Aid Society', meta: '1.1 mi - Open until 5 PM' },
-    { name: 'Domestic Violence Legal Clinic', meta: '3.0 mi - By appointment' },
-  ],
-  financial: [
-    { name: 'Emergency Assistance Fund', meta: '0.5 mi - Open until 6 PM' },
-  ],
-  counseling: [
-    { name: 'Trauma Recovery Counseling', meta: '1.8 mi - Open until 8 PM' },
-    { name: 'Peer Support Group - North', meta: '2.2 mi - Wed 7 PM' },
-  ],
-};
-
-function AidPanel() {
-  const [activeFilter, setActiveFilter] = useState('shelter');
-
-  return (
-    <div className={styles.aidPanel}>
-      <div className={styles.chatNotice}>
-        <Lock className={styles.noticeIcon} aria-hidden="true" />
-        <span>Search results are not stored or shared.</span>
-      </div>
-
-      <div className={styles.resourceMap}>
-        <div className={styles.mapPattern} aria-hidden="true" />
-        <MapPin className={`${styles.resourcePin} ${styles.resourcePinOne}`} aria-hidden="true" />
-        <MapPin className={`${styles.resourcePin} ${styles.resourcePinTwo}`} aria-hidden="true" />
-        <MapPin className={`${styles.resourcePin} ${styles.resourcePinThree}`} aria-hidden="true" />
-        <div className={styles.mapCaption}>Illustrative map - tap a resource for directions</div>
-      </div>
-
-      <div className={styles.filterScroller} aria-label="Resource filters">
-        {FILTERS.map((filter) => {
-          const active = activeFilter === filter.key;
-
-          return (
-            <button
-              key={filter.key}
-              type="button"
-              className={`${styles.filterButton} ${active ? styles.filterButtonActive : ''}`}
-              aria-pressed={active}
-              onClick={() => setActiveFilter(filter.key)}
-            >
-              {filter.label}
-            </button>
-          );
-        })}
-      </div>
-
-      <div className={styles.resourceList}>
-        {RESOURCES[activeFilter].map((resource) => (
-          <article key={resource.name} className={styles.resourceCard}>
-            <h2>{resource.name}</h2>
-            <p>{resource.meta}</p>
-            <div className={styles.resourceActions}>
-              <button type="button">
-                <Phone className={styles.tinyIcon} aria-hidden="true" />
-                Call
-              </button>
-              <button type="button">
-                <Map className={styles.tinyIcon} aria-hidden="true" />
-                Directions
-              </button>
-            </div>
-          </article>
-        ))}
       </div>
     </div>
   );
