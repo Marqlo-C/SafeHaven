@@ -6,89 +6,125 @@ export default function LandingPage() {
   return (
     <>
       <Head>
-        <title>Safe Harbor — A Safe Space When You Need It Most</title>
+        <title>Safe Harbor — Safety, Beautifully Disguised</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="A privacy-first platform connecting and protecting survivors of gender-based violence." />
+        <meta name="description" content="A quiet, zero-trace sanctuary for your private journey toward safety. Hidden in plain sight." />
       </Head>
 
       <div className={styles.page}>
         <header className={styles.header}>
-          <div className={styles.brand}>Safe Harbor</div>
+          <div className={styles.brand}>
+            <img src="/resources/images/logos/safe_harbor_logo.png" alt="" className={styles.logo} />
+            Safe Harbor
+          </div>
           <nav className={styles.nav}>
-            <Link href="/downloads" className={styles.navButton}>Get Protected Now</Link>
+            <Link href="/downloads" className={styles.navButton}>Get Protected</Link>
           </nav>
         </header>
 
         <main className={styles.main}>
-          {/* Soft Gradient Hero */}
+          {/* Hero Section - Ultra Minimalist & Empowering */}
           <section className={styles.heroSection}>
             <div className={styles.heroContent}>
-              <div className={styles.badge}>Trusted Support Network</div>
+              <div className={styles.badge}>Your private journey starts here</div>
               <h1 className={styles.heroTitle}>
-                Safety, disguised in <br />
-                <span className={styles.textGradient}>plain sight.</span>
+                Safety, <br />
+                <span className={styles.textGradient}>beautifully disguised.</span>
               </h1>
               <p className={styles.heroSubtitle}>
-                A private, zero-trace platform for women to connect, find resources, and document abuse securely. Hidden behind everyday apps like a calculator or weather forecast to keep you safe on shared devices.
+                A quiet digital sanctuary for survivors and those seeking a way out. 
+                Disguised as everyday tools, we provide the invisible space you need 
+                to find support, document your story, and reclaim your peace.
               </p>
               <div className={styles.heroActions}>
-                <Link href="/downloads" className={styles.primaryCta}>Download Disguised App</Link>
-                <span className={styles.secondaryText}>100% Free & Anonymous</span>
+                <Link href="/downloads" className={styles.primaryCta}>Get Started Privately</Link>
+                <span className={styles.secondaryText}>Encrypted • Invisible • Free Forever</span>
               </div>
             </div>
           </section>
 
-          {/* Marquee/Ticker effect for emphasis */}
+          {/* Value Proposition Ticker - Thinner, more elegant */}
           <div className={styles.tickerContainer}>
             <div className={styles.tickerTrack}>
-              <span>Zero-Trace Browsing</span>
+              <span>Invisible App Icons</span>
               <span className={styles.dot}>•</span>
-              <span>Encrypted Evidence Journal</span>
+              <span>Zero Search History</span>
+              <span className={styles.dot}>•</span>
+              <span>Secure Evidence Vault</span>
+              <span className={styles.dot}>•</span>
+              <span>Anonymous Peer Support</span>
+              <span className={styles.dot}>•</span>
+              <span>Instant Panic Redirect</span>
+              <span className={styles.dot}>•</span>
+              {/* Duplicate set for seamless loop */}
+              <span>Invisible App Icons</span>
+              <span className={styles.dot}>•</span>
+              <span>Zero Search History</span>
+              <span className={styles.dot}>•</span>
+              <span>Secure Evidence Vault</span>
               <span className={styles.dot}>•</span>
               <span>Anonymous Peer Support</span>
               <span className={styles.dot}>•</span>
-              <span>Panic Redirect</span>
+              <span>Instant Panic Redirect</span>
               <span className={styles.dot}>•</span>
-              <span>Zero-Trace Browsing</span>
-              <span className={styles.dot}>•</span>
-              <span>Encrypted Evidence Journal</span>
-              <span className={styles.dot}>•</span>
-              <span>Anonymous Peer Support</span>
             </div>
           </div>
 
-          {/* Bento Grid Features */}
+          {/* Feature Grid - Smaller, more refined "App-like" tiles */}
           <section className={styles.bentoSection}>
             <div className={styles.sectionHeader}>
-              <span className={styles.sectionLabel}>+ OUR IMPACT</span>
-              <h2 className={styles.sectionTitle}>Comprehensive Protection</h2>
+              <span className={styles.sectionLabel}>THE SANCTUARY CORE</span>
+              <h2 className={styles.sectionTitle}>Hidden protection.</h2>
             </div>
             
             <div className={styles.bentoGrid}>
-              <div className={`${styles.bentoCard} ${styles.cardLarge}`}>
-                <h3>Camouflaged Icons</h3>
-                <p>Choose how the app appears on your phone. Disguise Safe Harbor as a fully functional Calculator, News Reader, or Weather app. The real tools are locked behind your secure login.</p>
+              <div className={styles.bentoCard}>
+                <div className={styles.cardTag}>Disguise</div>
+                <h3>The Shield</h3>
+                <p>Hidden behind a working Calculator, News, or Weather app.</p>
               </div>
               
               <div className={styles.bentoCard}>
-                <h3>Anonymous IM</h3>
-                <p>Connect with other survivors privately. No phone numbers required. All connections are anonymous and untraceable.</p>
+                <div className={styles.cardTag}>Privacy</div>
+                <h3>Zero Trace</h3>
+                <p>No history. No cookies. No footprints left behind.</p>
               </div>
 
               <div className={styles.bentoCard}>
-                <h3>Incognito Core</h3>
-                <p>No browser history, no persistent cookies, no autocomplete. Your sessions vanish the moment you close the app.</p>
+                <div className={styles.cardTag}>Vault</div>
+                <h3>Evidence</h3>
+                <p>Securely log incidents with military-grade encryption.</p>
               </div>
 
               <div className={styles.bentoCard}>
-                <h3>Evidence Vault</h3>
-                <p>Securely log incidents, photos, and audio recordings. Cloud-backed so you never lose your records even if your device is seized.</p>
+                <div className={styles.cardTag}>Chat</div>
+                <h3>Connect</h3>
+                <p>Anonymous peer support circles that vanish on exit.</p>
               </div>
 
-              <div className={`${styles.bentoCard} ${styles.cardAccent}`}>
+              <div className={styles.bentoCard}>
+                <div className={styles.cardTag}>Safety</div>
                 <h3>Panic Exit</h3>
-                <p>Instantly wipe the screen and redirect to a safe website with a single tap, shake, or by pressing the Escape key.</p>
+                <p>One tap to instantly hide everything and redirect to safety.</p>
               </div>
+
+              <div className={styles.bentoCard}>
+                <div className={styles.cardTag}>Sync</div>
+                <h3>Cloud</h3>
+                <p>Your data stays safe even if your device is seized.</p>
+              </div>
+            </div>
+          </section>
+
+          {/* Mission Section - More intimate */}
+          <section className={styles.missionSection}>
+            <div className={styles.missionContent}>
+              <h2 className={styles.missionTitle}>Built with empathy</h2>
+              <p className={styles.missionText}>
+                We believe everyone deserves a space where they can be heard without fear. 
+                Safe Harbor isn't just an app; it's a bridge to your independence. 
+                We keep your secrets so you can find your strength.
+              </p>
             </div>
           </section>
         </main>
@@ -97,9 +133,16 @@ export default function LandingPage() {
           <div className={styles.footerContent}>
             <div className={styles.brand}>Safe Harbor</div>
             <p className={styles.footerDisclaimer}>
-              If you are in immediate danger, please call 911 or your local emergency services.
-              <br/>National Domestic Violence Hotline: 1-800-799-7233
+              <strong>Note:</strong> If you are in immediate danger, please use a safe device 
+              to call local emergency services or the National Hotline at 1-800-799-7233.
             </p>
+            <div className={styles.footerLinks}>
+              <Link href="/downloads">Install Now</Link>
+              <span>•</span>
+              <a href="#">Security Guide</a>
+              <span>•</span>
+              <a href="#">Privacy Policy</a>
+            </div>
           </div>
         </footer>
       </div>

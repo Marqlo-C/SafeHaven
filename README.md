@@ -2,6 +2,19 @@
 
 A privacy-first web platform for survivors of domestic violence. The real app is disguised as one of three everyday utilities (Calculator, News, Weather) to protect survivors on shared or monitored devices.
 
+**"Safety, beautifully disguised."**
+
+---
+
+## Visual Design System (iPhone Sanctuary Edition)
+
+Safe Harbor features an ultra-modern, premium UI designed to feel like a native iOS "sanctuary."
+
+- **Aesthetic:** Heavy glassmorphism (`backdrop-filter: blur`), squircle corners, and luminous atmosphere.
+- **Palette:** Warm Cream (`#f6f0e4`), Off-white Paper (`#fcfaf7`), Charcoal Ink (`#362e28`), and Clay Rust (`#c97d57`).
+- **Typography:** Bold, high-contrast "Inter" stacks with precise display spacing.
+- **Motion:** Seamless, infinite-scrolling marquees and cubic-bezier transitions.
+
 ---
 
 ## Tech Stack
@@ -162,10 +175,11 @@ HackDavis 2026/
     │   ├── api/news/
     │   │   └── headlines.js   ← News cover headline API.
     └── styles/
-        ├── globals.css           ← CSS custom properties, resets. Updated at Figma handoff.
-        ├── Landing.module.css    ← Landing page styles. Updated at Figma handoff.
-        ├── Login.module.css      ← Login/Register page styles. Updated at Figma handoff.
-        ├── ChatRoom.module.css   ← Chat UI styles. Updated at Figma handoff.
+        ├── globals.css           ← CSS custom properties, resets.
+        ├── Marketing.module.css  ← Landing page premium "Sanctuary" styles.
+        ├── Landing.module.css    ← App selection (Downloads) page styles.
+        ├── Login.module.css      ← Login/Register page styles.
+        ├── ChatRoom.module.css   ← Chat UI styles.
         ├── CalculatorCover.module.css
         ├── NewsCover.module.css
         └── WeatherCover.module.css
@@ -667,109 +681,23 @@ Survivors can privately document experiences and attach proof-of-abuse media. Al
 - DELETE on an entry cascades through GridFS — no orphaned files left behind.
 - All queries include `{ userId }` as a predicate; mismatched IDs return 404 (no data leakage).
 
-### UI
-
-Journal UI is deferred to the design handoff. All backend routes are ready and tested via API client (Postman/curl).
-
 ---
 
-## UI / Design Handoff
+## Cover Pages
 
-All pages and components are functional placeholders. When the Figma/Open Design handoff arrives:
-
-| File to replace | What changes |
-|---|---|
-| `src/styles/globals.css` | Design system tokens (colors, typography, spacing) |
-| `src/styles/Landing.module.css` | Landing page layout and visual design |
-| `src/styles/Login.module.css` | Login/Register form visual design |
-| `src/styles/ChatRoom.module.css` | Chat UI visual design |
-| `src/pages/index.jsx` | Content/copy and markup structure |
-| `src/pages/app/[theme].jsx` | Cover UI (calculator/news/weather disguise screens) |
-
-All React component logic, hooks, and API calls survive the handoff unchanged. Only CSS modules and markup structure get updated.
-
-
-
-
-
-MORE ON OUR COVER PAGES
-**Cover Pages**
 The app supports three disguise cover pages through the shared `/app/[theme]` route. Each cover is selected by the `theme` URL param and keeps the protected app shell, PWA manifest, privacy hooks, panic exit, and login button behavior intact.
 
 **Calculator Cover**
 Route: `/app/calculator`
 
-The calculator cover renders a functional basic calculator UI inside the authenticated app shell. It is built as a local React component and does not use external APIs or third-party services. The design is meant to look like a normal everyday calculator app while preserving access to the app’s privacy protections.
-
-Key files:
-```text
-src/components/CalculatorCover.jsx
-src/styles/CalculatorCover.module.css
-public/manifests/calculator.json
-```
+The calculator cover renders a functional basic calculator UI inside the authenticated app shell. It is built as a local React component and does not use external APIs or third-party services.
 
 **News Cover**
 Route: `/app/news`
 
-The news cover renders a dark, mobile-friendly news reader UI. It uses live headline data from NewsAPI.ai through a protected server-side API route, so the API key is never exposed to the browser. If the API key is missing or the request fails, the page silently falls back to static demo news content so the disguise still looks polished.
-
-The client requests:
-
-```text
-GET /api/news/headlines?tab=today|world|sports
-```
-
-The server fetches articles from NewsAPI.ai/Event Registry, normalizes the data, and returns only the fields the UI needs:
-
-```text
-source
-headline
-description
-content
-image
-url
-publishedAt
-```
-
-Key files:
-```text
-src/components/NewsCover.jsx
-src/styles/NewsCover.module.css
-src/pages/api/news/headlines.js
-src/config/config.js
-public/manifests/news.json
-```
-
-Environment variable:
-```text
-NEWSAPI_AI_KEY=
-```
+The news cover renders a dark, mobile-friendly news reader UI. It uses live headline data from NewsAPI.ai through a protected server-side API route.
 
 **Weather Cover**
 Route: `/app/weather`
 
-The weather cover renders a lightweight Weather Now screen inside the authenticated app shell. It does not fetch live weather data directly. Instead, it provides a disguised weather landing page with an `Open forecast` link that sends the user to AccuWeather only when clicked. This keeps the first screen looking like a weather app without adding a new API dependency.
-
-Key files:
-```text
-src/components/WeatherCover.jsx
-src/styles/WeatherCover.module.css
-public/manifests/weather.json
-```
-
-**Shared Route Logic**
-All three covers are selected in:
-
-```text
-src/pages/app/[theme].jsx
-```
-
-Current routing behavior:
-
-```text
-/app/calculator -> CalculatorCover
-/app/news       -> NewsCover
-/app/weather    -> WeatherCover
-```
-
-If the user is not authenticated, `withAuth` redirects them to `/login` before showing any cover page.
+The weather cover renders a lightweight Weather Now screen. It provides a disguised weather landing page with an `Open forecast` link.
