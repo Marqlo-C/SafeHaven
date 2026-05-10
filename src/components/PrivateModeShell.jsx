@@ -210,6 +210,7 @@ function SosPanel({ enabled }) {
   const [error, setError] = useState('');
   const [sentCount, setSentCount] = useState(0);
   const [lastLocation, setLastLocation] = useState(null);
+  const [locationError, setLocationError] = useState('');
 
   const requestCurrentLocation = () => new Promise((resolve, reject) => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
@@ -220,9 +221,39 @@ function SosPanel({ enabled }) {
     navigator.geolocation.getCurrentPosition(resolve, reject, {
       enableHighAccuracy: true,
       maximumAge: 0,
-      timeout: 15000,
     });
   });
+
+  useEffect(() => {
+    if (!enabled) return undefined;
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      setLocationError('Location is not available in this browser.');
+      return undefined;
+    }
+
+    const watcherId = navigator.geolocation.watchPosition(
+      ({ coords, timestamp }) => {
+        setLocationOn(true);
+        setLocationError('');
+        setLastLocation({
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          accuracy: coords.accuracy,
+          capturedAt: new Date(timestamp).toISOString(),
+        });
+      },
+      (err) => {
+        setLocationOn(false);
+        setLocationError(err.message || 'Unable to access live location.');
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+      }
+    );
+
+    return () => navigator.geolocation.clearWatch(watcherId);
+  }, [enabled]);
 
   const handleSend = async () => {
     if (!enabled || status === 'requesting' || status === 'sending') return;
@@ -231,14 +262,18 @@ function SosPanel({ enabled }) {
 
     try {
       setStatus('requesting');
-      const position = await requestCurrentLocation();
-      const { coords, timestamp } = position;
-      const location = {
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-        accuracy: coords.accuracy,
-        capturedAt: new Date(timestamp).toISOString(),
-      };
+      let location = lastLocation;
+
+      if (!location || Date.now() - new Date(location.capturedAt).getTime() > 60 * 1000) {
+        const position = await requestCurrentLocation();
+        const { coords, timestamp } = position;
+        location = {
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          accuracy: coords.accuracy,
+          capturedAt: new Date(timestamp).toISOString(),
+        };
+      }
 
       setLocationOn(true);
       setLastLocation(location);
@@ -291,6 +326,7 @@ function SosPanel({ enabled }) {
               : 'The SOS feature is currently disabled.'}
         </p>
         {error && <p className={styles.heroText}>{error}</p>}
+        {locationError && <p className={styles.heroText}>{locationError}</p>}
       </div>
 
       <button
@@ -330,7 +366,7 @@ function SosPanel({ enabled }) {
         />
       </div>
 
-      {locationOn && <LocationPreview sent={status === 'sent'} location={lastLocation} />}
+      {enabled && <LocationPreview sent={status === 'sent'} location={lastLocation} />}
 
       <div className={styles.notice}>
         <AlertTriangle className={styles.noticeIcon} aria-hidden="true" />
