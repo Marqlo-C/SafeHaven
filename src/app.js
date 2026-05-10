@@ -16,7 +16,7 @@ const { PwaFeature } = require('./features/pwa_feature');
 const { JournalFeature } = require('./features/journal_feature');
 const { AiChatFeature } = require('./features/ai_chat_feature');
 const { BookmarkFeature } = require('./features/bookmark_feature');
-const { ButtonFeature } = require('./features/button');
+const { ButtonFeature } = require('./features/button_feature');
 const { GeolocationFeature } = require('./features/geolocation_feature');
 
 /**
