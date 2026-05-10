@@ -299,6 +299,39 @@ Chrome distinguishes the three as separate installed apps via the `"id"` field i
 
 ---
 
+## Discreet SOS Button
+
+The app shell includes a small, unlabeled `Button` component that appears after a user is authenticated and viewing one of the disguise screens.
+
+### Purpose
+
+The button is not a login button. It is an in-app switch from the current cover identity into the SOS chat.
+
+### Flow
+
+```
+/ (landing)
+  -> click one app card / install one cover identity
+  -> /app/[theme]
+  -> withAuth check
+  -> /login?returnTo=/app/[theme] if there is no valid cookie
+  -> login success returns to /app/[theme]
+  -> click discreet Button
+  -> SOS chat
+```
+
+### Files
+
+| File | Responsibility |
+|---|---|
+| `src/features/button_feature.js` | Feature init and startup log for the button feature. |
+| `src/components/Button.jsx` | Small fixed-position button that calls the app shell's chat toggle handler. |
+| `src/pages/app/[theme].jsx` | Owns the local state that switches from cover UI to `ChatRoom`. |
+
+The button is controlled by `config.features.enable_button`. Keep the component low-contrast and unlabeled so the disguise remains the default visible experience.
+
+---
+
 ## Git Workflow
 
 ### Branch naming
