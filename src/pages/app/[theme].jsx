@@ -118,7 +118,6 @@ export default function AppShell({
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [platform, setPlatform] = useState('other');
-  const [showChat, setShowChat] = useState(false);
   const [installed, setInstalled] = useState(false);
   const [showPrivateMode, setShowPrivateMode] = useState(false);
 
@@ -213,8 +212,6 @@ export default function AppShell({
         {/* ── Main Content ── */}
         {showPrivateMode ? (
           <PrivateModeShell displayName={session.displayName} />
-        ) : showChat ? (
-          <ChatRoom roomId="sos" displayName={session.displayName} />
         ) : (
           <>
             {geolocationEnabled && <LocationCapture />}
@@ -224,8 +221,7 @@ export default function AppShell({
       </main>
 
       <PanicExit showButton={!showPrivateMode} />
-      {!showPrivateMode && !showChat && <Button onClick={() => setShowChat(true)} />}
-      {!showPrivateMode && showChat && <Button onClick={() => setShowPrivateMode(true)} />}
+      {!showPrivateMode && <Button onClick={() => setShowPrivateMode(true)} />}
 
       {/* Persistent Install Trigger for non-PWA mode */}
       {installPrompt && !showModal && (
