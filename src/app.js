@@ -19,6 +19,7 @@ const { BookmarkFeature } = require('./features/bookmark_feature');
 const { ButtonFeature } = require('./features/button_feature');
 const { GeolocationFeature } = require('./features/geolocation_feature');
 const { FriendingFeature } = require('./features/friending_feature');
+const { SOSFeature } = require('./features/sos_feature');
 
 /**
  * @param {import('socket.io').Server} io  - Socket.io server instance from server.js
@@ -58,6 +59,10 @@ function initFeatures(io) {
 
   if (config.features.enable_friending) {
     FriendingFeature.init();
+  }
+
+  if (config.features.enable_sos) {
+    SOSFeature.init(io);
   }
 
   // Template for adding the next feature:
