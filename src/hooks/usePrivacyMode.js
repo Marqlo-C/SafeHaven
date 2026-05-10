@@ -8,67 +8,6 @@ import { useEffect } from 'react';
  */
 export function usePrivacyMode() {
   useEffect(() => {
-    // ── Shake Detection Implementation ───────────────────────────────────────
-    const config = require('../config/config.json');
-    const SHAKE_THRESHOLD = 2500; // Extreme threshold - requires maximum physical force
-    const SHAKE_WINDOW = 300; // Ultra-tight window (0.3s) - must be extremely rapid
-    const MIN_SHAKES = 15; // High shake count - must be sustained for several seconds
-
-    let lastX, lastY, lastZ;
-    let lastTime = 0;
-    let shakeCount = 0;
-    let lastShakeTime = 0;
-
-    const onMotion = (event) => {
-      if (!config.features.enable_shake_panic) return;
-
-      const { x, y, z } = event.accelerationIncludingGravity;
-      const currentTime = Date.now();
-      const diffTime = currentTime - lastTime;
-
-      if (diffTime > 100) {
-        lastTime = currentTime;
-        const delta = Math.abs(x + y + z - lastX - lastY - lastZ);
-        const speed = (delta / diffTime) * 10000;
-
-        if (speed > SHAKE_THRESHOLD) {
-          // Check if this shake is within the window of the last one
-          if (currentTime - lastShakeTime > SHAKE_WINDOW) {
-            shakeCount = 1; // Start new shake sequence
-          } else {
-            shakeCount++;
-          }
-
-          lastShakeTime = currentTime;
-
-          if (shakeCount >= MIN_SHAKES) {
-            console.debug('[Shake] Multi-shake threshold reached');
-            triggerPanicExit();
-          }
-        }
-
-        lastX = x;
-        lastY = y;
-        lastZ = z;
-      }
-    };
-
-    if (config.features.enable_shake_panic && typeof window !== 'undefined' && 'DeviceMotionEvent' in window) {
-      // iOS 13+ requires permission for DeviceMotion
-      if (typeof DeviceMotionEvent.requestPermission === 'function') {
-        // We can't request on mount, but we can listen if already granted
-        window.addEventListener('devicemotion', onMotion);
-      } else {
-        window.addEventListener('devicemotion', onMotion);
-      }
-    }
-
-    return () => {
-      window.removeEventListener('devicemotion', onMotion);
-    };
-  }, []);
-
-  useEffect(() => {
     if (!('serviceWorker' in navigator)) return undefined;
 
     if (process.env.NODE_ENV !== 'production') {

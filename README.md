@@ -349,7 +349,7 @@ Chrome distinguishes the three as separate installed apps via the `"id"` field i
 | Panic exit — Escape key | Single keypress redirects immediately |
 | Panic exit — triple-tap | Three taps within 600ms on any touch surface |
 | Panic exit — corner button | Discreet fixed `✕` button, bottom-right |
-| Panic exit — shake | Detects vigorous device acceleration to trigger safe exit |
+| Panic exit — triple tap | Detects rapid triple tap on screen to trigger safe exit |
 | Panic redirect | Calls `POST /api/auth/logout` (`keepalive: true`) to clear the auth cookie, then `window.location.replace(NEXT_PUBLIC_SAFE_EXIT_URL)` — removes history entry |
 | No indexing | `<meta name="robots" content="noindex, nofollow">` on app shell pages |
 | No referrer leakage | `Referrer-Policy: no-referrer` site-wide |
