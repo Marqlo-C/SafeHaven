@@ -5,9 +5,9 @@
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background-color: #f8fafc; /* Very light cool grey */
-  color: #0f172a;
-  font-family: 'Inter', sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
   overflow-x: hidden;
 }
 
@@ -28,27 +28,26 @@
   font-weight: 700;
   font-size: 20px;
   letter-spacing: -0.02em;
-  color: #1e293b;
+  color: var(--color-foreground);
 }
 
 .navButton {
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  padding: 10px 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 10px 24px;
   border-radius: 100px;
   font-size: 14px;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--color-foreground);
   text-decoration: none;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .navButton:hover {
-  background: #ffffff;
+  background: white;
   transform: translateY(-1px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 /* ── Main Layout ─────────────────────────────────────────────────────────── */
@@ -57,16 +56,16 @@
   width: 100%;
 }
 
-/* ── Soft Gradient Hero (Medical-Websites.png Vibe) ──────────────────────── */
+/* ── Soft Gradient Hero ──────────────────────── */
 .heroSection {
   min-height: 90vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 120px 24px 80px;
-  background: radial-gradient(circle at top right, #e0f2fe, transparent 60%),
-              radial-gradient(circle at bottom left, #ede9fe, transparent 60%);
-  background-color: #f8fafc;
+  background: radial-gradient(circle at top right, #fcfaf7, transparent 60%),
+              radial-gradient(circle at bottom left, #e8dfd4, transparent 60%);
+  background-color: var(--color-bg);
   position: relative;
   overflow: hidden;
 }
@@ -82,15 +81,14 @@
 }
 
 .badge {
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   padding: 6px 16px;
   border-radius: 100px;
   font-size: 13px;
   font-weight: 600;
-  color: #3b82f6;
+  color: var(--color-accent);
   margin-bottom: 24px;
-  backdrop-filter: blur(4px);
 }
 
 .heroTitle {
@@ -99,11 +97,11 @@
   line-height: 1.1;
   letter-spacing: -0.04em;
   margin: 0 0 24px 0;
-  color: #0f172a;
+  color: var(--color-foreground);
 }
 
 .textGradient {
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-foreground) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -112,7 +110,7 @@
 .heroSubtitle {
   font-size: clamp(16px, 2vw, 20px);
   line-height: 1.6;
-  color: #475569;
+  color: var(--color-muted);
   max-width: 640px;
   margin-bottom: 40px;
 }
@@ -125,33 +123,33 @@
 }
 
 .primaryCta {
-  background: #3b82f6;
+  background: var(--color-accent);
   color: white;
-  padding: 16px 36px;
+  padding: 16px 48px;
   border-radius: 100px;
   font-size: 16px;
   font-weight: 600;
   text-decoration: none;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 10px 25px -5px rgba(201, 125, 87, 0.4);
 }
 
 .primaryCta:hover {
   transform: translateY(-2px);
-  box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.4);
-  background: #2563eb;
+  box-shadow: 0 20px 30px -5px rgba(201, 125, 87, 0.5);
+  background: #b56c49;
 }
 
 .secondaryText {
   font-size: 13px;
-  color: #64748b;
+  color: var(--color-muted);
   font-weight: 500;
 }
 
 /* ── Ticker / Marquee ────────────────────────────────────────────────────── */
 .tickerContainer {
-  background: #2563eb;
-  color: white;
+  background: var(--color-foreground);
+  color: var(--color-surface);
   padding: 16px 0;
   overflow: hidden;
   white-space: nowrap;
@@ -190,7 +188,7 @@
 }
 
 .sectionLabel {
-  color: #3b82f6;
+  color: var(--color-accent);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -203,7 +201,7 @@
   font-size: 36px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: #0f172a;
+  color: var(--color-foreground);
   margin: 0;
 }
 
@@ -215,11 +213,11 @@
 }
 
 .bentoCard {
-  background: white;
-  border-radius: 24px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
   padding: 32px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 10px 15px -3px rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
@@ -228,18 +226,18 @@
 
 .bentoCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+  box-shadow: var(--shadow-md);
 }
 
 .bentoCard h3 {
   font-size: 20px;
   font-weight: 700;
   margin: 0 0 12px 0;
-  color: #0f172a;
+  color: var(--color-foreground);
 }
 
 .bentoCard p {
-  color: #475569;
+  color: var(--color-muted);
   font-size: 15px;
   line-height: 1.5;
   margin: 0;
@@ -247,12 +245,13 @@
 
 .cardLarge {
   grid-column: span 2;
-  background: linear-gradient(to bottom right, #f8fafc, #e2e8f0);
+  background: linear-gradient(to bottom right, var(--color-surface), var(--color-bg));
 }
 
 .cardAccent {
-  background: #3b82f6;
+  background: var(--color-accent);
   color: white;
+  border-color: transparent;
 }
 
 .cardAccent h3, .cardAccent p {
@@ -273,9 +272,9 @@
 
 /* ── Footer ──────────────────────────────────────────────────────────────── */
 .footer {
-  background: #0f172a;
-  color: white;
-  padding: 60px 24px;
+  background: var(--color-foreground);
+  color: var(--color-surface);
+  padding: 80px 24px;
 }
 
 .footerContent {
@@ -289,12 +288,13 @@
 }
 
 .footer .brand {
-  color: white;
+  color: var(--color-surface);
   opacity: 0.8;
 }
 
 .footerDisclaimer {
-  color: #94a3b8;
+  color: var(--color-muted);
+  filter: brightness(1.5);
   font-size: 14px;
   line-height: 1.6;
   max-width: 500px;

@@ -1,13 +1,13 @@
-/* Disguise Setup Page - Ultra Clean "Pill" Aesthetic (214ede8c2f3b451cc8a0bea0f67d7a3d.webp) */
+/* Disguise Setup Page - Ultra Clean "Pill" Aesthetic */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 .page {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background-color: #ffffff;
-  color: #111827;
-  font-family: 'Inter', sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
 }
 
 /* ── Header ──────────────────────────────────────────────────────────────── */
@@ -21,19 +21,19 @@
 .backLink {
   font-size: 14px;
   font-weight: 500;
-  color: #6b7280;
+  color: var(--color-muted);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .backLink:hover {
-  color: #111827;
+  color: var(--color-foreground);
 }
 
 .headerTitle {
   font-size: 14px;
   font-weight: 600;
-  color: #111827;
+  color: var(--color-foreground);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -60,13 +60,13 @@
   font-weight: 700;
   letter-spacing: -0.04em;
   margin: 0 0 16px 0;
-  color: #111827;
+  color: var(--color-foreground);
 }
 
 .heroSubtitle {
   font-size: 16px;
   line-height: 1.6;
-  color: #4b5563;
+  color: var(--color-muted);
 }
 
 /* ── Pill Cards ──────────────────────────────────────────────────────────── */
@@ -79,20 +79,21 @@
 .pillCard {
   display: flex;
   align-items: center;
-  background: #f9fafb;
-  border: 1px solid #f3f4f6;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 100px; /* Gives it the distinct pill shape */
   padding: 16px 24px;
   text-decoration: none;
   color: inherit;
   transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .pillCard:hover {
-  background: #ffffff;
-  border-color: #e5e7eb;
+  background: white;
+  border-color: var(--color-accent);
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+  box-shadow: var(--shadow-md);
 }
 
 .pillIcon {
@@ -103,7 +104,7 @@
   margin-right: 20px;
   background: white;
   padding: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .pillInfo {
@@ -115,12 +116,12 @@
   font-size: 18px;
   font-weight: 600;
   margin: 0 0 4px 0;
-  color: #111827;
+  color: var(--color-foreground);
 }
 
 .pillDesc {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--color-muted);
   line-height: 1.4;
   margin: 0;
   white-space: nowrap;
@@ -133,7 +134,7 @@
 }
 
 .installBtn {
-  background: #3b82f6;
+  background: var(--color-accent);
   color: white;
   padding: 10px 24px;
   border-radius: 100px;
@@ -144,12 +145,12 @@
 }
 
 .pillCard:hover .installBtn {
-  background: #2563eb;
+  background: #b56c49;
 }
 
 @media (max-width: 600px) {
   .pillCard {
-    border-radius: 24px; /* Less extreme on mobile so text fits */
+    border-radius: var(--radius-lg); /* Less extreme on mobile so text fits */
     padding: 16px;
   }
   
