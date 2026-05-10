@@ -34,7 +34,7 @@ export default function Downloads() {
       <div className={styles.page}>
         <header className={styles.header}>
           <Link href="/" className={styles.backLink}>← Back to Home</Link>
-          <span className={styles.headerTitle}>Setup Setup</span>
+          <span className={styles.headerTitle}>Setup</span>
         </header>
 
         <main className={styles.main}>
