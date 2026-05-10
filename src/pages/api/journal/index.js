@@ -3,6 +3,7 @@ const { connectDB } = require('../../../lib/db');
 const { applySecurityHeaders } = require('../../../middleware/securityHeaders');
 const config = require('../../../config/config');
 const JournalEntry = require('../../../models/JournalEntry');
+const { JournalPrivacyFeature } = require('../../../features/journal_privacy_feature');
 
 export default requireAuth(async (req, res) => {
   applySecurityHeaders(res);
@@ -12,7 +13,8 @@ export default requireAuth(async (req, res) => {
   }
 
   await connectDB();
-  const userId = req.session.sub;
+  const session = req.session;
+  const userId = session.sub;
 
   // ── GET /api/journal — paginated list of the user's entries ───────────────
   if (req.method === 'GET') {
@@ -20,14 +22,20 @@ export default requireAuth(async (req, res) => {
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit || '20', 10)));
     const skip  = (page - 1) * limit;
 
+    const privacyFilter = config.features.enable_journal_privacy 
+      ? JournalPrivacyFeature.getPrivacyFilter(session) 
+      : {};
+
+    const query = { userId, ...privacyFilter };
+
     const [entries, total] = await Promise.all([
       JournalEntry
-        .find({ userId })
+        .find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .select('-__v'),
-      JournalEntry.countDocuments({ userId }),
+      JournalEntry.countDocuments(query),
     ]);
 
     return res.status(200).json({
@@ -38,7 +46,7 @@ export default requireAuth(async (req, res) => {
 
   // ── POST /api/journal — create a new entry ────────────────────────────────
   if (req.method === 'POST') {
-    const { title, content, incidentDate } = req.body ?? {};
+    const { title, content, incidentDate, isPrivate } = req.body ?? {};
 
     if (!content || typeof content !== 'string' || !content.trim()) {
       return res.status(400).json({ error: 'content is required.' });
@@ -52,6 +60,7 @@ export default requireAuth(async (req, res) => {
       title: (title || '').slice(0, 200),
       content: content.trim(),
       incidentDate: incidentDate ? new Date(incidentDate) : null,
+      isPrivate: config.features.enable_journal_privacy ? Boolean(isPrivate) : false,
     });
 
     return res.status(201).json({ entry });

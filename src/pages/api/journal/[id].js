@@ -5,6 +5,7 @@ const { getAttachmentBucket } = require('../../../lib/gridfs');
 const { applySecurityHeaders } = require('../../../middleware/securityHeaders');
 const config = require('../../../config/config');
 const JournalEntry = require('../../../models/JournalEntry');
+const { JournalPrivacyFeature } = require('../../../features/journal_privacy_feature');
 
 export default requireAuth(async (req, res) => {
   applySecurityHeaders(res);
@@ -19,23 +20,32 @@ export default requireAuth(async (req, res) => {
   }
 
   await connectDB();
-  const userId = req.session.sub;
+  const session = req.session;
+  const userId = session.sub;
 
   // ── GET /api/journal/[id] ─────────────────────────────────────────────────
   if (req.method === 'GET') {
     const entry = await JournalEntry.findOne({ _id: id, userId }).select('-__v');
     if (!entry) return res.status(404).json({ error: 'Entry not found.' });
+
+    if (config.features.enable_journal_privacy && !JournalPrivacyFeature.isVisible(entry, session)) {
+      return res.status(404).json({ error: 'Entry not found.' });
+    }
+
     return res.status(200).json({ entry });
   }
 
   // ── PUT /api/journal/[id] — update text fields only ──────────────────────
   if (req.method === 'PUT') {
-    const { title, content, incidentDate } = req.body ?? {};
+    const { title, content, incidentDate, isPrivate } = req.body ?? {};
 
     const update = {};
     if (title !== undefined)        update.title         = String(title).slice(0, 200);
     if (content !== undefined)      update.content       = String(content).slice(0, 50000);
     if (incidentDate !== undefined) update.incidentDate  = incidentDate ? new Date(incidentDate) : null;
+    if (isPrivate !== undefined && config.features.enable_journal_privacy) {
+      update.isPrivate = Boolean(isPrivate);
+    }
     update.updatedAt = new Date();
 
     const entry = await JournalEntry.findOneAndUpdate(
