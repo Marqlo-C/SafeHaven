@@ -64,8 +64,18 @@
 .switch,
 .backButton,
 .peerRow,
+.subTabButton,
+.emptyFriendState,
+.rerollButton,
+.requestButton,
+.acceptButton,
+.friendIconButton,
+.othersDots button,
 .sendButton,
 .uploadButton,
+.noteCloseButton,
+.noteCancelButton,
+.noteSaveButton,
 .filterButton,
 .resourceActions button {
   font-family: inherit;
@@ -116,7 +126,8 @@
 .sosPanel,
 .journalPanel,
 .aidPanel,
-.chatListPanel {
+.chatListPanel,
+.friendsPanel {
   height: 100%;
   overflow-y: auto;
   padding: 16px 16px 112px;
@@ -319,6 +330,142 @@
   color: var(--pm-muted-foreground);
   text-align: center;
   font-size: 12px;
+}
+
+.othersJournals {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.othersHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-inline: 4px;
+  color: var(--pm-muted-foreground);
+  font-size: 13px;
+}
+
+.othersHeader span:last-child {
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.othersCard {
+  position: relative;
+  min-height: 170px;
+  padding: 16px;
+  border: 1px solid var(--pm-border);
+  border-radius: 20px;
+  background: linear-gradient(135deg, oklch(0.95 0.03 80), oklch(0.93 0.05 70));
+  overflow: hidden;
+}
+
+.othersSlide {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  animation: othersSlideIn 0.45s ease-out;
+}
+
+.othersQuoteIcon {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: 20px;
+  height: 20px;
+  color: var(--pm-muted-foreground);
+  opacity: 0.5;
+}
+
+.othersPerson {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 28px;
+}
+
+.othersAvatarImage {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: block;
+  flex-shrink: 0;
+  background: oklch(0.88 0.06 80);
+}
+
+.othersPerson div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.othersPerson strong {
+  overflow: hidden;
+  color: var(--pm-foreground);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.othersPerson span {
+  overflow: hidden;
+  color: var(--pm-muted-foreground);
+  font-size: 11px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.othersCard p {
+  margin-top: 12px;
+  color: var(--pm-foreground);
+  font-size: 14px;
+  line-height: 1.58;
+}
+
+.othersStrength {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--pm-muted-foreground);
+  font-size: 12px;
+}
+
+.othersStrength svg {
+  color: oklch(0.56 0.13 35);
+}
+
+.othersDots {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.othersDots button {
+  width: 5px;
+  height: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: oklch(0.78 0.04 75);
+  cursor: pointer;
+  transition: width 0.18s ease, background-color 0.18s ease, opacity 0.18s ease;
+}
+
+.othersDots button.othersDotActive {
+  width: 14px;
+  background: oklch(0.4 0.08 45);
+  opacity: 1;
 }
 
 .heroCard {
@@ -681,6 +828,39 @@
   overflow: hidden;
 }
 
+.subTabsWrap {
+  padding: 12px 16px 0;
+  flex-shrink: 0;
+}
+
+.subTabs {
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--pm-muted);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  font-size: 13px;
+}
+
+.subTabButton {
+  min-height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--pm-muted-foreground);
+  cursor: pointer;
+  font-size: 13px;
+  transition: background-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.subTabButtonActive {
+  background: var(--pm-background);
+  color: var(--pm-foreground);
+  box-shadow: 0 2px 8px rgba(71, 52, 40, 0.08);
+  font-weight: 600;
+}
+
 .threadHeader {
   padding: 10px 12px;
   border-bottom: 1px solid var(--pm-border);
@@ -919,6 +1099,230 @@
   background: #f59e0b;
 }
 
+.emptyFriendState {
+  width: 100%;
+  padding: 20px;
+  border: 1px solid var(--pm-border);
+  border-radius: var(--pm-radius-lg);
+  background: var(--pm-card);
+  color: var(--pm-foreground);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.16s ease;
+}
+
+button.emptyFriendState:hover {
+  background: rgba(234, 228, 216, 0.48);
+}
+
+.emptyFriendState strong {
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.emptyFriendState > span:last-child {
+  color: var(--pm-muted-foreground);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.emptyIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--pm-muted);
+  color: var(--pm-muted-foreground);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.friendIdentity {
+  padding: 16px;
+  border: 1px solid var(--pm-border);
+  border-radius: var(--pm-radius-lg);
+  background: var(--pm-card);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.friendIdentityAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--pm-accent);
+  color: var(--pm-foreground);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.friendInfo {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.friendInfo > span {
+  overflow: hidden;
+  color: var(--pm-muted-foreground);
+  font-size: 11px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.friendInfo strong {
+  overflow: hidden;
+  color: var(--pm-foreground);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rerollButton,
+.friendIconButton,
+.acceptButton {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.rerollButton,
+.friendIconButton {
+  border: 1px solid var(--pm-border);
+  background: transparent;
+  color: var(--pm-foreground);
+}
+
+.acceptButton {
+  border: 0;
+  background: var(--pm-success);
+  color: white;
+}
+
+.addFriendLabel {
+  margin: 0 0 6px 4px;
+  color: var(--pm-muted-foreground);
+  font-size: 12px;
+}
+
+.addFriendField {
+  min-height: 48px;
+  padding: 6px 6px 6px 16px;
+  border: 1px solid var(--pm-border);
+  border-radius: 999px;
+  background: var(--pm-card);
+  color: var(--pm-muted-foreground);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.addFriendField input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--pm-foreground);
+  font: inherit;
+  font-size: 14px;
+}
+
+.addFriendField input::placeholder {
+  color: var(--pm-muted-foreground);
+}
+
+.requestButton {
+  min-height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--pm-accent-strong);
+  color: oklch(0.95 0.04 80);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.requestButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.friendSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.friendRows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.friendRow {
+  padding: 12px;
+  border: 1px solid var(--pm-border);
+  border-radius: var(--pm-radius-lg);
+  background: var(--pm-card);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.friendAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: oklch(0.92 0.04 80);
+  color: var(--pm-foreground);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.friendActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.friendMutedText {
+  padding: 0 8px;
+  color: var(--pm-muted-foreground);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .messages {
   flex: 1;
   min-height: 0;
@@ -1021,7 +1425,8 @@
 }
 
 .uploadButton {
-  min-height: 88px;
+  min-height: 96px;
+  padding: 10px 8px;
   border: 1px solid var(--pm-border);
   border-radius: var(--pm-radius-lg);
   background: var(--pm-card);
@@ -1030,7 +1435,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   font-size: 13px;
   cursor: pointer;
 }
@@ -1049,6 +1454,21 @@
 .uploadIcon {
   width: 20px;
   height: 20px;
+}
+
+.uploadLabel {
+  color: var(--pm-foreground);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.uploadHint {
+  max-width: 100%;
+  color: var(--pm-muted-foreground);
+  font-size: 11px;
+  line-height: 1.2;
+  text-align: center;
 }
 
 .sectionHeader {
@@ -1112,6 +1532,149 @@
   margin-top: 5px;
   font-size: 14px;
   line-height: 1.36;
+}
+
+.entryNote {
+  display: -webkit-box;
+  overflow: hidden;
+  white-space: pre-wrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.noteComposerBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.noteComposer {
+  width: 100%;
+  max-width: 420px;
+  padding: 20px;
+  border-radius: 24px 24px 0 0;
+  background: var(--pm-background);
+  box-shadow: 0 -18px 42px rgba(38, 27, 20, 0.22);
+}
+
+.noteComposerHeader {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.noteComposerTitle {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.noteComposerTitle > span {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--pm-muted);
+  color: var(--pm-foreground);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.noteComposerTitle strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.noteCloseButton {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--pm-foreground);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.noteCloseButton:hover {
+  background: var(--pm-muted);
+}
+
+.noteTextarea {
+  width: 100%;
+  min-height: 160px;
+  resize: none;
+  padding: 12px;
+  border: 1px solid var(--pm-border);
+  border-radius: 14px;
+  outline: 0;
+  background: var(--pm-card);
+  color: var(--pm-foreground);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.noteTextarea::placeholder {
+  color: var(--pm-muted-foreground);
+}
+
+.noteTextarea:focus {
+  border-color: var(--pm-accent);
+  box-shadow: 0 0 0 2px oklch(0.78 0.14 75 / 0.28);
+}
+
+.noteComposerMeta {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--pm-muted-foreground);
+  font-size: 11px;
+}
+
+.noteComposerActions {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.noteCancelButton,
+.noteSaveButton {
+  min-height: 44px;
+  border-radius: 999px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.noteCancelButton {
+  border: 1px solid var(--pm-border);
+  background: transparent;
+  color: var(--pm-foreground);
+}
+
+.noteSaveButton {
+  border: 0;
+  background: var(--pm-accent-strong);
+  color: oklch(0.95 0.04 80);
+}
+
+.noteSaveButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .resourceMap {
@@ -1271,8 +1834,18 @@
 .switch:focus-visible,
 .backButton:focus-visible,
 .peerRow:focus-visible,
+.subTabButton:focus-visible,
+.emptyFriendState:focus-visible,
+.rerollButton:focus-visible,
+.requestButton:focus-visible,
+.acceptButton:focus-visible,
+.friendIconButton:focus-visible,
+.othersDots button:focus-visible,
 .sendButton:focus-visible,
 .uploadButton:focus-visible,
+.noteCloseButton:focus-visible,
+.noteCancelButton:focus-visible,
+.noteSaveButton:focus-visible,
 .filterButton:focus-visible,
 .resourceActions button:focus-visible {
   outline: 2px solid var(--pm-accent-strong);
@@ -1284,6 +1857,18 @@
   100% {
     transform: scale(1.8);
     opacity: 0;
+  }
+}
+
+@keyframes othersSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -1300,10 +1885,23 @@
   }
 }
 
+@media (min-width: 521px) {
+  .noteComposerBackdrop {
+    align-items: center;
+    padding: 24px;
+  }
+
+  .noteComposer {
+    border-radius: 24px;
+    box-shadow: 0 18px 52px rgba(38, 27, 20, 0.28);
+  }
+}
+
 @media (max-width: 360px) {
   .homePanel,
   .sosPanel,
   .chatListPanel,
+  .friendsPanel,
   .journalPanel,
   .aidPanel {
     padding-inline: 12px;

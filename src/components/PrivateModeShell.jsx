@@ -6,12 +6,11 @@ import {
   Camera,
   Check,
   ChevronLeft,
-  ChevronRight,
   Circle,
   Clock,
   Cloud,
   FileImage,
-  Heart,
+  FileText,
   Home,
   LifeBuoy,
   Lock,
@@ -24,10 +23,13 @@ import {
   Send,
   Shield,
   Siren,
+  Shuffle,
+  Type,
+  UserPlus,
   Users,
-  Video,
   X,
 } from 'lucide-react';
+import HomePanel from './private-mode/HomePanel';
 import { triggerPanicExit } from '../hooks/usePrivacyMode';
 import styles from '../styles/PrivateModeShell.module.css';
 
@@ -113,94 +115,6 @@ function Panel({ active, children }) {
     >
       {children}
     </div>
-  );
-}
-
-function HomePanel({ onNavigate }) {
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
-
-  return (
-    <div className={styles.homePanel}>
-      <div className={styles.homeIntro}>
-        <div className={styles.homeGreeting}>{greeting}</div>
-        <h1>You&apos;re safe here.</h1>
-        <p>Take a breath. Everything in this space is private.</p>
-      </div>
-
-      <button type="button" className={styles.homeSosCard} onClick={() => onNavigate('sos')}>
-        <span className={styles.homeSosIcon} aria-hidden="true">
-          <Siren />
-        </span>
-        <span className={styles.homeSosCopy}>
-          <strong>Send an SOS</strong>
-          <span>Alert your trusted contacts in one tap</span>
-        </span>
-        <ChevronRight className={styles.homeChevron} aria-hidden="true" />
-      </button>
-
-      <div className={styles.setupCard}>
-        <div className={styles.setupHeader}>
-          <Shield className={styles.smallIcon} aria-hidden="true" />
-          <span>Your safety setup</span>
-        </div>
-        <div className={styles.miniGrid}>
-          <Mini label="Contacts" value="2" />
-          <Mini label="Location" value="Off" />
-          <Mini label="Backup" value="0" />
-        </div>
-      </div>
-
-      <div>
-        <div className={styles.actionHeading}>Quick actions</div>
-        <div className={styles.actionGrid}>
-          <ActionCard
-            icon={<MessageCircle />}
-            title="Talk to an advocate"
-            subtitle="Available now"
-            onClick={() => onNavigate('chat')}
-          />
-          <ActionCard
-            icon={<BookLock />}
-            title="Add to journal"
-            subtitle="Save evidence"
-            onClick={() => onNavigate('journal')}
-          />
-          <ActionCard
-            icon={<LifeBuoy />}
-            title="Find help nearby"
-            subtitle="Shelters and aid"
-            onClick={() => onNavigate('aid')}
-          />
-          <ActionCard
-            icon={<Heart />}
-            title="A moment for you"
-            subtitle="Quotes and breathing"
-          />
-        </div>
-      </div>
-
-      <p className={styles.homeFooter}>You are not alone. Help is one tap away.</p>
-    </div>
-  );
-}
-
-function Mini({ label, value }) {
-  return (
-    <div className={styles.miniCard}>
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </div>
-  );
-}
-
-function ActionCard({ icon, title, subtitle, onClick }) {
-  return (
-    <button type="button" className={styles.actionCard} onClick={onClick}>
-      <span className={styles.actionIcon} aria-hidden="true">{icon}</span>
-      <strong>{title}</strong>
-      <span>{subtitle}</span>
-    </button>
   );
 }
 
@@ -375,50 +289,27 @@ function LocationPreview({ sent }) {
   );
 }
 
-const PEERS = [
-  {
-    id: 'bot',
-    handle: 'SafeBot',
-    emoji: 'SB',
-    status: 'online',
-    lastMsg: 'I am here anytime. Try "I feel anxious".',
-    time: 'now',
-    isBot: true,
-  },
-  {
-    id: 'p1',
-    handle: 'QuietRiver',
-    emoji: 'QR',
-    status: 'online',
-    lastMsg: 'I hear you. Take your time.',
-    time: '2m',
-    unread: 2,
-  },
-  {
-    id: 'p2',
-    handle: 'MorningLark',
-    emoji: 'ML',
-    status: 'online',
-    lastMsg: 'You are not alone in this.',
-    time: '14m',
-  },
-  {
-    id: 'p3',
-    handle: 'PaperKite',
-    emoji: 'PK',
-    status: 'away',
-    lastMsg: 'I went through something similar last year.',
-    time: '1h',
-  },
-  {
-    id: 'p4',
-    handle: 'SilverPine',
-    emoji: 'SP',
-    status: 'away',
-    lastMsg: 'Sending strength your way.',
-    time: '3h',
-  },
+const BOT_CHAT = {
+  id: 'bot',
+  handle: 'SafeBot',
+  emoji: 'SB',
+  status: 'online',
+  lastMsg: 'I am here anytime. Try "I feel anxious".',
+  time: 'now',
+  isBot: true,
+};
+
+const SEED_FRIENDS = [
+  { id: 'f1', displayName: 'QuietRiver', emoji: 'QR', status: 'accepted', mutuals: 3 },
+  { id: 'f2', displayName: 'MorningLark', emoji: 'ML', status: 'accepted', mutuals: 1 },
+  { id: 'f3', displayName: 'PaperKite', emoji: 'PK', status: 'accepted' },
+  { id: 'f4', displayName: 'SilverPine', emoji: 'SP', status: 'incoming' },
+  { id: 'f5', displayName: 'BlueHarbor', emoji: 'BH', status: 'incoming' },
+  { id: 'f6', displayName: 'EmberMoth', emoji: 'EM', status: 'outgoing' },
 ];
+
+const MY_HANDLE = 'SoftFern';
+const MY_AVATAR = 'SF';
 
 const SEED_THREADS = {
   bot: [
@@ -429,11 +320,11 @@ const SEED_THREADS = {
       time: 'now',
     },
   ],
-  p1: [
+  f1: [
     {
       id: '1',
       from: 'them',
-      text: 'Hey, glad you reached out. You are safe here. We are both anonymous.',
+      text: 'Hey, glad you reached out. We are both anonymous here.',
       time: '9:40 PM',
     },
     {
@@ -449,19 +340,20 @@ const SEED_THREADS = {
       time: '9:41 PM',
     },
   ],
-  p2: [{ id: '1', from: 'them', text: 'You are not alone in this.', time: '8:12 PM' }],
-  p3: [{ id: '1', from: 'them', text: 'I went through something similar last year. Happy to share if it helps.', time: 'Yesterday' }],
-  p4: [{ id: '1', from: 'them', text: 'Sending strength your way.', time: 'Yesterday' }],
+  f2: [{ id: '1', from: 'them', text: 'You are not alone in this.', time: '8:12 PM' }],
+  f3: [{ id: '1', from: 'them', text: 'I went through something similar last year.', time: 'Yesterday' }],
 };
 
 const BOT_REPLIES = [
   'That sounds really hard. I am glad you are telling me.',
   'Let us try a quick grounding exercise. Name 5 things you can see right now.',
-  'You are doing the right thing by reaching out. Want me to suggest a peer to talk to?',
+  'You are doing the right thing by reaching out. Want me to suggest a friend to talk to?',
   'Take a slow breath in for 4, hold for 4, and out for 6. I am right here.',
 ];
 
-function ChatPanel({ displayName }) {
+function ChatPanel() {
+  const [subTab, setSubTab] = useState('messages');
+  const [friends, setFriends] = useState(SEED_FRIENDS);
   const [openId, setOpenId] = useState(null);
   const [threads, setThreads] = useState(SEED_THREADS);
   const [draft, setDraft] = useState('');
@@ -469,7 +361,27 @@ function ChatPanel({ displayName }) {
 
   useEffect(() => () => window.clearTimeout(replyTimer.current), []);
 
-  const openPeer = openId ? PEERS.find((peer) => peer.id === openId) : null;
+  const chats = useMemo(() => {
+    const friendChats = friends
+      .filter((friend) => friend.status === 'accepted')
+      .map((friend) => {
+        const thread = threads[friend.id] || [];
+        const last = thread[thread.length - 1];
+
+        return {
+          id: friend.id,
+          handle: friend.displayName,
+          emoji: friend.emoji,
+          status: 'online',
+          lastMsg: last?.text || 'Say hi',
+          time: last?.time || '-',
+        };
+      });
+
+    return [BOT_CHAT, ...friendChats];
+  }, [friends, threads]);
+
+  const openPeer = openId ? chats.find((chat) => chat.id === openId) || null : null;
   const messages = openId ? threads[openId] || [] : [];
 
   const send = () => {
@@ -501,11 +413,8 @@ function ChatPanel({ displayName }) {
     }, 900);
   };
 
-  if (!openPeer) {
-    return <ChatList peers={PEERS} onOpen={setOpenId} displayName={displayName} />;
-  }
-
-  return (
+  if (openPeer) {
+    return (
     <div className={styles.chatPanel}>
       <div className={styles.threadHeader}>
         <button type="button" className={styles.backButton} onClick={() => setOpenId(null)} aria-label="Back to chats">
@@ -518,8 +427,8 @@ function ChatPanel({ displayName }) {
             {openPeer.isBot && <Bot className={styles.botIcon} aria-hidden="true" />}
           </div>
           <span>
-            <Circle className={openPeer.status === 'online' ? styles.onlineDot : styles.awayDot} aria-hidden="true" />
-            {openPeer.status === 'online' ? 'Online' : 'Away'} - Anonymous
+            <Circle className={styles.onlineDot} aria-hidden="true" />
+            {openPeer.isBot ? 'Always available' : 'Friend - Anonymous'}
           </span>
         </div>
       </div>
@@ -571,21 +480,51 @@ function ChatPanel({ displayName }) {
         </div>
       </div>
     </div>
+    );
+  }
+
+  return (
+    <div className={styles.chatPanel}>
+      <div className={styles.subTabsWrap}>
+        <div className={styles.subTabs} role="tablist" aria-label="Chat sections">
+          <button
+            type="button"
+            className={`${styles.subTabButton} ${subTab === 'messages' ? styles.subTabButtonActive : ''}`}
+            aria-pressed={subTab === 'messages'}
+            onClick={() => setSubTab('messages')}
+          >
+            Messages
+          </button>
+          <button
+            type="button"
+            className={`${styles.subTabButton} ${subTab === 'friends' ? styles.subTabButtonActive : ''}`}
+            aria-pressed={subTab === 'friends'}
+            onClick={() => setSubTab('friends')}
+          >
+            Friends
+          </button>
+        </div>
+      </div>
+
+      {subTab === 'messages' ? (
+        <MessagesList chats={chats} onOpen={setOpenId} onGoFriends={() => setSubTab('friends')} />
+      ) : (
+        <FriendsPanel friends={friends} setFriends={setFriends} />
+      )}
+    </div>
   );
 }
 
-function ChatList({ peers, onOpen, displayName }) {
+function MessagesList({ chats, onOpen, onGoFriends }) {
   const [query, setQuery] = useState('');
-  const filtered = peers.filter((peer) => peer.handle.toLowerCase().includes(query.toLowerCase()));
+  const filtered = chats.filter((chat) => chat.handle.toLowerCase().includes(query.toLowerCase()));
+  const friendChats = filtered.filter((chat) => !chat.isBot);
 
   return (
     <div className={styles.chatListPanel}>
       <div className={styles.chatNotice}>
         <Lock className={styles.noticeIcon} aria-hidden="true" />
-        <span>
-          Everyone here is anonymous. Your handle is randomized each session.
-          {displayName ? ` Signed in as ${displayName}.` : ''}
-        </span>
+        <span>You can only message accepted friends. Add someone in Friends to start a chat.</span>
       </div>
 
       <label className={styles.searchField}>
@@ -593,38 +532,214 @@ function ChatList({ peers, onOpen, displayName }) {
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search people"
-          aria-label="Search people"
+          placeholder="Search chats"
+          aria-label="Search chats"
         />
       </label>
 
       <div className={styles.peerSectionLabel}>Always available</div>
-      {filtered.filter((peer) => peer.isBot).map((peer) => (
-        <PeerRow key={peer.id} peer={peer} onOpen={onOpen} />
+      {filtered.filter((chat) => chat.isBot).map((chat) => (
+        <ChatRow key={chat.id} chat={chat} onOpen={onOpen} />
       ))}
 
-      <div className={styles.peerSectionLabel}>People online</div>
-      {filtered.filter((peer) => !peer.isBot).map((peer) => (
-        <PeerRow key={peer.id} peer={peer} onOpen={onOpen} />
-      ))}
+      <div className={styles.peerSectionLabel}>Friend chats</div>
+      {friendChats.length === 0 ? (
+        <button type="button" className={styles.emptyFriendState} onClick={onGoFriends}>
+          <span className={styles.emptyIcon} aria-hidden="true">
+            <UserPlus />
+          </span>
+          <strong>No friend chats yet</strong>
+          <span>Tap to add someone by display name.</span>
+        </button>
+      ) : (
+        friendChats.map((chat) => <ChatRow key={chat.id} chat={chat} onOpen={onOpen} />)
+      )}
     </div>
   );
 }
 
-function PeerRow({ peer, onOpen }) {
+function ChatRow({ chat, onOpen }) {
   return (
-    <button type="button" className={styles.peerRow} onClick={() => onOpen(peer.id)}>
-      <Avatar peer={peer} />
+    <button type="button" className={styles.peerRow} onClick={() => onOpen(chat.id)}>
+      <Avatar peer={chat} />
       <span className={styles.peerCopy}>
         <span className={styles.peerNameLine}>
-          <strong>{peer.handle}</strong>
-          {peer.isBot && <Bot className={styles.botIcon} aria-hidden="true" />}
-          <span>{peer.time}</span>
+          <strong>{chat.handle}</strong>
+          {chat.isBot && <Bot className={styles.botIcon} aria-hidden="true" />}
+          <span>{chat.time}</span>
         </span>
-        <span>{peer.lastMsg}</span>
+        <span>{chat.lastMsg}</span>
       </span>
-      {peer.unread ? <span className={styles.unreadBadge}>{peer.unread}</span> : null}
     </button>
+  );
+}
+
+function FriendsPanel({ friends, setFriends }) {
+  const [query, setQuery] = useState('');
+
+  const incoming = friends.filter((friend) => friend.status === 'incoming');
+  const outgoing = friends.filter((friend) => friend.status === 'outgoing');
+  const accepted = friends.filter((friend) => friend.status === 'accepted');
+
+  const accept = (id) => {
+    setFriends((current) => current.map((friend) => (
+      friend.id === id ? { ...friend, status: 'accepted' } : friend
+    )));
+  };
+
+  const remove = (id) => {
+    setFriends((current) => current.filter((friend) => friend.id !== id));
+  };
+
+  const sendRequest = () => {
+    const handle = query.trim();
+    if (!handle) return;
+
+    const exists = friends.some((friend) => (
+      friend.displayName.toLowerCase() === handle.toLowerCase()
+    ));
+
+    if (exists) return;
+
+    setFriends((current) => [
+      ...current,
+      {
+        id: String(Date.now()),
+        displayName: handle,
+        emoji: handle.slice(0, 2).toUpperCase(),
+        status: 'outgoing',
+      },
+    ]);
+    setQuery('');
+  };
+
+  return (
+    <div className={styles.friendsPanel}>
+      <div className={styles.chatNotice}>
+        <Lock className={styles.noticeIcon} aria-hidden="true" />
+        <span>Friends connect by anonymous display name only. Real names are never shared.</span>
+      </div>
+
+      <div className={styles.friendIdentity}>
+        <span className={styles.friendIdentityAvatar} aria-hidden="true">{MY_AVATAR}</span>
+        <span className={styles.friendInfo}>
+          <span>Your display name</span>
+          <strong>{MY_HANDLE}</strong>
+        </span>
+        <button type="button" className={styles.rerollButton} aria-label="Reroll handle">
+          <Shuffle className={styles.smallIcon} aria-hidden="true" />
+        </button>
+      </div>
+
+      <div>
+        <div className={styles.addFriendLabel}>Add by display name</div>
+        <label className={styles.addFriendField}>
+          <Search className={styles.smallIcon} aria-hidden="true" />
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') sendRequest();
+            }}
+            placeholder="e.g. QuietRiver"
+            aria-label="Add friend by display name"
+          />
+          <button
+            type="button"
+            className={styles.requestButton}
+            disabled={!query.trim()}
+            onClick={sendRequest}
+          >
+            Request
+          </button>
+        </label>
+      </div>
+
+      {incoming.length > 0 && (
+        <FriendSection title={`Requests - ${incoming.length}`}>
+          {incoming.map((friend) => (
+            <FriendRow key={friend.id} friend={friend}>
+              <button
+                type="button"
+                className={styles.acceptButton}
+                aria-label={`Accept ${friend.displayName}`}
+                onClick={() => accept(friend.id)}
+              >
+                <Check className={styles.tinyIcon} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                className={styles.friendIconButton}
+                aria-label={`Decline ${friend.displayName}`}
+                onClick={() => remove(friend.id)}
+              >
+                <X className={styles.tinyIcon} aria-hidden="true" />
+              </button>
+            </FriendRow>
+          ))}
+        </FriendSection>
+      )}
+
+      {outgoing.length > 0 && (
+        <FriendSection title={`Pending - ${outgoing.length}`}>
+          {outgoing.map((friend) => (
+            <FriendRow key={friend.id} friend={friend}>
+              <span className={styles.friendMutedText}>Waiting...</span>
+              <button
+                type="button"
+                className={styles.friendIconButton}
+                aria-label={`Cancel request to ${friend.displayName}`}
+                onClick={() => remove(friend.id)}
+              >
+                <X className={styles.tinyIcon} aria-hidden="true" />
+              </button>
+            </FriendRow>
+          ))}
+        </FriendSection>
+      )}
+
+      <FriendSection title={`Friends - ${accepted.length}`}>
+        {accepted.length === 0 ? (
+          <div className={styles.emptyFriendState}>
+            <span className={styles.emptyIcon} aria-hidden="true">
+              <UserPlus />
+            </span>
+            <strong>No friends yet</strong>
+            <span>Add someone by their display name to start chatting.</span>
+          </div>
+        ) : (
+          accepted.map((friend) => (
+            <FriendRow key={friend.id} friend={friend}>
+              {friend.mutuals ? (
+                <span className={styles.friendMutedText}>{friend.mutuals} mutual</span>
+              ) : null}
+            </FriendRow>
+          ))
+        )}
+      </FriendSection>
+    </div>
+  );
+}
+
+function FriendSection({ title, children }) {
+  return (
+    <section className={styles.friendSection}>
+      <div className={styles.peerSectionLabel}>{title}</div>
+      <div className={styles.friendRows}>{children}</div>
+    </section>
+  );
+}
+
+function FriendRow({ friend, children }) {
+  return (
+    <div className={styles.friendRow}>
+      <span className={styles.friendAvatar} aria-hidden="true">{friend.emoji}</span>
+      <span className={styles.friendInfo}>
+        <strong>{friend.displayName}</strong>
+        <span>Anonymous</span>
+      </span>
+      <span className={styles.friendActions}>{children}</span>
+    </div>
   );
 }
 
@@ -640,28 +755,61 @@ function Avatar({ peer }) {
 const JOURNAL_ENTRIES = [
   {
     id: '1',
-    type: 'Photo',
-    Icon: Camera,
+    type: 'Media',
     when: 'May 9, 2026 - 3:42 PM',
     note: 'Bruise on left arm. After argument in kitchen.',
   },
   {
     id: '2',
     type: 'Audio',
-    Icon: Mic,
     when: 'May 7, 2026 - 11:08 PM',
     note: 'Recorded shouting. About 4 minutes.',
   },
   {
     id: '3',
-    type: 'Photo',
-    Icon: Camera,
+    type: 'Note',
     when: 'May 4, 2026 - 8:15 AM',
-    note: 'Broken picture frame in hallway.',
+    note: 'He took my phone away again this morning. Would not give it back until I apologized.',
   },
 ];
 
+function formatJournalTimestamp() {
+  return new Date().toLocaleString([], {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
 function JournalPanel() {
+  const [entries, setEntries] = useState(JOURNAL_ENTRIES);
+  const [composing, setComposing] = useState(false);
+  const [draft, setDraft] = useState('');
+
+  const saveNote = () => {
+    const text = draft.trim();
+    if (!text) return;
+
+    setEntries((current) => [
+      {
+        id: String(Date.now()),
+        type: 'Note',
+        when: formatJournalTimestamp(),
+        note: text,
+      },
+      ...current,
+    ]);
+    setDraft('');
+    setComposing(false);
+  };
+
+  const cancelNote = () => {
+    setComposing(false);
+    setDraft('');
+  };
+
   return (
     <div className={styles.journalPanel}>
       <div className={styles.chatNotice}>
@@ -670,44 +818,128 @@ function JournalPanel() {
       </div>
 
       <div className={styles.uploadGrid}>
-        <UploadButton icon={<Camera className={styles.uploadIcon} aria-hidden="true" />} label="Photo" />
-        <UploadButton icon={<Mic className={styles.uploadIcon} aria-hidden="true" />} label="Audio" />
-        <UploadButton icon={<Video className={styles.uploadIcon} aria-hidden="true" />} label="Video" />
+        <UploadButton
+          icon={<Camera className={styles.uploadIcon} aria-hidden="true" />}
+          label="Media"
+          hint="Photo or video"
+        />
+        <UploadButton
+          icon={<Mic className={styles.uploadIcon} aria-hidden="true" />}
+          label="Audio"
+          hint="Record now"
+        />
+        <UploadButton
+          icon={<Type className={styles.uploadIcon} aria-hidden="true" />}
+          label="Text"
+          hint="Write a note"
+          onClick={() => setComposing(true)}
+        />
       </div>
 
       <div className={styles.sectionHeader}>
         <span>Recent entries</span>
-        <span>{JOURNAL_ENTRIES.length} saved</span>
+        <span>{entries.length} saved</span>
       </div>
 
       <div className={styles.entryList}>
-        {JOURNAL_ENTRIES.map(({ id, type, Icon, when, note }) => (
+        {entries.map(({ id, type, when, note }) => (
           <article key={id} className={styles.entryCard}>
             <div className={styles.entryThumb} aria-hidden="true">
-              <FileImage className={styles.entryThumbIcon} />
+              {type === 'Note' && <FileText className={styles.entryThumbIcon} />}
+              {type === 'Audio' && <Mic className={styles.entryThumbIcon} />}
+              {type === 'Media' && <FileImage className={styles.entryThumbIcon} />}
             </div>
             <div className={styles.entryContent}>
               <div className={styles.entryMeta}>
-                <Icon className={styles.tinyIcon} aria-hidden="true" />
+                {type === 'Note' && <FileText className={styles.tinyIcon} aria-hidden="true" />}
+                {type === 'Audio' && <Mic className={styles.tinyIcon} aria-hidden="true" />}
+                {type === 'Media' && <Camera className={styles.tinyIcon} aria-hidden="true" />}
                 <span>{type}</span>
                 <span>-</span>
                 <span>{when}</span>
               </div>
-              <p>{note}</p>
+              <p className={styles.entryNote}>{note}</p>
             </div>
           </article>
         ))}
       </div>
+
+      {composing && (
+        <NoteComposer
+          value={draft}
+          onChange={setDraft}
+          onCancel={cancelNote}
+          onSave={saveNote}
+        />
+      )}
     </div>
   );
 }
 
-function UploadButton({ icon, label }) {
+function UploadButton({ icon, label, hint, onClick }) {
   return (
-    <button type="button" className={styles.uploadButton} aria-label={`Add ${label.toLowerCase()} evidence`}>
+    <button
+      type="button"
+      className={styles.uploadButton}
+      aria-label={`Add ${label.toLowerCase()} evidence`}
+      onClick={onClick}
+    >
       <span className={styles.uploadIconCircle}>{icon}</span>
-      <span>{label}</span>
+      <span className={styles.uploadLabel}>{label}</span>
+      <span className={styles.uploadHint}>{hint}</span>
     </button>
+  );
+}
+
+function NoteComposer({ value, onChange, onCancel, onSave }) {
+  return (
+    <div className={styles.noteComposerBackdrop} onClick={onCancel}>
+      <div className={styles.noteComposer} onClick={(event) => event.stopPropagation()}>
+        <div className={styles.noteComposerHeader}>
+          <div className={styles.noteComposerTitle}>
+            <span aria-hidden="true">
+              <FileText className={styles.smallIcon} />
+            </span>
+            <strong>New note</strong>
+          </div>
+          <button
+            type="button"
+            className={styles.noteCloseButton}
+            aria-label="Close"
+            onClick={onCancel}
+          >
+            <X className={styles.tinyIcon} aria-hidden="true" />
+          </button>
+        </div>
+
+        <textarea
+          autoFocus
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder="Write what happened. Only you can see this."
+          className={styles.noteTextarea}
+        />
+
+        <div className={styles.noteComposerMeta}>
+          <span>Saved with timestamp</span>
+          <span>{value.length} chars</span>
+        </div>
+
+        <div className={styles.noteComposerActions}>
+          <button type="button" className={styles.noteCancelButton} onClick={onCancel}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            className={styles.noteSaveButton}
+            disabled={!value.trim()}
+            onClick={onSave}
+          >
+            Save note
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
