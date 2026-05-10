@@ -7,7 +7,6 @@ import CalculatorCover from '../../components/CalculatorCover';
 import NewsCover from '../../components/NewsCover';
 import PrivateModeShell from '../../components/PrivateModeShell';
 import WeatherCover from '../../components/WeatherCover';
-import LocationCapture from '../../components/LocationCapture';
 import { usePrivacyMode } from '../../hooks/usePrivacyMode';
 import { withAuth } from '../../lib/withAuth';
 import landingStyles from '../../styles/Landing.module.css';
@@ -109,7 +108,6 @@ export default function AppShell({
   themeColor,
   appleTouchIcon,
   session,
-  geolocationEnabled,
   sosEnabled,
 }) {
   usePrivacyMode();
@@ -217,7 +215,6 @@ export default function AppShell({
           <PrivateModeShell displayName={session?.displayName} sosEnabled={sosEnabled} />
         ) : (
           <>
-            {geolocationEnabled && <LocationCapture />}
             {renderCover()}
           </>
         )}
@@ -245,7 +242,6 @@ export const getServerSideProps = withAuth(async (context) => {
   return {
     props: {
       ...theme,
-      geolocationEnabled: Boolean(config.features.enable_geolocation),
       sosEnabled: Boolean(config.features.enable_sos),
     },
   };
