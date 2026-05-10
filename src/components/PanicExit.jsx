@@ -6,14 +6,13 @@ import { triggerPanicExit } from '../hooks/usePrivacyMode';
  *
  * Triggers on:
  *  1. Escape key
- *  2. Rapid quadruple-tap anywhere on a touch screen
+ *  2. Horizontal swipe (left-to-right or right-to-left) on touch screens
  *  3. Click/tap of the visible quick-exit button when shown
  */
 const config = require('../config/config.json');
 
 export default function PanicExit({ showButton = true }) {
-  const tapCount = useRef(0);
-  const tapTimer = useRef(null);
+  const touchStart = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const onKeyDown = (event) => {
@@ -25,32 +24,40 @@ export default function PanicExit({ showButton = true }) {
   }, []);
 
   useEffect(() => {
-    const handleQuadTap = () => {
-      if (!config.features.enable_quad_tap_panic) return;
-
-      tapCount.current += 1;
-
-      if (tapCount.current >= 4) {
-        clearTimeout(tapTimer.current);
-        tapCount.current = 0;
-        console.debug('[Tap] Quadruple tap detected');
-        triggerPanicExit();
-        return;
-      }
-
-      clearTimeout(tapTimer.current);
-      tapTimer.current = setTimeout(() => {
-        tapCount.current = 0;
-      }, 400);
+    const handleTouchStart = (e) => {
+      touchStart.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
     };
 
-    window.addEventListener('touchend', handleQuadTap);
-    window.addEventListener('click', handleQuadTap);
+    const handleTouchEnd = (e) => {
+      if (!config.features.enable_swipe_panic) return;
+
+      // Disable swipe if keyboard is likely up (input/textarea is focused)
+      const activeEl = document.activeElement;
+      const isInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+      if (isInput) return;
+
+      const deltaX = e.changedTouches[0].clientX - touchStart.current.x;
+      const deltaY = e.changedTouches[0].clientY - touchStart.current.y;
+
+      // Horizontal swipe threshold: > 100px horizontal, < 50px vertical deviation
+      const minDistance = 150;
+      const maxVerticalDev = 100;
+
+      if (Math.abs(deltaX) > minDistance && Math.abs(deltaY) < maxVerticalDev) {
+        console.debug('[Swipe] Horizontal swipe detected');
+        triggerPanicExit();
+      }
+    };
+
+    window.addEventListener('touchstart', handleTouchStart);
+    window.addEventListener('touchend', handleTouchEnd);
 
     return () => {
-      window.removeEventListener('touchend', handleQuadTap);
-      window.removeEventListener('click', handleQuadTap);
-      clearTimeout(tapTimer.current);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
     };
   }, []);
 

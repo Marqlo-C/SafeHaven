@@ -347,7 +347,7 @@ Chrome distinguishes the three as separate installed apps via the `"id"` field i
 | History lock | `usePrivacyMode` traps `popstate` — the back button goes nowhere |
 | Session wipe on hide | `sessionStorage.clear()` fires on `visibilitychange: hidden` |
 | Panic exit — Escape key | Single keypress redirects immediately |
-| Panic exit — quadruple-tap | Four taps within 400ms on any touch surface |
+| Panic exit — horizontal swipe | Large horizontal swipe on touch surface (disabled when typing) |
 | Panic exit — corner button | Discreet fixed `✕` button, bottom-right |
 | Panic exit — quadruple tap | Detects rapid quadruple tap on screen to trigger safe exit |
 | Panic redirect | Calls `POST /api/auth/logout` (`keepalive: true`) to clear the auth cookie, then `window.location.replace(NEXT_PUBLIC_SAFE_EXIT_URL)` — removes history entry |
