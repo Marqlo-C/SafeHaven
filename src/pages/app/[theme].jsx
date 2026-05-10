@@ -3,15 +3,15 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import PanicExit from '../../components/PanicExit';
 import Button from '../../components/Button';
+import ChatRoom from '../../components/ChatRoom';
 import CalculatorCover from '../../components/CalculatorCover';
 import NewsCover from '../../components/NewsCover';
 import PrivateModeShell from '../../components/PrivateModeShell';
 import WeatherCover from '../../components/WeatherCover';
 import LocationCapture from '../../components/LocationCapture';
 import { usePrivacyMode } from '../../hooks/usePrivacyMode';
+import { withAuth } from '../../lib/withAuth';
 import landingStyles from '../../styles/Landing.module.css';
-
-const { withAuth } = require('../../lib/withAuth');
 
 const ShieldIcon = ({ className }) => (
   <svg 
@@ -77,7 +77,7 @@ const InstallModal = ({ isOpen, onClose, onInstall, canInstall, platform, appNam
           ) : canInstall ? (
             <>
               <p>To secure this app on your device and hide its identity, click the button below to install it to your home screen.</p>
-              <p className={landingStyles.modalNote}>Once installed, it will appear as a standard {appName.split(' ')[0]} icon.</p>
+              <p className={landingStyles.modalNote}>Once installed, it will appear as a standard {appName ? appName.split(' ')[0] : 'App'} icon.</p>
             </>
           ) : (
             <>
@@ -118,6 +118,7 @@ export default function AppShell({
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [platform, setPlatform] = useState('other');
+  const [showChat, setShowChat] = useState(false);
   const [installed, setInstalled] = useState(false);
   const [showPrivateMode, setShowPrivateMode] = useState(false);
 
@@ -171,7 +172,7 @@ export default function AppShell({
     if (themeKey === 'calculator') return <CalculatorCover />;
     if (themeKey === 'news') return <NewsCover />;
     if (themeKey === 'weather') return <WeatherCover />;
-    return <PrivateModeShell displayName={session.displayName} />;
+    return <PrivateModeShell displayName={session?.displayName} />;
   };
 
   return (
@@ -196,6 +197,8 @@ export default function AppShell({
         <InstallModal 
           isOpen={showModal}
           onClose={() => setShowModal(false)}
+          onInstall={handleInstall}
+          canInstall={!!installPrompt}
           platform={platform}
           appName={appName}
         />
@@ -212,7 +215,9 @@ export default function AppShell({
 
         {/* ── Main Content ── */}
         {showPrivateMode ? (
-          <PrivateModeShell displayName={session.displayName} />
+          <PrivateModeShell displayName={session?.displayName} />
+        ) : showChat ? (
+          <ChatRoom roomId="sos" displayName={session?.displayName} />
         ) : (
           <>
             {geolocationEnabled && <LocationCapture />}
@@ -222,7 +227,8 @@ export default function AppShell({
       </main>
 
       <PanicExit showButton={!showPrivateMode} />
-      {!showPrivateMode && <Button onClick={() => setShowPrivateMode(true)} />}
+      {!showPrivateMode && !showChat && <Button onClick={() => setShowChat(true)} />}
+      {!showPrivateMode && showChat && <Button onClick={() => setShowPrivateMode(true)} />}
 
       {/* Persistent Install Trigger for non-PWA mode */}
       {installPrompt && !showModal && (
