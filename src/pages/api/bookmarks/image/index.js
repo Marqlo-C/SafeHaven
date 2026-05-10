@@ -14,7 +14,8 @@ const IMAGE_MIMETYPES = new Set([
   'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic',
 ]);
 
-export const apiConfig = { api: { bodyParser: false } };
+// Disable Next.js body parser — multer handles the multipart stream.
+export const config = { api: { bodyParser: false } };
 
 export default requireAuth(async (req, res) => {
   applySecurityHeaders(res);

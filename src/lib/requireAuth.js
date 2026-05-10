@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const cookie = require('cookie');
 const config = require('../config/config');
 
 /**
@@ -15,7 +16,14 @@ const config = require('../config/config');
  */
 function requireAuth(handler) {
   return async (req, res) => {
-    const token = req.cookies?.auth_token;
+    // Next.js normally populates req.cookies, but when bodyParser: false is set
+    // or when using a custom server, it might be missing.
+    let token = req.cookies?.auth_token;
+
+    if (!token && req.headers.cookie) {
+      const cookies = cookie.parse(req.headers.cookie);
+      token = cookies.auth_token;
+    }
 
     if (!token) {
       return res.status(401).json({ error: 'Authentication required.' });
@@ -29,7 +37,7 @@ function requireAuth(handler) {
         duressMode: decoded.duressMode || false,
       };
       return handler(req, res);
-    } catch {
+    } catch (err) {
       return res.status(401).json({ error: 'Session expired. Please sign in again.' });
     }
   };

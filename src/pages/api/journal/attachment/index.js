@@ -10,7 +10,7 @@ const config = require('../../../../config/config');
 const JournalEntry = require('../../../../models/JournalEntry');
 
 // Disable Next.js body parser — multer handles the multipart stream.
-export const apiConfig = { api: { bodyParser: false } };
+export const config = { api: { bodyParser: false } };
 
 export default requireAuth(async (req, res) => {
   applySecurityHeaders(res);
