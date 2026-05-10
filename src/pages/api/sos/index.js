@@ -4,7 +4,7 @@ const { getSocketServer } = require('../../../lib/socketServer');
 const { applySecurityHeaders } = require('../../../middleware/securityHeaders');
 const config = require('../../../config/config');
 const ChatMessage = require('../../../models/ChatMessage');
-const Friend = require('../../../models/Friend');
+const TrustedContact = require('../../../models/TrustedContact');
 
 const LOCATION_MAX_AGE_MS = 5 * 60 * 1000;
 
@@ -73,15 +73,23 @@ export default requireAuth(async (req, res) => {
   await connectDB();
 
   const userId = req.session.sub;
-  const trustedContacts = await Friend
-    .find({
-      status: 'accepted',
-      $or: [{ requesterId: userId }, { recipientId: userId }],
+  const trustedContacts = await TrustedContact
+    .find({ userId })
+    .populate({
+      path: 'friendId',
+      match: {
+        status: 'accepted',
+        $or: [{ requesterId: userId }, { recipientId: userId }],
+      },
+      select: '_id',
     })
-    .select('_id')
-    .lean();
+    .select('friendId');
 
-  if (trustedContacts.length === 0) {
+  const trustedFriendIds = trustedContacts
+    .map((trustedContact) => trustedContact.friendId?._id)
+    .filter(Boolean);
+
+  if (trustedFriendIds.length === 0) {
     return res.status(409).json({ error: 'No trusted contacts are available.' });
   }
 
@@ -95,9 +103,9 @@ export default requireAuth(async (req, res) => {
   const io = getSocketServer();
   const sentMessages = [];
 
-  for (const friend of trustedContacts) {
+  for (const friendId of trustedFriendIds) {
     const savedMessage = await ChatMessage.create({
-      friendId: friend._id,
+      friendId,
       senderId: userId,
       message,
     });
@@ -105,7 +113,7 @@ export default requireAuth(async (req, res) => {
     await savedMessage.populate('senderId', 'anonymousDisplayName');
     const serialized = serializeMessage(savedMessage);
     sentMessages.push(serialized);
-    io?.to(`friend:${friend._id.toString()}`).emit('receive_message', serialized);
+    io?.to(`friend:${friendId.toString()}`).emit('receive_message', serialized);
   }
 
   return res.status(200).json({
