@@ -1,0 +1,16 @@
+
+> hackdavis-2026@0.1.0 dev
+> node server.js
+
+[PwaFeature] PWA ready. Safe-exit URL: https://www.google.com
+[PwaFeature] Cover identities: calculator.json, news.json, weather.json
+[AuthFeature] Zero-trace auth system initialized.
+[ChatFeature] Anonymous chat enabled.
+[JournalFeature] Private evidence journal initialized.
+[JournalFeature] Attachment storage: MongoDB GridFS (journal_attachments).
+[AiChatFeature] AI support chat initialized.
+[BookmarkFeature] Bookmark system initialized.
+[BookmarkFeature] Attachment storage: MongoDB GridFS (bookmark_attachments).
+[ButtonFeature] Discreet SOS chat button enabled.
+[GeolocationFeature] Opt-in latest-location storage enabled.
+> Ready on http://localhost:3000 [dev]

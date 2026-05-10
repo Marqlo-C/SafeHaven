@@ -1,0 +1,38 @@
+[PwaFeature] PWA ready. Safe-exit URL: https://www.google.com
+[PwaFeature] Cover identities: calculator.json, news.json, weather.json
+[AuthFeature] Zero-trace auth system initialized.
+[ChatFeature] Anonymous chat enabled.
+[JournalFeature] Private evidence journal initialized.
+[JournalFeature] Attachment storage: MongoDB GridFS (journal_attachments).
+[AiChatFeature] AI support chat initialized.
+[BookmarkFeature] Bookmark system initialized.
+[BookmarkFeature] Attachment storage: MongoDB GridFS (bookmark_attachments).
+[ButtonFeature] Discreet SOS chat button enabled.
+[GeolocationFeature] Opt-in latest-location storage enabled.
+> Ready on http://localhost:3000 [dev]
+[AuthFeature] MongoDB connected.
+ ○ Compiling /app/[theme] ...
+ ✓ Compiled /app/[theme] in 6.3s (405 modules)
+ GET /app/calculator 307 in 6539ms
+ GET / 200 in 6738ms
+ GET / 200 in 66ms
+ ○ Compiling /downloads ...
+ ✓ Compiled /downloads in 620ms (412 modules)
+ GET /_next/data/development/app/calculator.json?theme=calculator 200 in 80ms
+ ✓ Compiled /login in 402ms (461 modules)
+ GET /_next/data/development/login.json?returnTo=%2F_next%2Fdata%2Fdevelopment%2Fapp%2Fcalculator.json%3Ftheme%3Dcalculator 200 in 100ms
+ ✓ Compiled /api/auth/login in 218ms (201 modules)
+ POST /api/auth/login 200 in 1260ms
+ GET /_next/data/development/app/calculator.json?theme=calculator 200 in 96ms
+ ✓ Compiled /api/geolocation in 171ms (205 modules)
+ GET /api/geolocation 200 in 1028ms
+ GET /api/geolocation 200 in 80ms
+ ✓ Compiled /api/auth/logout in 258ms (198 modules)
+ POST /api/auth/logout 200 in 326ms
+ ✓ Compiled / in 258ms (457 modules)
+ ✓ Compiled /_error in 370ms (459 modules)
+ GET / 500 in 1254ms
+ GET /_next/static/chunks/react-refresh.js 404 in 58ms
+ GET /_next/static/chunks/main.js 404 in 52ms
+ GET /_next/static/chunks/pages/_app.js 404 in 32ms
+ GET /_next/static/chunks/pages/_error.js 404 in 27ms
