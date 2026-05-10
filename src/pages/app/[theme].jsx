@@ -185,6 +185,7 @@ export default function AppShell({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content={appName} />
         <link rel="apple-touch-icon" href={appleTouchIcon} />
+        <link rel="icon" href={appleTouchIcon} />
         <meta name="robots" content="noindex, nofollow" />
         <meta name="referrer" content="no-referrer" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />

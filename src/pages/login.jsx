@@ -79,6 +79,7 @@ export default function LoginPage() {
         <meta name="robots" content="noindex, nofollow" />
         <meta name="referrer" content="no-referrer" />
         <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
+        <link rel="icon" href="/resources/images/logos/safe_harbor_logo.png" />
       </Head>
 
       <div className={styles.page}>

@@ -40,6 +40,7 @@ export default function Downloads() {
       <Head>
         <title>Select Your Disguise</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        <link rel="icon" href="/resources/images/logos/safe_harbor_logo.png" />
       </Head>
 
       <div className={styles.page}>

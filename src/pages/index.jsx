@@ -45,6 +45,7 @@ export default function LandingPage() {
         <title>Safe Harbor — Safety, Beautifully Disguised</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="A quiet, zero-trace sanctuary for your private journey toward safety. Hidden in plain sight." />
+        <link rel="icon" href="/resources/images/logos/safe_harbor_logo.png" />
       </Head>
 
       <div className={styles.page}>
