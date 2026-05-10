@@ -4,7 +4,7 @@
   "short_name": "Weather",
   "description": "Real-time weather forecasts and alerts for your area.",
   "start_url": "/app/weather",
-  "scope": "/",
+  "scope": "/app/weather",
   "display": "standalone",
   "background_color": "#0c2340",
   "theme_color": "#0c2340",

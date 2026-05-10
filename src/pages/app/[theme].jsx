@@ -50,7 +50,7 @@ const THEMES = {
 
 /* ── Install Modal Component ────────────────────────────────────────────── */
 
-const InstallModal = ({ isOpen, onClose, platform, appName }) => {
+const InstallModal = ({ isOpen, onClose, onInstall, canInstall, platform, appName }) => {
   if (!isOpen) return null;
   const isIOS = platform === 'ios';
 
@@ -74,6 +74,11 @@ const InstallModal = ({ isOpen, onClose, platform, appName }) => {
               </ol>
               <p className={landingStyles.modalNote}>It will appear as a normal utility icon.</p>
             </>
+          ) : canInstall ? (
+            <>
+              <p>To secure this app on your device and hide its identity, click the button below to install it to your home screen.</p>
+              <p className={landingStyles.modalNote}>Once installed, it will appear as a standard {appName.split(' ')[0]} icon.</p>
+            </>
           ) : (
             <>
               <p>To secure this app on your device:</p>
@@ -86,7 +91,11 @@ const InstallModal = ({ isOpen, onClose, platform, appName }) => {
           )}
         </div>
         
-        <button className={landingStyles.modalAction} onClick={onClose}>Finish Setup</button>
+        {canInstall && !isIOS ? (
+          <button className={landingStyles.modalAction} onClick={onInstall}>Install Now</button>
+        ) : (
+          <button className={landingStyles.modalAction} onClick={onClose}>Finish Setup</button>
+        )}
       </div>
     </div>
   );

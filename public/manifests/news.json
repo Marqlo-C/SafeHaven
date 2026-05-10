@@ -4,7 +4,7 @@
   "short_name": "News",
   "description": "Stay informed with curated headlines from trusted sources.",
   "start_url": "/app/news",
-  "scope": "/",
+  "scope": "/app/news",
   "display": "standalone",
   "background_color": "#0d1b2a",
   "theme_color": "#0d1b2a",
