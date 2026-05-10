@@ -1818,9 +1818,11 @@ button.emptyFriendState:hover {
 }
 
 .resourceMap {
-  height: 180px;
+  height: 200px;
+  flex-shrink: 0;
   border: 1px solid var(--pm-border);
   border-radius: var(--pm-radius-lg);
+  margin-bottom: 20px;
 }
 
 .resourcePin {
@@ -1858,25 +1860,27 @@ button.emptyFriendState:hover {
   color: var(--pm-muted-foreground);
   font-size: 11px;
 }
-
 .filterScroller {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  margin-inline: -16px;
-  padding: 0 16px 4px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 16px;
 }
 
 .filterButton {
-  flex-shrink: 0;
   min-height: 32px;
-  padding: 6px 14px;
+  padding: 4px 6px;
   border: 1px solid var(--pm-border);
   border-radius: 999px;
   background: var(--pm-card);
   color: var(--pm-foreground);
   font-size: 13px;
-  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .filterButtonActive {
