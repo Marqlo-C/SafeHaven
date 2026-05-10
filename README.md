@@ -59,6 +59,9 @@ A healthy boot prints this sequence to the terminal:
 [ChatFeature] Anonymous chat enabled.
 [JournalFeature] Private evidence journal initialized.
 [JournalFeature] Attachment storage: MongoDB GridFS (journal_attachments).
+[AiChatFeature] AI support chat initialized.
+[BookmarkFeature] Bookmark system initialized.
+[BookmarkFeature] Attachment storage: MongoDB GridFS (bookmark_attachments).
 > Ready on http://localhost:3000 [dev]
 [AuthFeature] MongoDB connected.
 ```
@@ -94,21 +97,26 @@ HackDavis 2026/
     │   ├── auth_feature.js    ← Zero-trace auth: register, login, logout controllers.
     │   ├── chat_feature.js    ← Anonymous Socket.io chat rooms.
     │   ├── journal_feature.js ← Private evidence journal init + readiness logging.
+    │   ├── ai_chat_feature.js ← AI support chat init (validates CLAUDE_API_KEY).
+    │   ├── bookmark_feature.js← Bookmark system init + readiness logging.
     │   └── pwa_feature.js     ← Validates PWA manifests exist at startup.
     ├── models/
     │   ├── User.js            ← Mongoose schema: username, bcrypt hashes, display name.
-    │   └── JournalEntry.js    ← Schema: title, content, incidentDate, attachments[].
+    │   ├── JournalEntry.js    ← Schema: title, content, incidentDate, attachments[].
+    │   └── Bookmark.js        ← Schema: content, title, type, image, tags.
     ├── lib/
     │   ├── db.js              ← Cached Mongoose connection (survives hot reloads).
     │   ├── withAuth.js        ← getServerSideProps wrapper — protects pages.
     │   ├── requireAuth.js     ← API route wrapper — enforces auth on endpoints.
-    │   ├── gridfs.js          ← Lazy GridFS bucket helper (journal_attachments).
-    │   └── multerHelper.js    ← Multer adapter for Next.js: memoryStorage, 50MB, MIME guard.
+    │   ├── gridfs.js          ← Lazy GridFS buckets: journal_attachments + bookmark_attachments.
+    │   ├── multerHelper.js    ← Multer adapter for Next.js: memoryStorage, 50MB, MIME guard.
+    │   └── anthropic.js       ← Lazy Anthropic client singleton (reads CLAUDE_API_KEY).
     ├── middleware/
     │   └── securityHeaders.js ← Cache-prevention + security headers for auth routes.
     ├── hooks/
     │   ├── usePrivacyMode.js  ← SW registration, history lock, session wipe on hide.
-    │   └── useChat.js         ← Socket.io client hook: connect, join room, messages.
+    │   ├── useChat.js         ← Socket.io client hook: connect, join room, messages.
+    │   └── useSpeechToText.js ← Web Speech API hook. ⚠ NOT YET WORKING — needs investigation.
     ├── components/
     │   ├── PanicExit.jsx      ← Always-on quick-exit (Escape / triple-tap / button).
     │   └── ChatRoom.jsx       ← Anonymous real-time chat UI.
@@ -116,18 +124,28 @@ HackDavis 2026/
     │   ├── _app.jsx           ← Global CSS import.
     │   ├── index.jsx          ← Landing page: describes app, links to 3 PWA installs.
     │   ├── login.jsx          ← Login / Register page (toggles between modes).
+    │   ├── dev-test.jsx       ← ⚠ DEV ONLY — delete before shipping. Tests AI chat, bookmarks, STT.
     │   ├── app/
     │   │   └── [theme].jsx    ← Auth-gated app shell for calculator | news | weather.
     │   ├── api/auth/
     │   │   ├── register.js
     │   │   ├── login.js
     │   │   └── logout.js
-    │   └── api/journal/
-    │       ├── index.js           ← GET (list, paginated) + POST (create entry)
-    │       ├── [id].js            ← GET / PUT / DELETE a single entry
-    │       └── attachment/
-    │           ├── index.js       ← POST upload (multipart/form-data)
-    │           └── [fileId].js    ← GET stream + DELETE a file
+    │   ├── api/journal/
+    │   │   ├── index.js           ← GET (list, paginated) + POST (create entry)
+    │   │   ├── [id].js            ← GET / PUT / DELETE a single entry
+    │   │   └── attachment/
+    │   │       ├── index.js       ← POST upload (multipart/form-data)
+    │   │       └── [fileId].js    ← GET stream + DELETE a file
+    │   ├── api/ai-chat/
+    │   │   └── index.js           ← POST — sends conversation to Claude, returns response
+    │   └── api/bookmarks/
+    │       ├── index.js           ← GET (list, paginated + type filter) + POST (create)
+    │       ├── [id].js            ← GET / PUT / DELETE a single bookmark
+    │       ├── from-chat.js       ← POST — auto-creates bookmark from an AI response
+    │       └── image/
+    │           ├── index.js       ← POST upload image (images only, replaces previous)
+    │           └── [fileId].js    ← GET inline stream + DELETE
     └── styles/
         ├── globals.css           ← CSS custom properties, resets. Updated at Figma handoff.
         ├── Landing.module.css    ← Landing page styles. Updated at Figma handoff.
@@ -148,6 +166,8 @@ All feature flags live in `src/config/config.json`. Set a flag to `true` to acti
     "enable_auth_system": true,
     "enable_anonymous_chat": true,
     "enable_journal": true,
+    "enable_ai_chat": true,
+    "enable_bookmarks": true,
     "enable_safety_alert": false,
     "enable_resource_directory": false,
     "enable_crisis_escalation": false
@@ -372,6 +392,114 @@ import ChatRoom from '../components/ChatRoom';
 ```
 
 Room IDs are arbitrary strings. Future features (resource directory, crisis escalation) will use specific room IDs per resource or counselor session.
+
+---
+
+## AI Support Chat
+
+Survivors can have a private conversation with a Claude-powered assistant that provides emotional support, safety planning, and local resource referrals (lawyers, shelters, therapists, hotlines).
+
+### Env var required
+
+```
+CLAUDE_API_KEY=sk-ant-...
+```
+
+Add this to `.env` locally and to Railway environment variables in production. Get a key from the shared Anthropic workspace or create one at console.anthropic.com.
+
+### API
+
+| Method | Route | Description |
+|---|---|---|
+| POST | `/api/ai-chat` | Send conversation history, receive assistant reply |
+
+**Request body:**
+```json
+{ "messages": [{ "role": "user", "content": "I need help finding a lawyer in Sacramento" }] }
+```
+
+**Response:**
+```json
+{ "message": "Here are some legal aid options in Sacramento...", "role": "assistant" }
+```
+
+### System prompt behavior
+
+The assistant is instructed to:
+- Be trauma-informed and non-judgmental
+- Surface the National DV Hotline (`1-800-799-7233`) when immediate danger is mentioned
+- Ask for city/state when suggesting local resources
+- Never diagnose mental health conditions
+- Keep responses concise (survivors may be reading quickly)
+
+The system prompt is server-side only — never exposed to the client.
+
+### Model
+
+`claude-haiku-4-5-20251001` — fast and cost-efficient for a support chat context.
+
+---
+
+## Bookmarks
+
+Survivors can save AI suggestions, resource links, and personal notes. Each bookmark can optionally have an image attachment.
+
+### API routes
+
+| Method | Route | Description |
+|---|---|---|
+| GET | `/api/bookmarks` | Paginated list (`?page=&limit=&type=`) |
+| POST | `/api/bookmarks` | Create bookmark (`{ content, title?, type?, tags? }`) |
+| GET | `/api/bookmarks/:id` | Fetch single bookmark |
+| PUT | `/api/bookmarks/:id` | Update title, content, tags |
+| DELETE | `/api/bookmarks/:id` | Delete bookmark + image from GridFS |
+| POST | `/api/bookmarks/from-chat` | Auto-create bookmark from an AI response (title auto-generated) |
+| POST | `/api/bookmarks/image?bookmarkId=` | Upload image (images only, replaces previous) |
+| GET | `/api/bookmarks/image/:fileId` | Serve image inline |
+| DELETE | `/api/bookmarks/image/:fileId` | Remove image |
+
+### Bookmark types
+
+| Type | When to use |
+|---|---|
+| `ai_suggestion` | Saved from AI chat via `from-chat` endpoint |
+| `resource` | A lawyer, shelter, hotline the user wants to remember |
+| `note` | Freeform user note |
+
+### Auto-bookmark from chat
+
+`POST /api/bookmarks/from-chat` takes `{ content }` (the AI message text), auto-generates a title from the first sentence, sets type to `ai_suggestion`, and tags it `["chat"]`. Used by the chat UI's 📌 bookmark button.
+
+---
+
+## Speech to Text
+
+⚠ **Not yet working** — hook is implemented (`src/hooks/useSpeechToText.js`) but `onresult` is not firing in testing. Needs further investigation (possible Chrome Web Speech API / network access issue). Do not block UI work on this.
+
+### Hook API (when fixed)
+
+```jsx
+import { useSpeechToText } from '../hooks/useSpeechToText';
+
+const { transcript, listening, supported, startListening, stopListening, clearTranscript } = useSpeechToText();
+```
+
+| Return | Type | Description |
+|---|---|---|
+| `transcript` | string | Accumulated text from current session |
+| `listening` | boolean | True while mic is active |
+| `supported` | boolean | False on Firefox / Safari — hide the button |
+| `startListening()` | fn | Begin capture |
+| `stopListening()` | fn | End capture |
+| `clearTranscript()` | fn | Reset to `''` |
+
+---
+
+## Dev Test Page
+
+`src/pages/dev-test.jsx` — **delete before shipping.**
+
+Accessible at `/dev-test` (must be logged in). Tests AI chat with live voice input, bookmark CRUD with image upload, and standalone STT. Used during backend development before UI is designed.
 
 ---
 

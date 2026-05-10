@@ -4,6 +4,8 @@
     "enable_auth_system": true,
     "enable_pwa": true,
     "enable_journal": true,
+    "enable_ai_chat": true,
+    "enable_bookmarks": true,
     "enable_button": true,
     "enable_safety_alert": false,
     "enable_resource_directory": false,

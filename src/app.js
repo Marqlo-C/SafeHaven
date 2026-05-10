@@ -14,6 +14,8 @@ const { ChatFeature } = require('./features/chat_feature');
 const { AuthFeature } = require('./features/auth_feature');
 const { PwaFeature } = require('./features/pwa_feature');
 const { JournalFeature } = require('./features/journal_feature');
+const { AiChatFeature } = require('./features/ai_chat_feature');
+const { BookmarkFeature } = require('./features/bookmark_feature');
 const { ButtonFeature } = require('./features/button');
 
 /**
@@ -34,6 +36,14 @@ function initFeatures(io) {
 
   if (config.features.enable_journal) {
     JournalFeature.init();
+  }
+
+  if (config.features.enable_ai_chat) {
+    AiChatFeature.init();
+  }
+
+  if (config.features.enable_bookmarks) {
+    BookmarkFeature.init();
   }
 
   if (config.features.enable_button) {
