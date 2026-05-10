@@ -77,6 +77,7 @@ A healthy boot prints this sequence to the terminal:
 [BookmarkFeature] Attachment storage: MongoDB GridFS (bookmark_attachments).
 [ButtonFeature] Discreet SOS chat button enabled.
 [GeolocationFeature] Opt-in latest-location storage enabled.
+[SOSFeature] Trusted-contact SOS messaging enabled.
 > Ready on http://localhost:3000 [dev]
 [AuthFeature] MongoDB connected.
 ```
@@ -202,6 +203,7 @@ All feature flags live in `src/config/config.json`. Set a flag to `true` to acti
     "enable_bookmarks": true,
     "enable_button": true,
     "enable_geolocation": true,
+    "enable_sos": true,
     "enable_safety_alert": false,
     "enable_resource_directory": false,
     "enable_crisis_escalation": false
@@ -347,6 +349,7 @@ Chrome distinguishes the three as separate installed apps via the `"id"` field i
 | Panic exit — Escape key | Single keypress redirects immediately |
 | Panic exit — triple-tap | Three taps within 600ms on any touch surface |
 | Panic exit — corner button | Discreet fixed `✕` button, bottom-right |
+| Panic exit — shake | Detects vigorous device acceleration to trigger safe exit |
 | Panic redirect | Calls `POST /api/auth/logout` (`keepalive: true`) to clear the auth cookie, then `window.location.replace(NEXT_PUBLIC_SAFE_EXIT_URL)` — removes history entry |
 | No indexing | `<meta name="robots" content="noindex, nofollow">` on app shell pages |
 | No referrer leakage | `Referrer-Policy: no-referrer` site-wide |
@@ -386,6 +389,36 @@ The button is not a login button. It is an in-app switch from the current cover 
 | `src/pages/app/[theme].jsx` | Owns the local state that switches from cover UI to `ChatRoom`. |
 
 The button is controlled by `config.features.enable_button`. Keep the component low-contrast and unlabeled so the disguise remains the default visible experience.
+
+---
+
+## SOS Feature
+
+The SOS feature sends an emergency message with the user's current browser location to all accepted trusted contacts.
+
+### Flow
+
+```
+PrivateModeShell SOS tab
+  -> user taps Send SOS
+  -> browser requests current location
+  -> POST /api/sos
+  -> server verifies auth + enable_sos
+  -> server finds accepted Friend relationships
+  -> server writes one ChatMessage per trusted contact chat
+  -> online contacts receive the message through Socket.io
+```
+
+### Files
+
+| File | Responsibility |
+|---|---|
+| `src/features/sos_feature.js` | Feature init, startup log, and Socket.io reference registration. |
+| `src/pages/api/sos/index.js` | Protected SOS endpoint that validates location and sends chat messages. |
+| `src/lib/socketServer.js` | Singleton bridge for sharing the Socket.io server with API routes. |
+| `src/components/PrivateModeShell.jsx` | Gets browser location and calls `/api/sos` from the SOS tab. |
+
+The feature is controlled by `config.features.enable_sos`. If disabled, `/api/sos` returns `404` and the SOS panel disables sending.
 
 ---
 

@@ -9,14 +9,13 @@ import PrivateModeShell from '../../components/PrivateModeShell';
 import WeatherCover from '../../components/WeatherCover';
 import LocationCapture from '../../components/LocationCapture';
 import { usePrivacyMode } from '../../hooks/usePrivacyMode';
+import { withAuth } from '../../lib/withAuth';
 import landingStyles from '../../styles/Landing.module.css';
 
-const { withAuth } = require('../../lib/withAuth');
-
 const ShieldIcon = ({ className }) => (
-  <svg 
-    viewBox="0 0 24 24" 
-    fill="currentColor" 
+  <svg
+    viewBox="0 0 24 24"
+    fill="currentColor"
     className={className}
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -62,7 +61,7 @@ const InstallModal = ({ isOpen, onClose, onInstall, canInstall, platform, appNam
           <ShieldIcon className={landingStyles.modalShield} />
           <h3 className={landingStyles.modalTitle}>Secure {appName}</h3>
         </div>
-        
+
         <div className={landingStyles.modalBody}>
           {isIOS ? (
             <>
@@ -77,7 +76,7 @@ const InstallModal = ({ isOpen, onClose, onInstall, canInstall, platform, appNam
           ) : canInstall ? (
             <>
               <p>To secure this app on your device and hide its identity, click the button below to install it to your home screen.</p>
-              <p className={landingStyles.modalNote}>Once installed, it will appear as a standard {appName.split(' ')[0]} icon.</p>
+              <p className={landingStyles.modalNote}>Once installed, it will appear as a standard {appName ? appName.split(' ')[0] : 'App'} icon.</p>
             </>
           ) : (
             <>
@@ -90,7 +89,7 @@ const InstallModal = ({ isOpen, onClose, onInstall, canInstall, platform, appNam
             </>
           )}
         </div>
-        
+
         {canInstall && !isIOS ? (
           <button className={landingStyles.modalAction} onClick={onInstall}>Install Now</button>
         ) : (
@@ -111,6 +110,7 @@ export default function AppShell({
   appleTouchIcon,
   session,
   geolocationEnabled,
+  sosEnabled,
 }) {
   usePrivacyMode();
   const router = useRouter();
@@ -171,7 +171,7 @@ export default function AppShell({
     if (themeKey === 'calculator') return <CalculatorCover />;
     if (themeKey === 'news') return <NewsCover />;
     if (themeKey === 'weather') return <WeatherCover />;
-    return <PrivateModeShell displayName={session.displayName} />;
+    return <PrivateModeShell displayName={session?.displayName} sosEnabled={sosEnabled} />;
   };
 
   return (
@@ -193,9 +193,11 @@ export default function AppShell({
 
       <main>
         {/* ── Installation Modal (Differentiated by Route) ── */}
-        <InstallModal 
+        <InstallModal
           isOpen={showModal}
           onClose={() => setShowModal(false)}
+          onInstall={handleInstall}
+          canInstall={!!installPrompt}
           platform={platform}
           appName={appName}
         />
@@ -212,7 +214,7 @@ export default function AppShell({
 
         {/* ── Main Content ── */}
         {showPrivateMode ? (
-          <PrivateModeShell displayName={session.displayName} />
+          <PrivateModeShell displayName={session?.displayName} sosEnabled={sosEnabled} />
         ) : (
           <>
             {geolocationEnabled && <LocationCapture />}
@@ -244,6 +246,7 @@ export const getServerSideProps = withAuth(async (context) => {
     props: {
       ...theme,
       geolocationEnabled: Boolean(config.features.enable_geolocation),
+      sosEnabled: Boolean(config.features.enable_sos),
     },
   };
 });

@@ -47,6 +47,12 @@ const journalEntrySchema = new mongoose.Schema({
     default: [],
   },
 
+  isPrivate: {
+    type: Boolean,
+    default: false,
+    index: true,
+  },
+
   createdAt: { type: Date, default: Date.now, immutable: true },
   updatedAt: { type: Date, default: Date.now },
 });

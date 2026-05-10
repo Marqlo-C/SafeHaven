@@ -29,7 +29,7 @@ function AiChatTest() {
   const [loading, setLoading]       = useState(false);
   const [result, setResult]         = useState('');
   const [bookmarked, setBookmarked] = useState({});
-  const { transcript, listening, supported, startListening, stopListening, clearTranscript } = useSpeechToText();
+  const { transcript, listening, supported, startListening, stopListening, clearTranscript, loading: sttLoading } = useSpeechToText();
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -104,8 +104,8 @@ function AiChatTest() {
 
       {supported && (
         <>
-          <button style={listening ? s.btnRed : s.btnGrn} onClick={useVoice}>
-            {listening ? '⏹ Stop & use' : transcript ? '✓ Use transcript' : '🎤 Voice input'}
+          <button style={listening ? s.btnRed : s.btnGrn} onClick={useVoice} disabled={sttLoading}>
+            {sttLoading ? '⌛ Transcribing...' : listening ? '⏹ Stop & Transcribe' : transcript ? '✓ Use transcript' : '🎤 Voice input'}
           </button>
           {listening && (
             <div style={{ ...s.pre, marginTop: '6px', minHeight: '40px', borderColor: '#059669' }}>
@@ -223,19 +223,19 @@ function BookmarksTest() {
 // ─── Voice to text standalone ─────────────────────────────────────────────────
 
 function VoiceTest() {
-  const { transcript, listening, supported, startListening, stopListening, clearTranscript } = useSpeechToText();
+  const { transcript, listening, supported, startListening, stopListening, clearTranscript, loading: sttLoading } = useSpeechToText();
   return (
     <div style={s.section}>
-      <h2 style={s.h2}>Voice to Text  <span style={{ fontSize: '13px', color: '#9ca3af' }}>(Web Speech API)</span></h2>
-      {!supported && <p style={{ color: '#f87171' }}>Not supported in this browser. Use Chrome or Edge.</p>}
+      <h2 style={s.h2}>Voice to Text  <span style={{ fontSize: '13px', color: '#9ca3af' }}>(ElevenLabs STT)</span></h2>
+      {!supported && <p style={{ color: '#f87171' }}>Not supported in this browser. MediaRecorder API required.</p>}
       {supported && (
         <>
-          <button style={listening ? s.btnRed : s.btnGrn} onClick={listening ? stopListening : startListening}>
-            {listening ? '⏹ Stop' : '🎤 Start'}
+          <button style={listening ? s.btnRed : s.btnGrn} onClick={listening ? stopListening : startListening} disabled={sttLoading}>
+            {sttLoading ? '⌛ Transcribing...' : listening ? '⏹ Stop' : '🎤 Start'}
           </button>
           <button style={s.btn} onClick={clearTranscript}>Clear</button>
           <div style={{ ...s.pre, marginTop: '12px', minHeight: '60px' }}>
-            {transcript || <span style={{ opacity: 0.4 }}>Transcript will appear here…</span>}
+            {transcript || <span style={{ opacity: 0.4 }}>Transcript will appear here after stopping…</span>}
           </div>
         </>
       )}

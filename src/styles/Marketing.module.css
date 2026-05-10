@@ -91,6 +91,55 @@
   align-items: center;
 }
 
+/* ── Morphing Identity Animation ─────────────────────────────────── */
+.morphingIconContainer {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 32px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.morphingIcon {
+  width: 48px;
+  height: 48px;
+  color: var(--color-accent);
+  position: absolute;
+  opacity: 0;
+  transform: scale(0.8) translateY(10px);
+  filter: blur(5px);
+  animation: morphCycle 12s infinite;
+}
+
+.morphingIcon:nth-child(1) { animation-delay: 0s; }
+.morphingIcon:nth-child(2) { animation-delay: 3s; }
+.morphingIcon:nth-child(3) { animation-delay: 6s; }
+.morphingIcon:nth-child(4) { animation-delay: 9s; }
+
+.morphingGlow {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(201, 125, 87, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+@keyframes morphCycle {
+  0% { opacity: 0; transform: scale(0.8) translateY(10px); filter: blur(5px); }
+  5% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+  20% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+  25% { opacity: 0; transform: scale(1.1) translateY(-10px); filter: blur(5px); }
+  100% { opacity: 0; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+}
+
 .badge {
   background: rgba(252, 250, 247, 0.5);
   backdrop-filter: blur(10px);
@@ -320,6 +369,18 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.footerBrand {
+  position: relative;
+  margin-bottom: 24px;
+  justify-content: center;
+}
+
+.footerBrand .logo {
+  position: absolute;
+  left: -44px; /* Logo width (32px) + gap (12px) */
+  margin: 0;
 }
 
 .footerDisclaimer {

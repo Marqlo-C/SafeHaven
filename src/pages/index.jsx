@@ -1,5 +1,11 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import { 
+  Calculator, 
+  Newspaper, 
+  CloudSun, 
+  Shield 
+} from 'lucide-react';
 import styles from '../styles/Marketing.module.css';
 
 const ShieldIcon = ({ className }) => (
@@ -38,6 +44,16 @@ const CloudIcon = ({ className }) => (
   </svg>
 );
 
+const MorphingIcon = () => (
+  <div className={styles.morphingIconContainer}>
+    <div className={styles.morphingGlow} />
+    <Calculator className={styles.morphingIcon} />
+    <Newspaper className={styles.morphingIcon} />
+    <CloudSun className={styles.morphingIcon} />
+    <Shield className={styles.morphingIcon} />
+  </div>
+);
+
 export default function LandingPage() {
   return (
     <>
@@ -66,6 +82,7 @@ export default function LandingPage() {
           {/* Hero Section - Ultra Minimalist & Empowering */}
           <section className={styles.heroSection}>
             <div className={styles.heroContent}>
+              <MorphingIcon />
               <div className={styles.badge}>Your private journey starts here</div>
               <h1 className={styles.heroTitle}>
                 Safety, <br />
@@ -180,7 +197,7 @@ export default function LandingPage() {
 
         <footer className={styles.footer}>
           <div className={styles.footerContent}>
-            <div className={styles.brand}>
+            <div className={`${styles.brand} ${styles.footerBrand}`}>
               <img src="/resources/images/logos/safe_harbor_logo.png" alt="" className={styles.logo} />
               Safe Harbor
             </div>

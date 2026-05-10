@@ -1,61 +1,101 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-export function useSpeechToText({ lang = 'en-US' } = {}) {
+/**
+ * useSpeechToText — Reliable transcription using ElevenLabs STT.
+ *
+ * This refactored version uses the MediaRecorder API to capture audio
+ * and sends it to our server-side /api/stt endpoint for processing.
+ * This works across all modern browsers (Chrome, Safari, Mobile).
+ */
+export function useSpeechToText() {
   const [transcript, setTranscript] = useState('');
   const [listening, setListening]   = useState(false);
   const [supported, setSupported]   = useState(false);
-  const recognitionRef = useRef(null);
-  const finalTextRef   = useRef('');
+  const [loading, setLoading]       = useState(false);
+  
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef   = useRef([]);
 
   useEffect(() => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    setSupported(!!SR);
+    // Check for MediaRecorder support
+    setSupported(!!(window.MediaRecorder && navigator.mediaDevices && navigator.mediaDevices.getUserMedia));
   }, []);
 
-  const startListening = useCallback(() => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR || recognitionRef.current) return;
+  const startListening = useCallback(async () => {
+    if (!supported) return;
 
-    finalTextRef.current = '';
-    setTranscript('');
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunksRef.current = [];
+      
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
 
-    const r = new SR();
-    r.lang = lang;
-    r.continuous = true;
-    r.interimResults = true;
-
-    r.onresult = (event) => {
-      let interim = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          finalTextRef.current += event.results[i][0].transcript + ' ';
-        } else {
-          interim += event.results[i][0].transcript;
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
         }
-      }
-      setTranscript(finalTextRef.current + interim);
-    };
+      };
 
-    r.onend   = () => { recognitionRef.current = null; setListening(false); };
-    r.onerror = () => { recognitionRef.current = null; setListening(false); };
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        await transcribeAudio(audioBlob);
+        
+        // Stop all tracks to release the microphone
+        stream.getTracks().forEach(track => track.stop());
+      };
 
-    recognitionRef.current = r;
-    r.start();
-    setListening(true);
-  }, [lang]);
+      mediaRecorder.start();
+      setListening(true);
+      setTranscript(''); // Clear previous transcript
+    } catch (err) {
+      console.error('[STT] Could not start recording:', err);
+      setListening(false);
+    }
+  }, [supported]);
 
   const stopListening = useCallback(() => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-      recognitionRef.current = null;
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
     }
     setListening(false);
   }, []);
 
+  const transcribeAudio = async (blob) => {
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', blob, 'recording.wav');
+
+      const res = await fetch('/api/stt', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok && data.transcript) {
+        setTranscript(data.transcript);
+      } else {
+        console.error('[STT] Transcription failed:', data.error);
+      }
+    } catch (err) {
+      console.error('[STT] API error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const clearTranscript = useCallback(() => {
-    finalTextRef.current = '';
     setTranscript('');
   }, []);
 
-  return { transcript, listening, supported, startListening, stopListening, clearTranscript };
+  return { 
+    transcript, 
+    listening, 
+    supported, 
+    loading, // New state for transcription in progress
+    startListening, 
+    stopListening, 
+    clearTranscript 
+  };
 }

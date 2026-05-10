@@ -41,7 +41,7 @@ const TABS = [
   { id: 'aid', title: 'Resources', label: 'Aid', Icon: LifeBuoy },
 ];
 
-export default function PrivateModeShell({ displayName }) {
+export default function PrivateModeShell({ displayName, sosEnabled = false }) {
   const [activeTab, setActiveTab] = useState('home');
 
   const activeTitle = useMemo(
@@ -71,7 +71,7 @@ export default function PrivateModeShell({ displayName }) {
             <HomePanel onNavigate={setActiveTab} />
           </Panel>
           <Panel active={activeTab === 'sos'}>
-            <SosPanel />
+            <SosPanel enabled={sosEnabled} />
           </Panel>
           <Panel active={activeTab === 'chat'}>
             <ChatPanel displayName={displayName} />
@@ -118,27 +118,110 @@ function Panel({ active, children }) {
   );
 }
 
-function SosPanel() {
+function SosPanel({ enabled }) {
   const [status, setStatus] = useState('ready');
   const [locationOn, setLocationOn] = useState(false);
-  const timerRef = useRef(null);
+  const [error, setError] = useState('');
+  const [sentCount, setSentCount] = useState(0);
+  const [lastLocation, setLastLocation] = useState(null);
+  const [locationError, setLocationError] = useState('');
 
-  useEffect(() => () => window.clearTimeout(timerRef.current), []);
+  const requestCurrentLocation = () => new Promise((resolve, reject) => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      reject(new Error('Location is not available in this browser.'));
+      return;
+    }
 
-  const handleSend = () => {
-    if (status !== 'ready') return;
+    navigator.geolocation.getCurrentPosition(resolve, reject, {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+    });
+  });
 
-    setStatus('sending');
-    window.clearTimeout(timerRef.current);
-    timerRef.current = window.setTimeout(() => setStatus('sent'), 1200);
+  useEffect(() => {
+    if (!enabled) return undefined;
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      setLocationError('Location is not available in this browser.');
+      return undefined;
+    }
+
+    const watcherId = navigator.geolocation.watchPosition(
+      ({ coords, timestamp }) => {
+        setLocationOn(true);
+        setLocationError('');
+        setLastLocation({
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          accuracy: coords.accuracy,
+          capturedAt: new Date(timestamp).toISOString(),
+        });
+      },
+      (err) => {
+        setLocationOn(false);
+        setLocationError(err.message || 'Unable to access live location.');
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+      }
+    );
+
+    return () => navigator.geolocation.clearWatch(watcherId);
+  }, [enabled]);
+
+  const handleSend = async () => {
+    if (!enabled || status === 'requesting' || status === 'sending') return;
+
+    setError('');
+
+    try {
+      setStatus('requesting');
+      let location = lastLocation;
+
+      if (!location || Date.now() - new Date(location.capturedAt).getTime() > 60 * 1000) {
+        const position = await requestCurrentLocation();
+        const { coords, timestamp } = position;
+        location = {
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          accuracy: coords.accuracy,
+          capturedAt: new Date(timestamp).toISOString(),
+        };
+      }
+
+      setLocationOn(true);
+      setLastLocation(location);
+      setStatus('sending');
+
+      const response = await fetch('/api/sos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(location),
+      });
+      const body = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(body.error || 'Unable to send SOS.');
+      }
+
+      setSentCount(body.sentCount || 0);
+      setStatus('sent');
+    } catch (err) {
+      setStatus('error');
+      setError(err.message || 'Unable to send SOS.');
+    }
   };
 
   const heroLabel = status === 'sent'
     ? 'Alert Sent'
+    : status === 'requesting'
+      ? 'Getting your location...'
     : status === 'sending'
       ? 'Sending alert...'
       : status === 'error'
         ? 'Unable to send. Try again.'
+        : !enabled
+          ? 'SOS is unavailable'
         : 'Ready to alert your contacts';
 
   return (
@@ -150,22 +233,28 @@ function SosPanel() {
         </div>
         <h1 className={styles.heroTitle}>{heroLabel}</h1>
         <p className={styles.heroText}>
-          {locationOn
-            ? 'One tap alerts your trusted contacts and shares your live location.'
-            : 'One tap alerts your trusted contacts. Location is not shared.'}
+          {status === 'sent'
+            ? `Your current location was sent to ${sentCount} trusted contact${sentCount === 1 ? '' : 's'}.`
+            : enabled
+              ? 'One tap gets your current location and sends it to your trusted contacts in chat.'
+              : 'The SOS feature is currently disabled.'}
         </p>
+        {error && <p className={styles.heroText}>{error}</p>}
+        {locationError && <p className={styles.heroText}>{locationError}</p>}
       </div>
 
       <button
         type="button"
         className={`${styles.sosButton} ${status === 'sent' ? styles.sosButtonSent : ''}`}
-        disabled={status !== 'ready'}
+        disabled={!enabled || status === 'requesting' || status === 'sending'}
         onClick={handleSend}
       >
         {status === 'sent' && <Check className={styles.buttonIcon} aria-hidden="true" />}
         <span>
           {status === 'sent'
             ? 'SOS Sent'
+            : status === 'requesting'
+              ? 'Getting location...'
             : status === 'sending'
               ? 'Sending...'
               : 'Send SOS'}
@@ -178,7 +267,7 @@ function SosPanel() {
           label="Trusted Contacts"
           value="2 contacts"
         />
-        <LocationCard on={locationOn} onToggle={setLocationOn} />
+        <LocationCard on={locationOn} />
         <StatusCard
           icon={<Cloud className={styles.smallIcon} aria-hidden="true" />}
           label="Evidence Backup"
@@ -191,7 +280,7 @@ function SosPanel() {
         />
       </div>
 
-      {locationOn && <LocationPreview sent={status === 'sent'} />}
+      {enabled && <LocationPreview sent={status === 'sent'} location={lastLocation} />}
 
       <div className={styles.notice}>
         <AlertTriangle className={styles.noticeIcon} aria-hidden="true" />
@@ -213,7 +302,7 @@ function StatusCard({ icon, label, value }) {
   );
 }
 
-function LocationCard({ on, onToggle }) {
+function LocationCard({ on }) {
   return (
     <div className={`${styles.statusCard} ${on ? styles.statusCardActive : ''}`}>
       <div className={styles.locationHeader}>
@@ -221,26 +310,23 @@ function LocationCard({ on, onToggle }) {
           <MapPin className={styles.smallIcon} aria-hidden="true" />
           <span>Location Sharing</span>
         </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={on}
-          aria-label="Toggle location sharing"
+        <span
+          role="status"
+          aria-label={on ? 'Location included' : 'Location required'}
           className={`${styles.switch} ${on ? styles.switchOn : ''}`}
-          onClick={() => onToggle(!on)}
         >
           <span aria-hidden="true" />
-        </button>
+        </span>
       </div>
-      <div className={styles.statusValue}>{on ? 'On' : 'Off'}</div>
+      <div className={styles.statusValue}>{on ? 'Included' : 'Required'}</div>
       <div className={styles.statusHint}>
-        {on ? 'Contacts can see you' : 'Contacts cannot see you'}
+        {on ? 'Contacts receive your current location' : 'Requested when SOS is sent'}
       </div>
     </div>
   );
 }
 
-function LocationPreview({ sent }) {
+function LocationPreview({ sent, location }) {
   const contacts = [
     { name: 'Mom', initials: 'MR' },
     { name: 'Sarah', initials: 'SK' },
@@ -269,8 +355,16 @@ function LocationPreview({ sent }) {
             Live
           </span>
         </div>
-        <div className={styles.locationAddress}>412 Elm Street, Apt 3B</div>
-        <div className={styles.locationDetail}>Riverside, CA - accurate to about 12 m</div>
+        <div className={styles.locationAddress}>
+          {location
+            ? `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}`
+            : 'Current coordinates'}
+        </div>
+        <div className={styles.locationDetail}>
+          {location?.accuracy
+            ? `Accurate to about ${Math.round(location.accuracy)} m`
+            : 'Accuracy pending'}
+        </div>
 
         <div className={styles.contactRow}>
           <div className={styles.avatarStack} aria-hidden="true">
@@ -280,8 +374,8 @@ function LocationPreview({ sent }) {
           </div>
           <div className={styles.contactCopy}>
             {sent
-              ? 'Mom and Sarah are tracking you now.'
-              : 'Mom and Sarah will see this if you tap SOS.'}
+              ? 'Your trusted contacts received this in chat.'
+              : 'Your trusted contacts will receive this in chat.'}
           </div>
         </div>
       </div>
