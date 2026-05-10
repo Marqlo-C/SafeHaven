@@ -430,3 +430,89 @@ All pages and components are functional placeholders. When the Figma/Open Design
 | `src/pages/app/[theme].jsx` | Cover UI (calculator/news/weather disguise screens) |
 
 All React component logic, hooks, and API calls survive the handoff unchanged. Only CSS modules and markup structure get updated.
+
+
+
+
+
+MORE ON OUR COVER PAGES
+**Cover Pages**
+The app supports three disguise cover pages through the shared `/app/[theme]` route. Each cover is selected by the `theme` URL param and keeps the protected app shell, PWA manifest, privacy hooks, panic exit, and login button behavior intact.
+
+**Calculator Cover**
+Route: `/app/calculator`
+
+The calculator cover renders a functional basic calculator UI inside the authenticated app shell. It is built as a local React component and does not use external APIs or third-party services. The design is meant to look like a normal everyday calculator app while preserving access to the app’s privacy protections.
+
+Key files:
+```text
+src/components/CalculatorCover.jsx
+src/styles/CalculatorCover.module.css
+public/manifests/calculator.json
+```
+
+**News Cover**
+Route: `/app/news`
+
+The news cover renders a dark, mobile-friendly news reader UI. It uses live headline data from NewsAPI.ai through a protected server-side API route, so the API key is never exposed to the browser. If the API key is missing or the request fails, the page silently falls back to static demo news content so the disguise still looks polished.
+
+The client requests:
+
+```text
+GET /api/news/headlines?tab=today|world|sports
+```
+
+The server fetches articles from NewsAPI.ai/Event Registry, normalizes the data, and returns only the fields the UI needs:
+
+```text
+source
+headline
+description
+content
+image
+url
+publishedAt
+```
+
+Key files:
+```text
+src/components/NewsCover.jsx
+src/styles/NewsCover.module.css
+src/pages/api/news/headlines.js
+src/config/config.js
+public/manifests/news.json
+```
+
+Environment variable:
+```text
+NEWSAPI_AI_KEY=
+```
+
+**Weather Cover**
+Route: `/app/weather`
+
+The weather cover renders a lightweight Weather Now screen inside the authenticated app shell. It does not fetch live weather data directly. Instead, it provides a disguised weather landing page with an `Open forecast` link that sends the user to AccuWeather only when clicked. This keeps the first screen looking like a weather app without adding a new API dependency.
+
+Key files:
+```text
+src/components/WeatherCover.jsx
+src/styles/WeatherCover.module.css
+public/manifests/weather.json
+```
+
+**Shared Route Logic**
+All three covers are selected in:
+
+```text
+src/pages/app/[theme].jsx
+```
+
+Current routing behavior:
+
+```text
+/app/calculator -> CalculatorCover
+/app/news       -> NewsCover
+/app/weather    -> WeatherCover
+```
+
+If the user is not authenticated, `withAuth` redirects them to `/login` before showing any cover page.
