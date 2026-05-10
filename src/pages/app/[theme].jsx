@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import PanicExit from '../../components/PanicExit';
 import Button from '../../components/Button';
 import ChatRoom from '../../components/ChatRoom';
@@ -8,8 +9,20 @@ import NewsCover from '../../components/NewsCover';
 import WeatherCover from '../../components/WeatherCover';
 import LocationCapture from '../../components/LocationCapture';
 import { usePrivacyMode } from '../../hooks/usePrivacyMode';
+import landingStyles from '../../styles/Landing.module.css';
 
 const { withAuth } = require('../../lib/withAuth');
+
+const ShieldIcon = ({ className }) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
+  </svg>
+);
 
 const THEMES = {
   calculator: {
@@ -35,6 +48,52 @@ const THEMES = {
   },
 };
 
+/* ── Install Modal Component ────────────────────────────────────────────── */
+
+const InstallModal = ({ isOpen, onClose, platform, appName }) => {
+  if (!isOpen) return null;
+  const isIOS = platform === 'ios';
+
+  return (
+    <div className={landingStyles.modalOverlay} onClick={onClose}>
+      <div className={landingStyles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <button className={landingStyles.closeBtn} onClick={onClose}>✕</button>
+        <div className={landingStyles.modalHeader}>
+          <ShieldIcon className={landingStyles.modalShield} />
+          <h3 className={landingStyles.modalTitle}>Secure {appName}</h3>
+        </div>
+        
+        <div className={landingStyles.modalBody}>
+          {isIOS ? (
+            <>
+              <p>To hide this app on your iPhone:</p>
+              <ol className={landingStyles.steps}>
+                <li>Tap the <strong>Share</strong> button in Safari.</li>
+                <li>Select <strong>Add to Home Screen</strong>.</li>
+                <li>Tap <strong>Add</strong>.</li>
+              </ol>
+              <p className={landingStyles.modalNote}>It will appear as a normal utility icon.</p>
+            </>
+          ) : (
+            <>
+              <p>To secure this app on your device:</p>
+              <ol className={landingStyles.steps}>
+                <li>Tap the <strong>menu icon</strong> in your browser.</li>
+                <li>Select <strong>Install App</strong>.</li>
+                <li>Confirm to add it to your home screen.</li>
+              </ol>
+            </>
+          )}
+        </div>
+        
+        <button className={landingStyles.modalAction} onClick={onClose}>Finish Setup</button>
+      </div>
+    </div>
+  );
+};
+
+/* ── Main App Shell Component ────────────────────────────────────────────── */
+
 export default function AppShell({
   themeKey,
   appName,
@@ -45,24 +104,45 @@ export default function AppShell({
   geolocationEnabled,
 }) {
   usePrivacyMode();
+  const router = useRouter();
 
   const [installPrompt, setInstallPrompt] = useState(null);
-  const [installed, setInstalled] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [platform, setPlatform] = useState('other');
   const [showChat, setShowChat] = useState(false);
 
   useEffect(() => {
-    const onPrompt = (e) => { e.preventDefault(); setInstallPrompt(e); };
-    window.addEventListener('beforeinstallprompt', onPrompt);
-    window.addEventListener('appinstalled', () => { setInstalled(true); setInstallPrompt(null); });
-    return () => window.removeEventListener('beforeinstallprompt', onPrompt);
-  }, []);
+    // Check platform
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) setPlatform('ios');
 
-  const handleInstall = async () => {
+    // Auto-show modal if install flag is present
+    if (router.query.install === 'true') {
+      setShowModal(true);
+    }
+
+    const onPrompt = (e) => { 
+      e.preventDefault(); 
+      setInstallPrompt(e); 
+    };
+
+    window.addEventListener('beforeinstallprompt', onPrompt);
+    window.addEventListener('appinstalled', () => { 
+      setShowModal(false);
+      setInstallPrompt(null); 
+    });
+
+    return () => window.removeEventListener('beforeinstallprompt', onPrompt);
+  }, [router.query.install]);
+
+  const triggerNativeInstall = async () => {
     if (!installPrompt) return;
     installPrompt.prompt();
     const { outcome } = await installPrompt.userChoice;
-    if (outcome === 'accepted') setInstalled(true);
-    setInstallPrompt(null);
+    if (outcome === 'accepted') {
+      setInstallPrompt(null);
+      setShowModal(false);
+    }
   };
 
   return (
@@ -78,21 +158,19 @@ export default function AppShell({
         <link rel="apple-touch-icon" href={appleTouchIcon} />
         <meta name="robots" content="noindex, nofollow" />
         <meta name="referrer" content="no-referrer" />
-        <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
-        <meta httpEquiv="autocomplete" content="off" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
       </Head>
 
       <main>
-        {installPrompt && !installed && (
-          <div style={bannerStyle}>
-            <span>Add {appName} to your home screen.</span>
-            <button onClick={handleInstall} style={installBtnStyle}>Install</button>
-          </div>
-        )}
+        {/* ── Installation Modal (Differentiated by Route) ── */}
+        <InstallModal 
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          platform={platform}
+          appName={appName}
+        />
 
-        {/* ── Real app content ── */}
-        {/* Cover UI (calculator/news/weather disguise) goes here at Figma handoff. */}
-        {/* ChatRoom is the functional core until cover UIs are designed.           */}
+        {/* ── Disguise Content ── */}
         {geolocationEnabled && <LocationCapture />}
         {showChat ? (
           <ChatRoom roomId="sos" displayName={session.displayName} />
@@ -109,6 +187,14 @@ export default function AppShell({
 
       <PanicExit />
       {!showChat && <Button onClick={() => setShowChat(true)} />}
+
+      {/* Persistent Install Trigger for non-PWA mode */}
+      {installPrompt && !showModal && (
+        <div style={bannerStyle} onClick={() => setShowModal(true)}>
+          <span>Secure {appName} to Home Screen</span>
+          <button onClick={(e) => { e.stopPropagation(); triggerNativeInstall(); }} style={installBtnStyle}>Install</button>
+        </div>
+      )}
     </>
   );
 }
@@ -128,25 +214,38 @@ export const getServerSideProps = withAuth(async (context) => {
   };
 });
 
-// ── Inline styles (non-design, structural only) ───────────────────────────────
+// ── Inline styles (discreet banner) ──────────────────────────────────────────
 
 const bannerStyle = {
+  position: 'fixed',
+  bottom: '80px',
+  left: '16px',
+  right: '16px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: '12px',
-  padding: '12px 16px',
-  background: 'rgba(255,255,255,0.08)',
-  color: '#fff',
+  padding: '14px 20px',
+  background: 'rgba(252, 250, 247, 0.8)',
+  backdropFilter: 'blur(20px)',
+  WebkitBackdropFilter: 'blur(20px)',
+  border: '1px solid rgba(232, 223, 212, 0.5)',
+  borderRadius: '20px',
+  color: '#362e28',
   fontSize: '14px',
+  fontWeight: '600',
+  boxShadow: '0 10px 30px rgba(54, 46, 40, 0.1)',
+  zIndex: 100,
+  cursor: 'pointer',
 };
 
 const installBtnStyle = {
-  padding: '6px 14px',
-  borderRadius: '6px',
-  border: '1px solid rgba(255,255,255,0.3)',
-  background: 'transparent',
+  padding: '8px 16px',
+  borderRadius: '999px',
+  border: 'none',
+  background: '#362e28',
   color: '#fff',
   cursor: 'pointer',
   fontSize: '13px',
+  fontWeight: '700',
 };
