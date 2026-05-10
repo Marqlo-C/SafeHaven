@@ -19,9 +19,19 @@ export function usePrivacyMode() {
     const onMotion = (event) => {
       if (!config.features.enable_shake_panic) return;
 
-      const { x, y, z } = event.accelerationIncludingGravity;
+      const motion = event.accelerationIncludingGravity;
+      if (!motion) return;
+      const { x = 0, y = 0, z = 0 } = motion;
       const currentTime = Date.now();
       const diffTime = currentTime - lastTime;
+
+      if (lastTime === 0) {
+        lastTime = currentTime;
+        lastX = x;
+        lastY = y;
+        lastZ = z;
+        return;
+      }
 
       if (diffTime > 100) {
         lastTime = currentTime;

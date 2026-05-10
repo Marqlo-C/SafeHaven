@@ -38,8 +38,10 @@ export function useSpeechToText() {
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-        await transcribeAudio(audioBlob);
+        const mimeType = mediaRecorder.mimeType || 'audio/webm';
+        const extension = mimeType.includes('wav') ? 'wav' : 'webm';
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        await transcribeAudio(audioBlob, extension);
         
         // Stop all tracks to release the microphone
         stream.getTracks().forEach(track => track.stop());
@@ -61,11 +63,11 @@ export function useSpeechToText() {
     setListening(false);
   }, []);
 
-  const transcribeAudio = async (blob) => {
+  const transcribeAudio = async (blob, extension) => {
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append('file', blob, 'recording.wav');
+      formData.append('file', blob, `recording.${extension}`);
 
       const res = await fetch('/api/stt', {
         method: 'POST',

@@ -66,7 +66,7 @@ export default requireAuth(async (req, res) => {
   if (Date.now() - capturedAtDate.getTime() > LOCATION_MAX_AGE_MS) {
     return res.status(400).json({ error: 'location is too old. Please refresh it.' });
   }
-  if (capturedAtDate.getTime() - Date.now() > LOCATION_MAX_AGE_MS) {
+  if (capturedAtDate.getTime() > Date.now()) {
     return res.status(400).json({ error: 'capturedAt cannot be in the future.' });
   }
 
