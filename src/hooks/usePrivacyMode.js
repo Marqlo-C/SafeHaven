@@ -8,6 +8,51 @@ import { useEffect } from 'react';
  */
 export function usePrivacyMode() {
   useEffect(() => {
+    // ── Shake Detection Implementation ───────────────────────────────────────
+    const config = require('../config/config.json');
+    const SHAKE_THRESHOLD = 25; // Adjusted for "violent" shake
+    let lastX, lastY, lastZ;
+    let lastTime = 0;
+
+    const onMotion = (event) => {
+      if (!config.features.enable_shake_panic) return;
+
+      const { x, y, z } = event.accelerationIncludingGravity;
+      const currentTime = Date.now();
+      const diffTime = currentTime - lastTime;
+
+      if (diffTime > 100) {
+        lastTime = currentTime;
+        const delta = Math.abs(x + y + z - lastX - lastY - lastZ);
+        const speed = (delta / diffTime) * 10000;
+
+        if (speed > SHAKE_THRESHOLD) {
+          console.debug('[Shake] Panic threshold reached');
+          triggerPanicExit();
+        }
+
+        lastX = x;
+        lastY = y;
+        lastZ = z;
+      }
+    };
+
+    if (config.features.enable_shake_panic && typeof window !== 'undefined' && 'DeviceMotionEvent' in window) {
+      // iOS 13+ requires permission for DeviceMotion
+      if (typeof DeviceMotionEvent.requestPermission === 'function') {
+        // We can't request on mount, but we can listen if already granted
+        window.addEventListener('devicemotion', onMotion);
+      } else {
+        window.addEventListener('devicemotion', onMotion);
+      }
+    }
+
+    return () => {
+      window.removeEventListener('devicemotion', onMotion);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!('serviceWorker' in navigator)) return undefined;
 
     if (process.env.NODE_ENV !== 'production') {
