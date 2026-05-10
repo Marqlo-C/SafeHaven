@@ -48,9 +48,11 @@ function authenticateSocket(socket) {
 
 function serializeMessage(message) {
   const senderId = message.senderId._id?.toString() || message.senderId.toString();
+  const roomId = message.friendId?._id?.toString() || message.friendId?.toString();
 
   return {
     id: message._id.toString(),
+    roomId,
     senderId,
     senderDisplayName: message.senderId.anonymousDisplayName,
     message: message.message,
@@ -83,6 +85,8 @@ class ChatFeature {
 
       const userRoom = `user:${session.userId}`;
       socket.join(userRoom);
+
+      socket.emit('session_info', { userId: session.userId, displayName: session.displayName });
 
       console.log(`[ChatFeature] Client connected: ${socket.id}, joined ${userRoom}`);
 
@@ -153,7 +157,7 @@ class ChatFeature {
        * Client emits: { roomId: friendRelationshipId, message: string }
        * Server stores then broadcasts to all sockets in the friend room.
        */
-      socket.on('send_message', async ({ roomId, message }) => {
+      socket.on('send_message', async ({ roomId, message, clientId }) => {
         if (!roomId || !message || typeof message !== 'string') return;
         const trimmed = message.trim().slice(0, MAX_MESSAGE_LENGTH);
         if (!trimmed) return;
@@ -168,10 +172,12 @@ class ChatFeature {
         if (!isPersistedId(roomId)) {
           const mockMsg = {
             id: `mock-${Date.now()}`,
+            roomId, // Crucial for client routing
             senderId: session.userId,
             senderDisplayName: session.displayName || 'SoftFern',
             message: trimmed,
             timestamp: Date.now(),
+            clientId // Echo back
           };
           io.to(socketRoom).emit('receive_message', mockMsg);
           return;
@@ -201,8 +207,10 @@ class ChatFeature {
           });
 
           await savedMessage.populate('senderId', 'anonymousDisplayName');
+          const serialized = serializeMessage(savedMessage);
+          serialized.clientId = clientId; // Echo back
 
-          io.to(socketRoom).emit('receive_message', serializeMessage(savedMessage));
+          io.to(socketRoom).emit('receive_message', serialized);
         } catch (err) {
           console.error('[ChatFeature] send_message error:', err.name, err.message);
           socket.emit('chat_error', { error: 'Unable to send message.' });

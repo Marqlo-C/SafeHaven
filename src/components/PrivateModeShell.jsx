@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import {
   AlertTriangle,
   BookLock,
@@ -113,47 +113,123 @@ function isPersistedFriendId(id) {
 export default function PrivateModeShell({ displayName, sosEnabled = false }) {
   const [activeTab, setActiveTab] = useState('home');
   const [friends, setFriends] = useState(SEED_FRIENDS);
+  
+  // Persistence: Keep chat history alive across tab switches
+  const [allMessages, setAllMessages] = useState({});
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const socketRef = useRef(null);
 
   const activeTitle = useMemo(
-    () => TABS.find((tab) => tab.id === activeTab)?.title || 'Home',
+    () => TABS.find((t) => t.id === activeTab)?.title || 'Home',
     [activeTab]
   );
 
   const loadFriends = async () => {
     try {
-      const [friendsResponse, trustedResponse] = await Promise.all([
+      const [fRes, tRes] = await Promise.all([
         fetch('/api/friends'),
         fetch('/api/trusted-contacts'),
       ]);
+      if (!fRes.ok) return;
 
-      if (!friendsResponse.ok) return;
+      const fBody = await fRes.json();
+      const tBody = tRes.ok ? await tRes.json() : {};
+      const trustedIds = new Set((tBody.trustedContacts || []).map(c => c.friendRelationshipId));
 
-      const friendsBody = await friendsResponse.json();
-      const trustedBody = trustedResponse.ok ? await trustedResponse.json() : {};
-      const trustedFriendIds = new Set(
-        (trustedBody.trustedContacts || []).map((contact) => contact.friendRelationshipId)
-      );
+      const next = (fBody.friends || [])
+        .filter(f => f.status === 'accepted' || f.status === 'pending')
+        .map(f => normalizeFriend(f, trustedIds));
 
-      const nextFriends = (friendsBody.friends || [])
-        .filter((friend) => friend.status === 'accepted' || friend.status === 'pending')
-        .map((friend) => normalizeFriend(friend, trustedFriendIds));
-
-      if (nextFriends.length > 0) {
-        setFriends(nextFriends);
-      }
-    } catch {
-      // Keep existing state on error.
+      if (next.length > 0) setFriends(next);
+    } catch (err) {
+      console.error('[Sync] Load error:', err);
     }
   };
 
-  useEffect(() => {
-    loadFriends();
+  // ── Socket Helpers (Memoized to prevent loops) ───────────────────────────
+
+  const joinRoomGlobal = useCallback((roomId) => {
+    if (socketRef.current?.connected) {
+      console.debug('[Sync] Joining room:', roomId);
+      socketRef.current.emit('join_room', { roomId });
+    }
   }, []);
 
-  // ── Centralized Actions (Enables Sync Across Tabs) ─────────────────────────
+  const sendMessageGlobal = useCallback((roomId, text) => {
+    if (!socketRef.current?.connected) return;
+    
+    const clientId = `client-${Date.now()}-${Math.random()}`;
+    const optimisticMsg = {
+      id: clientId,
+      senderId: currentUserId,
+      message: text.trim(),
+      timestamp: Date.now(),
+      isOptimistic: true,
+      clientId,
+      roomId
+    };
 
+    setAllMessages(prev => ({
+      ...prev,
+      [roomId]: [...(prev[roomId] || []), optimisticMsg]
+    }));
+
+    socketRef.current.emit('send_message', { roomId, message: text.trim(), clientId });
+  }, [currentUserId]);
+
+  // Background Socket Listener
+  useEffect(() => {
+    loadFriends();
+
+    let socket;
+    import('socket.io-client').then(({ io }) => {
+      socket = io({ autoConnect: true });
+      socketRef.current = socket;
+
+      socket.on('connect', () => {
+        console.log('[Sync] Background socket connected:', socket.id);
+      });
+
+      socket.on('session_info', ({ userId }) => {
+        setCurrentUserId(userId);
+      });
+
+      socket.on('receive_message', (msg) => {
+        console.log('[Sync] Background message received for room:', msg.roomId);
+        if (!msg.roomId) return;
+
+        setAllMessages((prev) => {
+          const roomMsgs = prev[msg.roomId] || [];
+          // Deduplicate: Remove by server ID OR by clientId
+          const filtered = roomMsgs.filter(m => 
+            m.id !== msg.id && 
+            (!msg.clientId || m.clientId !== msg.clientId)
+          );
+          return {
+            ...prev,
+            [msg.roomId]: [...filtered, msg]
+          };
+        });
+      });
+      
+      socket.on('chat_history', ({ roomId, messages: history, currentUserId: userId }) => {
+        console.log(`[Sync] Received history for room ${roomId}: ${history.length} messages`);
+        setAllMessages(prev => ({
+          ...prev,
+          [roomId]: history
+        }));
+        setCurrentUserId(userId);
+      });
+    });
+
+    return () => {
+      socketRef.current?.disconnect();
+      socketRef.current = null;
+    };
+  }, []);
+
+  // Actions
   const toggleTrusted = async (id, value) => {
-    // Optimistic Update
     setFriends((current) => current.map((f) => 
       f.id === id ? { ...f, isTrusted: value } : f
     ));
@@ -263,6 +339,10 @@ export default function PrivateModeShell({ displayName, sosEnabled = false }) {
               onAcceptFriend={acceptFriend}
               onRemoveFriend={removeFriend}
               onRequestFriend={requestFriend}
+              allMessages={allMessages}
+              currentUserId={currentUserId}
+              joinRoomGlobal={joinRoomGlobal}
+              sendMessageGlobal={sendMessageGlobal}
             />
           </Panel>
           <Panel active={activeTab === 'journal'}>
@@ -605,24 +685,35 @@ function LocationPreview({ sent, location, trustedContacts }) {
 
 // ── Chat Panel (PRESERVING ORIGINAL UI) ──────────────────────────────────────
 
-function ChatPanel({ displayName, friends, onToggleTrusted, onAcceptFriend, onRemoveFriend, onRequestFriend }) {
+function ChatPanel({ 
+  displayName, 
+  friends, 
+  onToggleTrusted, 
+  onAcceptFriend, 
+  onRemoveFriend, 
+  onRequestFriend,
+  allMessages,
+  currentUserId,
+  joinRoomGlobal,
+  sendMessageGlobal
+}) {
   const [subTab, setSubTab] = useState('messages');
   const [openId, setOpenId] = useState(null);
   const [draft, setDraft] = useState('');
   
   const { transcript, listening, startListening, stopListening, clearTranscript } = useSpeechToText();
 
-  // Chat hook handles real-time messages for human friends.
-  const { 
-    messages: chatMessages, 
-    sendMessage: sendChatMessage, 
-    currentUserId 
-  } = useChat(openId && openId !== 'bot' ? openId : null);
-
   // Local state for bot chat.
   const [botMessages, setBotMessages] = useState(SEED_THREADS.bot);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // Sync with global room joining when a thread is opened
+  useEffect(() => {
+    if (openId && openId !== 'bot') {
+      joinRoomGlobal(openId);
+    }
+  }, [openId, joinRoomGlobal]);
 
   useEffect(() => {
     if (transcript) {
@@ -635,21 +726,23 @@ function ChatPanel({ displayName, friends, onToggleTrusted, onAcceptFriend, onRe
     const friendChats = friends
       .filter((friend) => friend.status === 'accepted')
       .map((friend) => {
+        const msgs = allMessages[friend.id] || [];
+        const last = msgs[msgs.length - 1];
         return {
           id: friend.id,
           handle: friend.displayName,
           emoji: friend.emoji,
           status: 'online',
-          lastMsg: 'Tap to chat',
-          time: '-',
+          lastMsg: last?.message || 'Tap to chat',
+          time: last?.timestamp ? new Date(last.timestamp).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '-',
         };
       });
 
     return [BOT_CHAT, ...friendChats];
-  }, [friends]);
+  }, [friends, allMessages]);
 
   const openPeer = openId ? chats.find((chat) => chat.id === openId) || null : null;
-  const messages = openId === 'bot' ? botMessages : chatMessages;
+  const messages = openId === 'bot' ? botMessages : (allMessages[openId] || []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -690,7 +783,7 @@ function ChatPanel({ displayName, friends, onToggleTrusted, onAcceptFriend, onRe
         setIsTyping(false);
       }
     } else {
-      sendChatMessage(text);
+      sendMessageGlobal(openId, text);
     }
   };
 

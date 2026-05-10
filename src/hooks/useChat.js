@@ -33,6 +33,11 @@ export function useChat(roomId) {
         socket.emit('join_room', { roomId });
       });
 
+      socket.on('session_info', ({ userId }) => {
+        console.log('[useChat] Received session_info, userId:', userId);
+        setCurrentUserId(userId);
+      });
+
       socket.on('connect_error', (err) => {
         console.error('[useChat] Connection error:', err.message);
         setError(`Connection failed: ${err.message}`);
@@ -51,9 +56,20 @@ export function useChat(roomId) {
       });
 
       socket.on('receive_message', (msg) => {
-        console.log('[useChat] Received new message:', msg.id);
+        console.log('[useChat] Received message:', msg.id, 'roomId:', msg.roomId, 'currentRoom:', roomId);
+        
+        // Only add if it belongs to this room
+        if (String(msg.roomId) !== String(roomId)) {
+          console.debug('[useChat] Message belongs to different room, ignoring.');
+          return;
+        }
+
         setMessages((prev) => {
-          const filtered = prev.filter(m => m.id !== msg.id && m.id !== `opt-${msg.timestamp}`);
+          const filtered = prev.filter(m => 
+            m.id !== msg.id && 
+            (!msg.clientId || m.clientId !== msg.clientId) &&
+            (!m.isOptimistic || m.message !== msg.message)
+          );
           return [...filtered, msg];
         });
       });
@@ -72,16 +88,19 @@ export function useChat(roomId) {
   const sendMessage = useCallback(
     (text) => {
       if (socketRef.current?.connected && text.trim()) {
+        const clientId = `client-${Date.now()}-${Math.random()}`;
         const optimisticMsg = {
-          id: `opt-${Date.now()}`,
+          id: clientId, // Use clientId as temp ID
           senderId: currentUserId,
           message: text.trim(),
           timestamp: Date.now(),
-          isOptimistic: true
+          isOptimistic: true,
+          clientId // Tag for deduplication
         };
         
+        console.log('[useChat] Sending message with clientId:', clientId);
         setMessages((prev) => [...prev, optimisticMsg]);
-        socketRef.current.emit('send_message', { roomId, message: text.trim() });
+        socketRef.current.emit('send_message', { roomId, message: text.trim(), clientId });
       }
     },
     [roomId, currentUserId]

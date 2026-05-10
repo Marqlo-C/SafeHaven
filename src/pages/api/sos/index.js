@@ -134,10 +134,12 @@ export default requireAuth(async (req, res) => {
       // Emit to specific chat room and recipient user room
       io?.to(`friend:${friendId.toString()}`).emit('receive_message', serialized);
       io?.to(`user:${recipientUserId}`).emit('receive_message', serialized);
+      io?.to(`user:${userId}`).emit('receive_message', serialized);
     } else {
       // Demo/Mock Fallback: Just emit the message without saving to DB.
       const mockSerialized = {
         id: `mock-sos-${Date.now()}-${friendId}`,
+        roomId: friendId, // Crucial for client routing
         senderId: userId,
         senderDisplayName: req.session.displayName || 'SoftFern',
         message,
@@ -146,6 +148,7 @@ export default requireAuth(async (req, res) => {
       sentMessages.push(mockSerialized);
       io?.to(`friend:${friendId}`).emit('receive_message', mockSerialized);
       io?.to(`user:${recipientUserId}`).emit('receive_message', mockSerialized);
+      io?.to(`user:${userId}`).emit('receive_message', mockSerialized);
     }
   }
 
