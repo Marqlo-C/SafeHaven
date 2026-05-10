@@ -62,6 +62,8 @@ A healthy boot prints this sequence to the terminal:
 [AiChatFeature] AI support chat initialized.
 [BookmarkFeature] Bookmark system initialized.
 [BookmarkFeature] Attachment storage: MongoDB GridFS (bookmark_attachments).
+[ButtonFeature] Discrete SOS chat button enabled.
+[GeolocationFeature] Opt-in latest-location storage enabled.
 > Ready on http://localhost:3000 [dev]
 [AuthFeature] MongoDB connected.
 ```
@@ -99,11 +101,14 @@ HackDavis 2026/
     │   ├── journal_feature.js ← Private evidence journal init + readiness logging.
     │   ├── ai_chat_feature.js ← AI support chat init (validates CLAUDE_API_KEY).
     │   ├── bookmark_feature.js← Bookmark system init + readiness logging.
+    │   ├── geolocation_feature.js ← Opt-in latest-location storage readiness logging.
+    │   ├── button.js          ← Discrete SOS chat access button readiness logging.
     │   └── pwa_feature.js     ← Validates PWA manifests exist at startup.
     ├── models/
     │   ├── User.js            ← Mongoose schema: username, bcrypt hashes, display name.
     │   ├── JournalEntry.js    ← Schema: title, content, incidentDate, attachments[].
-    │   └── Bookmark.js        ← Schema: content, title, type, image, tags.
+    │   ├── Bookmark.js        ← Schema: content, title, type, image, tags.
+    │   └── UserLocation.js    ← Schema: one latest GeoJSON location per user.
     ├── lib/
     │   ├── db.js              ← Cached Mongoose connection (survives hot reloads).
     │   ├── withAuth.js        ← getServerSideProps wrapper — protects pages.
@@ -116,10 +121,16 @@ HackDavis 2026/
     ├── hooks/
     │   ├── usePrivacyMode.js  ← SW registration, history lock, session wipe on hide.
     │   ├── useChat.js         ← Socket.io client hook: connect, join room, messages.
-    │   └── useSpeechToText.js ← Web Speech API hook. ⚠ NOT YET WORKING — needs investigation.
+    │   ├── useSpeechToText.js ← Web Speech API hook. ⚠ NOT YET WORKING — needs investigation.
+    │   └── useGeolocation.js  ← Browser watchPosition + latest-location API calls.
     ├── components/
     │   ├── PanicExit.jsx      ← Always-on quick-exit (Escape / triple-tap / button).
-    │   └── ChatRoom.jsx       ← Anonymous real-time chat UI.
+    │   ├── ChatRoom.jsx       ← Anonymous real-time chat UI.
+    │   ├── LocationCapture.jsx ← Live coordinate tester + clear control.
+    │   ├── Button.jsx         ← Discrete SOS chat access control.
+    │   ├── CalculatorCover.jsx ← Calculator disguise UI.
+    │   ├── NewsCover.jsx      ← News disguise UI.
+    │   └── WeatherCover.jsx   ← Weather disguise UI.
     ├── pages/
     │   ├── _app.jsx           ← Global CSS import.
     │   ├── index.jsx          ← Landing page: describes app, links to 3 PWA installs.
@@ -139,18 +150,25 @@ HackDavis 2026/
     │   │       └── [fileId].js    ← GET stream + DELETE a file
     │   ├── api/ai-chat/
     │   │   └── index.js           ← POST — sends conversation to Claude, returns response
-    │   └── api/bookmarks/
-    │       ├── index.js           ← GET (list, paginated + type filter) + POST (create)
-    │       ├── [id].js            ← GET / PUT / DELETE a single bookmark
-    │       ├── from-chat.js       ← POST — auto-creates bookmark from an AI response
-    │       └── image/
-    │           ├── index.js       ← POST upload image (images only, replaces previous)
-    │           └── [fileId].js    ← GET inline stream + DELETE
+    │   ├── api/bookmarks/
+    │   │   ├── index.js           ← GET (list, paginated + type filter) + POST (create)
+    │   │   ├── [id].js            ← GET / PUT / DELETE a single bookmark
+    │   │   ├── from-chat.js       ← POST — auto-creates bookmark from an AI response
+    │   │   └── image/
+    │   │       ├── index.js       ← POST upload image (images only, replaces previous)
+    │   │       └── [fileId].js    ← GET inline stream + DELETE
+    │   ├── api/geolocation/
+    │   │   └── index.js       ← GET latest + POST upsert + DELETE clear.
+    │   ├── api/news/
+    │   │   └── headlines.js   ← News cover headline API.
     └── styles/
         ├── globals.css           ← CSS custom properties, resets. Updated at Figma handoff.
         ├── Landing.module.css    ← Landing page styles. Updated at Figma handoff.
         ├── Login.module.css      ← Login/Register page styles. Updated at Figma handoff.
-        └── ChatRoom.module.css   ← Chat UI styles. Updated at Figma handoff.
+        ├── ChatRoom.module.css   ← Chat UI styles. Updated at Figma handoff.
+        ├── CalculatorCover.module.css
+        ├── NewsCover.module.css
+        └── WeatherCover.module.css
 ```
 
 ---
@@ -168,6 +186,8 @@ All feature flags live in `src/config/config.json`. Set a flag to `true` to acti
     "enable_journal": true,
     "enable_ai_chat": true,
     "enable_bookmarks": true,
+    "enable_button": true,
+    "enable_geolocation": true,
     "enable_safety_alert": false,
     "enable_resource_directory": false,
     "enable_crisis_escalation": false
@@ -183,7 +203,11 @@ server.js
         ├── config.features.enable_pwa       → PwaFeature.init()
         ├── config.features.enable_auth      → AuthFeature.init()
         ├── config.features.enable_chat      → ChatFeature.init(io)
-        └── config.features.enable_journal   → JournalFeature.init()
+        ├── config.features.enable_journal   → JournalFeature.init()
+        ├── config.features.enable_ai_chat   → AiChatFeature.init()
+        ├── config.features.enable_bookmarks → BookmarkFeature.init()
+        ├── config.features.enable_button    → ButtonFeature.init()
+        └── config.features.enable_geolocation → GeolocationFeature.init()
 ```
 
 `src/config/config.js` is the **singleton bridge** — it merges `config.json` (public flags, committed) with `.env` (private secrets, local-only). Every `require('./config/config')` across the app returns the same cached object.
@@ -314,8 +338,7 @@ Chrome distinguishes the three as separate installed apps via the `"id"` field i
 | No referrer leakage | `Referrer-Policy: no-referrer` site-wide |
 | No autofill | `autocomplete="off"` / `autocomplete="new-password"` on all auth inputs |
 | Password visibility toggle | Show/Hide button on each password field — no clipboard or autofill exposure |
-
-> **Location tracking**: Not blocked by default. Geolocation will be needed for the panic/report feature. Decision deferred to the safety alert feature implementation.
+| Opt-in geolocation | Browser permission required; latest location stored only after user action |
 
 ---
 
@@ -500,6 +523,79 @@ const { transcript, listening, supported, startListening, stopListening, clearTr
 `src/pages/dev-test.jsx` — **delete before shipping.**
 
 Accessible at `/dev-test` (must be logged in). Tests AI chat with live voice input, bookmark CRUD with image upload, and standalone STT. Used during backend development before UI is designed.
+
+---
+
+## Geolocation
+
+The geolocation feature is an opt-in foundation for future trusted-contact sharing. The app can request the survivor's current browser location, save the latest coordinates for their own account, and show live coordinates in the app for testing.
+
+No friends/trusted-contact access exists yet. That sharing layer should be added later with explicit relationship and consent checks.
+
+### API routes
+
+All geolocation routes are protected by `requireAuth`, so requests require a valid HTTP-only auth cookie.
+
+| Method | Route | Description |
+|---|---|---|
+| GET | `/api/geolocation` | Return the signed-in user's saved latest location, or `null` |
+| POST | `/api/geolocation` | Upsert latest location from browser coordinates |
+| DELETE | `/api/geolocation` | Clear the signed-in user's saved location |
+
+### POST body
+
+```json
+{
+  "latitude": 38.5449,
+  "longitude": -121.7405,
+  "accuracy": 25,
+  "altitude": null,
+  "altitudeAccuracy": null,
+  "heading": null,
+  "speed": null,
+  "capturedAt": "2026-05-09T22:00:00.000Z"
+}
+```
+
+Validation rules:
+- `latitude` must be between `-90` and `90`.
+- `longitude` must be between `-180` and `180`.
+- `capturedAt` must be a valid date.
+- Coordinates older than 5 minutes are rejected.
+- Future timestamps more than 5 minutes ahead are rejected.
+
+### Storage
+
+| Data | Location |
+|---|---|
+| Latest location | MongoDB `userlocations` collection |
+| User ownership | `userId` references the authenticated `User` |
+| Coordinates | GeoJSON Point stored as `[longitude, latitude]` |
+| Optional metadata | accuracy, altitude, altitudeAccuracy, heading, speed |
+
+The model enforces one location document per user with a unique `userId`. Every save overwrites the previous location, so the app does not store a movement history.
+
+### Client behavior
+
+| Layer | File | Responsibility |
+|---|---|---|
+| Feature init | `src/features/geolocation_feature.js` | Logs readiness when enabled |
+| API route | `src/pages/api/geolocation/index.js` | GET / POST / DELETE latest location |
+| Model | `src/models/UserLocation.js` | Mongoose schema + GeoJSON index |
+| Hook | `src/hooks/useGeolocation.js` | Uses `navigator.geolocation.watchPosition` |
+| UI | `src/components/LocationCapture.jsx` | Live coordinates, stop live, clear |
+
+The UI exposes a `Live coordinates` button. It starts `watchPosition`, displays latitude/longitude, and posts each browser-provided update to `/api/geolocation`.
+
+There is no fixed update interval. Browsers send `watchPosition` updates when the device/location provider has a new reading. On laptops, updates may be infrequent; on phones, updates are more likely while moving.
+
+### Privacy notes
+
+- Browser location permission is required before coordinates are collected.
+- The app does not load third-party map tiles for this feature.
+- Only the latest location is stored.
+- `DELETE /api/geolocation` clears the saved location.
+- Friend/trusted-contact sharing is not implemented yet.
 
 ---
 
