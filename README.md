@@ -62,7 +62,7 @@ A healthy boot prints this sequence to the terminal:
 [AiChatFeature] AI support chat initialized.
 [BookmarkFeature] Bookmark system initialized.
 [BookmarkFeature] Attachment storage: MongoDB GridFS (bookmark_attachments).
-[ButtonFeature] Discrete SOS chat button enabled.
+[ButtonFeature] Discreet SOS chat button enabled.
 [GeolocationFeature] Opt-in latest-location storage enabled.
 > Ready on http://localhost:3000 [dev]
 [AuthFeature] MongoDB connected.
@@ -102,7 +102,7 @@ HackDavis 2026/
     │   ├── ai_chat_feature.js ← AI support chat init (validates CLAUDE_API_KEY).
     │   ├── bookmark_feature.js← Bookmark system init + readiness logging.
     │   ├── geolocation_feature.js ← Opt-in latest-location storage readiness logging.
-    │   ├── button.js          ← Discrete SOS chat access button readiness logging.
+    │   ├── button.js          ← Discreet SOS chat access button readiness logging.
     │   └── pwa_feature.js     ← Validates PWA manifests exist at startup.
     ├── models/
     │   ├── User.js            ← Mongoose schema: username, bcrypt hashes, display name.
@@ -127,7 +127,7 @@ HackDavis 2026/
     │   ├── PanicExit.jsx      ← Always-on quick-exit (Escape / triple-tap / button).
     │   ├── ChatRoom.jsx       ← Anonymous real-time chat UI.
     │   ├── LocationCapture.jsx ← Live coordinate tester + clear control.
-    │   ├── Button.jsx         ← Discrete SOS chat access control.
+    │   ├── Button.jsx         ← Discreet SOS chat access control.
     │   ├── CalculatorCover.jsx ← Calculator disguise UI.
     │   ├── NewsCover.jsx      ← News disguise UI.
     │   └── WeatherCover.jsx   ← Weather disguise UI.

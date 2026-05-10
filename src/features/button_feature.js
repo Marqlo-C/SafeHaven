@@ -1,5 +1,5 @@
 /**
- * ButtonFeature - discrete SOS chat access button.
+ * ButtonFeature - discreet SOS chat access button.
  *
  * Enables a small, subtle button component that appears on disguised app pages
  * after authentication. The button switches the user from the cover identity
@@ -8,7 +8,7 @@
 
 class ButtonFeature {
   static init() {
-    console.log('[ButtonFeature] Discrete SOS chat button enabled.');
+    console.log('[ButtonFeature] Discreet SOS chat button enabled.');
   }
 }
 

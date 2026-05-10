@@ -1,5 +1,5 @@
 /**
- * Button - discrete in-app switch from a disguise screen to SOS chat.
+ * Button - discreet in-app switch from a disguise screen to SOS chat.
  *
  * The control stays small, unlabeled, and low-contrast so the cover identity
  * remains the primary visible experience until the user intentionally opens
