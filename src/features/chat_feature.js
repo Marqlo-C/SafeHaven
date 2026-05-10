@@ -58,6 +58,10 @@ function serializeMessage(message) {
   };
 }
 
+function isPersistedId(id) {
+  return mongoose.isValidObjectId(id);
+}
+
 class ChatFeature {
   /**
    * @param {import('socket.io').Server} io
@@ -77,7 +81,10 @@ class ChatFeature {
       socket.data.session = session;
       socket.data.allowedRooms = new Set();
 
-      console.log(`[ChatFeature] Client connected: ${socket.id}`);
+      const userRoom = `user:${session.userId}`;
+      socket.join(userRoom);
+
+      console.log(`[ChatFeature] Client connected: ${socket.id}, joined ${userRoom}`);
 
       /**
        * Client emits: { roomId: friendRelationshipId }
@@ -85,8 +92,19 @@ class ChatFeature {
        */
       socket.on('join_room', async ({ roomId }) => {
         if (!roomId || typeof roomId !== 'string') return;
-        if (!mongoose.isValidObjectId(roomId)) {
-          socket.emit('chat_error', { error: 'Invalid friend chat.' });
+
+        // Demo/Mock Fallback: If not a MongoDB ID, allow joining for testing.
+        if (!isPersistedId(roomId)) {
+          console.debug(`[ChatFeature] Joining demo room: ${roomId}`);
+          const socketRoom = `friend:${roomId}`;
+          socket.join(socketRoom);
+          socket.data.allowedRooms.add(socketRoom);
+          
+          socket.emit('chat_history', {
+            roomId,
+            currentUserId: session.userId,
+            messages: [], // Demo rooms start empty
+          });
           return;
         }
 
@@ -137,14 +155,25 @@ class ChatFeature {
        */
       socket.on('send_message', async ({ roomId, message }) => {
         if (!roomId || !message || typeof message !== 'string') return;
-        if (!mongoose.isValidObjectId(roomId)) return;
-
         const trimmed = message.trim().slice(0, MAX_MESSAGE_LENGTH);
         if (!trimmed) return;
 
         const socketRoom = `friend:${roomId}`;
         if (!socket.data.allowedRooms.has(socketRoom)) {
           socket.emit('chat_error', { error: 'Join an accepted friend chat before sending.' });
+          return;
+        }
+
+        // Demo/Mock Fallback: Just echo back to the room.
+        if (!isPersistedId(roomId)) {
+          const mockMsg = {
+            id: `mock-${Date.now()}`,
+            senderId: session.userId,
+            senderDisplayName: session.displayName || 'SoftFern',
+            message: trimmed,
+            timestamp: Date.now(),
+          };
+          io.to(socketRoom).emit('receive_message', mockMsg);
           return;
         }
 

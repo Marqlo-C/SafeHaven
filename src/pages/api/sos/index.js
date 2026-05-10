@@ -49,7 +49,7 @@ export default requireAuth(async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed.' });
   }
 
-  const { latitude, longitude, accuracy, capturedAt } = req.body ?? {};
+  const { latitude, longitude, accuracy, capturedAt, manualRecipientIds } = req.body ?? {};
   const lat = parseCoordinate(latitude);
   const lng = parseCoordinate(longitude);
   const capturedAtDate = capturedAt ? new Date(capturedAt) : new Date();
@@ -81,15 +81,25 @@ export default requireAuth(async (req, res) => {
         status: 'accepted',
         $or: [{ requesterId: userId }, { recipientId: userId }],
       },
-      select: '_id',
+      select: '_id requesterId recipientId',
     })
     .select('friendId');
 
-  const trustedFriendIds = trustedContacts
-    .map((trustedContact) => trustedContact.friendId?._id)
+  let trustedRelationships = trustedContacts
+    .map((tc) => tc.friendId)
     .filter(Boolean);
 
-  if (trustedFriendIds.length === 0) {
+  // Development Fallback: If no real contacts in DB but manual ones provided, use them.
+  if (trustedRelationships.length === 0 && Array.isArray(manualRecipientIds)) {
+    console.debug('[SOS] Using manual recipient list for development testing.');
+    trustedRelationships = manualRecipientIds.map(id => ({ 
+      _id: id, 
+      requesterId: userId, 
+      recipientId: id // Mock recipient ID
+    }));
+  }
+
+  if (trustedRelationships.length === 0) {
     return res.status(409).json({ error: 'No trusted contacts are available.' });
   }
 
@@ -103,17 +113,40 @@ export default requireAuth(async (req, res) => {
   const io = getSocketServer();
   const sentMessages = [];
 
-  for (const friendId of trustedFriendIds) {
-    const savedMessage = await ChatMessage.create({
-      friendId,
-      senderId: userId,
-      message,
-    });
+  for (const rel of trustedRelationships) {
+    const friendId = rel._id;
+    const recipientUserId = rel.requesterId.toString() === userId
+      ? rel.recipientId.toString()
+      : rel.requesterId.toString();
 
-    await savedMessage.populate('senderId', 'anonymousDisplayName');
-    const serialized = serializeMessage(savedMessage);
-    sentMessages.push(serialized);
-    io?.to(`friend:${friendId.toString()}`).emit('receive_message', serialized);
+    // If it's a persisted MongoDB relationship, save to DB and notify.
+    if (isPersistedFriendId(friendId)) {
+      const savedMessage = await ChatMessage.create({
+        friendId,
+        senderId: userId,
+        message,
+      });
+
+      await savedMessage.populate('senderId', 'anonymousDisplayName');
+      const serialized = serializeMessage(savedMessage);
+      sentMessages.push(serialized);
+
+      // Emit to specific chat room and recipient user room
+      io?.to(`friend:${friendId.toString()}`).emit('receive_message', serialized);
+      io?.to(`user:${recipientUserId}`).emit('receive_message', serialized);
+    } else {
+      // Demo/Mock Fallback: Just emit the message without saving to DB.
+      const mockSerialized = {
+        id: `mock-sos-${Date.now()}-${friendId}`,
+        senderId: userId,
+        senderDisplayName: req.session.displayName || 'SoftFern',
+        message,
+        timestamp: Date.now(),
+      };
+      sentMessages.push(mockSerialized);
+      io?.to(`friend:${friendId}`).emit('receive_message', mockSerialized);
+      io?.to(`user:${recipientUserId}`).emit('receive_message', mockSerialized);
+    }
   }
 
   return res.status(200).json({
@@ -121,3 +154,7 @@ export default requireAuth(async (req, res) => {
     sentCount: sentMessages.length,
   });
 });
+
+function isPersistedFriendId(id) {
+  return /^[a-f0-9]{24}$/i.test(String(id));
+}

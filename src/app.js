@@ -21,6 +21,7 @@ const { GeolocationFeature } = require('./features/geolocation_feature');
 const { FriendingFeature } = require('./features/friending_feature');
 const { TrustedContactFeature } = require('./features/trusted_contact_feature');
 const { SOSFeature } = require('./features/sos_feature');
+const { SOSSyncFeature } = require('./features/sos_sync_feature');
 
 /**
  * @param {import('socket.io').Server} io  - Socket.io server instance from server.js
@@ -68,6 +69,10 @@ function initFeatures(io) {
 
   if (config.features.enable_sos) {
     SOSFeature.init(io);
+  }
+
+  if (config.isFeatureEnabled('enable_sos_sync')) {
+    SOSSyncFeature.init();
   }
 
   // Template for adding the next feature:

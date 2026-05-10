@@ -22,31 +22,40 @@ export function useChat(roomId) {
     let socket;
 
     import('socket.io-client').then(({ io }) => {
+      console.log(`[useChat] Connecting to socket for room: ${roomId}`);
       socket = io({ autoConnect: true });
       socketRef.current = socket;
 
       socket.on('connect', () => {
+        console.log(`[useChat] Connected! Socket ID: ${socket.id}`);
         setConnected(true);
         setError('');
         socket.emit('join_room', { roomId });
       });
 
-      socket.on('disconnect', () => {
+      socket.on('connect_error', (err) => {
+        console.error('[useChat] Connection error:', err.message);
+        setError(`Connection failed: ${err.message}`);
+      });
+
+      socket.on('disconnect', (reason) => {
+        console.log(`[useChat] Disconnected: ${reason}`);
         setConnected(false);
         setCurrentUserId(null);
       });
 
       socket.on('chat_history', ({ messages: history, currentUserId: userId }) => {
+        console.log(`[useChat] Received history: ${history.length} messages. User ID: ${userId}`);
         setMessages(Array.isArray(history) ? history : []);
         setCurrentUserId(userId || null);
       });
 
-      socket.on('chat_error', ({ error: chatError }) => {
-        setError(chatError || 'Chat unavailable.');
-      });
-
       socket.on('receive_message', (msg) => {
-        setMessages((prev) => [...prev, msg]);
+        console.log('[useChat] Received new message:', msg.id);
+        setMessages((prev) => {
+          const filtered = prev.filter(m => m.id !== msg.id && m.id !== `opt-${msg.timestamp}`);
+          return [...filtered, msg];
+        });
       });
     });
 
@@ -63,10 +72,19 @@ export function useChat(roomId) {
   const sendMessage = useCallback(
     (text) => {
       if (socketRef.current?.connected && text.trim()) {
+        const optimisticMsg = {
+          id: `opt-${Date.now()}`,
+          senderId: currentUserId,
+          message: text.trim(),
+          timestamp: Date.now(),
+          isOptimistic: true
+        };
+        
+        setMessages((prev) => [...prev, optimisticMsg]);
         socketRef.current.emit('send_message', { roomId, message: text.trim() });
       }
     },
-    [roomId]
+    [roomId, currentUserId]
   );
 
   return { messages, connected, currentUserId, error, sendMessage };

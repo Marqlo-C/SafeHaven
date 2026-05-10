@@ -11,6 +11,7 @@
     "enable_friending": true,
     "enable_trusted_contacts": true,
     "enable_sos": true,
+    "enable_sos_sync": true,
     "enable_swipe_panic": true,
     "enable_journal_privacy": true,
     "enable_safety_alert": false,
