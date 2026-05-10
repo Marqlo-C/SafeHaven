@@ -10,9 +10,9 @@ export function usePrivacyMode() {
   useEffect(() => {
     // ── Shake Detection Implementation ───────────────────────────────────────
     const config = require('../config/config.json');
-    const SHAKE_THRESHOLD = 60; // Increased from 25 for much lower sensitivity
-    const SHAKE_WINDOW = 1000; // 1 second window to complete the shakes
-    const MIN_SHAKES = 3; // Minimum distinct shakes required
+    const SHAKE_THRESHOLD = 120; // Extremely high (doubled again) to prevent any accidental trigger
+    const SHAKE_WINDOW = 700; // Much tighter window (0.7s) - must be very rapid
+    const MIN_SHAKES = 4; // Requires 4 distinct "violent" changes in direction
 
     let lastX, lastY, lastZ;
     let lastTime = 0;
