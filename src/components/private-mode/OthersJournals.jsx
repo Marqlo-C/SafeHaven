@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Heart, Quote } from 'lucide-react';
-import styles from '../../styles/PrivateModeShell.module.css';
+import styles from '../../styles/private-mode/home.module.css';
 
 const FALLBACK_JOURNALS = [
   {

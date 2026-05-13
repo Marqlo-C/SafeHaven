@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Lock, MapPin, Phone, Map, Shield } from 'lucide-react';
 import { useGeolocation } from '../../hooks/useGeolocation';
-import styles from '../../styles/PrivateModeShell.module.css';
+import styles from '../../styles/private-mode/aid.module.css';
 
 const FILTERS = [
   { key: 'shelter', label: 'Shelters' },

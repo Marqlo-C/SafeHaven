@@ -1,0 +1,231 @@
+.aidPanel {
+  height: 100%;
+  overflow-y: auto;
+  padding: 16px 16px 112px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.chatNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border-radius: 16px;
+  background: rgba(234, 228, 216, 0.62);
+  color: var(--pm-muted-foreground);
+  font-size: 12px;
+  line-height: 1.45;
+  padding: 10px 12px;
+}
+
+.noticeIcon {
+  width: 15px;
+  height: 15px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.resourceMap {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, oklch(0.93 0.05 90), oklch(0.88 0.09 80), oklch(0.85 0.1 70));
+  height: 200px;
+  flex-shrink: 0;
+  border: 1px solid var(--pm-border);
+  border-radius: var(--pm-radius-lg);
+  margin-bottom: 20px;
+}
+
+.mapPattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.25;
+  background-image: radial-gradient(circle at 30% 40%, #a89c8a 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+.resourcePin {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  color: oklch(0.4 0.08 45);
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.16));
+}
+
+.resourcePinOne {
+  top: 48px;
+  left: 64px;
+}
+
+.resourcePinTwo {
+  top: 96px;
+  left: 160px;
+}
+
+.resourcePinThree {
+  top: 64px;
+  right: 48px;
+}
+
+.userPin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translate(-50%, -50%);
+}
+
+.pinPulse,
+.pinDot {
+  border-radius: 50%;
+}
+
+.pinPulse {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  background: oklch(0.78 0.14 75 / 0.45);
+  animation: ping 1.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.pinDot {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border: 2px solid white;
+  background: oklch(0.4 0.08 45);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+}
+
+.mapCaption {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: rgba(250, 248, 242, 0.72);
+  backdrop-filter: blur(8px);
+  color: var(--pm-muted-foreground);
+  font-size: 11px;
+}
+
+.filterScroller {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.filterButton {
+  font-family: inherit;
+  min-height: 32px;
+  padding: 4px 6px;
+  border: 1px solid var(--pm-border);
+  border-radius: 999px;
+  background: var(--pm-card);
+  color: var(--pm-foreground);
+  font-size: 13px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.filterButtonActive {
+  border-color: var(--pm-foreground);
+  background: var(--pm-foreground);
+  color: var(--pm-background);
+}
+
+.resourceList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.resourceCard {
+  background: var(--pm-card);
+  border: 1px solid var(--pm-border);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.resourceInfo {
+  width: 100%;
+}
+
+.resourceCard h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.resourceMeta {
+  font-size: 13px;
+  color: var(--pm-accent-strong);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.resourceAddress {
+  font-size: 13px;
+  color: var(--pm-muted-foreground);
+  line-height: 1.4;
+}
+
+.resourceActions {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.resourceActions button {
+  font-family: inherit;
+  min-height: 36px;
+  border: 1px solid var(--pm-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--pm-foreground);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tinyIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.filterButton:focus-visible,
+.resourceActions button:focus-visible {
+  outline: 2px solid var(--pm-accent-strong);
+  outline-offset: 2px;
+}
+
+@keyframes ping {
+  75%,
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .aidPanel {
+    padding-inline: 12px;
+  }
+}

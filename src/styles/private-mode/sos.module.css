@@ -1,0 +1,376 @@
+.sosPanel {
+  height: 100%;
+  overflow-y: auto;
+  padding: 16px 16px 112px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.heroCard {
+  padding: 20px;
+  border-radius: var(--pm-radius-xl);
+  color: oklch(0.95 0.04 80);
+  background: linear-gradient(135deg, oklch(0.38 0.08 35), oklch(0.28 0.06 40));
+  box-shadow: 0 10px 24px rgba(71, 52, 40, 0.12);
+}
+
+.heroKicker,
+.statusLabel,
+.locationMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.heroKicker {
+  opacity: 0.9;
+  font-size: 13px;
+}
+
+.heroTitle {
+  margin: 12px 0 2px;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.18;
+}
+
+.heroText {
+  font-size: 13px;
+  line-height: 1.45;
+  opacity: 0.9;
+}
+
+.smallIcon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.tinyIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.buttonIcon {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+.sosButton,
+.switch {
+  font-family: inherit;
+}
+
+.sosButton {
+  min-height: 64px;
+  width: 100%;
+  border: 0;
+  border-radius: var(--pm-radius-lg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--pm-accent);
+  color: oklch(0.25 0.05 40);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.sosButton:disabled {
+  cursor: default;
+}
+
+.sosButtonSent {
+  background: var(--pm-success);
+  color: white;
+}
+
+.statusGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.statusCard {
+  min-height: 112px;
+  padding: 16px;
+  border: 1px solid var(--pm-border);
+  border-radius: var(--pm-radius-lg);
+  background: var(--pm-card);
+}
+
+.statusCardActive {
+  border-color: var(--pm-accent);
+}
+
+.statusLabel {
+  color: var(--pm-muted-foreground);
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.statusValue {
+  margin-top: 10px;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.statusHint {
+  margin-top: 4px;
+  color: var(--pm-muted-foreground);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.locationHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.switch {
+  width: 38px;
+  height: 22px;
+  padding: 2px;
+  border: 0;
+  border-radius: 999px;
+  background: oklch(0.82 0.04 75);
+  cursor: pointer;
+}
+
+.switch span {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  transform: translateX(0);
+  transition: transform 0.16s ease;
+}
+
+.switchOn {
+  background: var(--pm-accent);
+}
+
+.switchOn span {
+  transform: translateX(16px);
+}
+
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border-radius: 16px;
+  background: rgba(234, 228, 216, 0.62);
+  color: var(--pm-muted-foreground);
+  font-size: 12px;
+  line-height: 1.45;
+  border: 1px solid var(--pm-border);
+  padding: 12px;
+}
+
+.noticeIcon {
+  width: 15px;
+  height: 15px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.locationPreview {
+  overflow: hidden;
+  border: 1px solid var(--pm-accent);
+  border-radius: var(--pm-radius-lg);
+  background: var(--pm-card);
+}
+
+.mapPreview {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, oklch(0.93 0.05 90), oklch(0.88 0.09 80), oklch(0.85 0.1 70));
+  height: 150px;
+}
+
+.mapPattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.25;
+  background-image: radial-gradient(circle at 30% 40%, #a89c8a 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+.mapRoadHorizontal,
+.mapRoadOne,
+.mapRoadTwo {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.52);
+}
+
+.mapRoadHorizontal {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+}
+
+.mapRoadOne,
+.mapRoadTwo {
+  top: 0;
+  bottom: 0;
+  width: 2px;
+}
+
+.mapRoadOne {
+  left: 33%;
+}
+
+.mapRoadTwo {
+  left: 66%;
+  opacity: 0.82;
+}
+
+.userPin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translate(-50%, -50%);
+}
+
+.pinPulse,
+.pinDot {
+  border-radius: 50%;
+}
+
+.pinPulse {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  background: oklch(0.78 0.14 75 / 0.45);
+  animation: ping 1.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.pinDot {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border: 2px solid white;
+  background: oklch(0.4 0.08 45);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+}
+
+.pinLabel {
+  margin-top: 5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--pm-foreground);
+  font-size: 10px;
+}
+
+.locationBody {
+  padding: 16px;
+}
+
+.locationMeta {
+  color: var(--pm-muted-foreground);
+  font-size: 12px;
+}
+
+.liveBadge {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: oklch(0.78 0.14 75 / 0.25);
+  color: var(--pm-accent-strong);
+}
+
+.liveBadge span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: oklch(0.55 0.13 145);
+}
+
+.locationAddress {
+  margin-top: 6px;
+  font-size: 14px;
+}
+
+.locationDetail {
+  margin-top: 2px;
+  color: var(--pm-muted-foreground);
+  font-size: 12px;
+}
+
+.contactRow {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--pm-border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatarStack {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.avatarStack span {
+  width: 28px;
+  height: 28px;
+  margin-left: -8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--pm-card);
+  border-radius: 50%;
+  background: oklch(0.88 0.06 80);
+  color: var(--pm-foreground);
+  font-size: 10px;
+}
+
+.avatarStack span:first-child {
+  margin-left: 0;
+}
+
+.contactCopy {
+  color: var(--pm-muted-foreground);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.sosButton:focus-visible,
+.switch:focus-visible {
+  outline: 2px solid var(--pm-accent-strong);
+  outline-offset: 2px;
+}
+
+@keyframes ping {
+  75%,
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .sosPanel {
+    padding-inline: 12px;
+  }
+
+  .statusGrid {
+    grid-template-columns: 1fr;
+  }
+}

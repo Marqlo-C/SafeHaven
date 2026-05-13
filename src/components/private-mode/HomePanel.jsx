@@ -8,7 +8,7 @@ import {
   Siren,
 } from 'lucide-react';
 import OthersJournals from './OthersJournals';
-import styles from '../../styles/PrivateModeShell.module.css';
+import styles from '../../styles/private-mode/home.module.css';
 
 export default function HomePanel({ onNavigate }) {
   const hour = new Date().getHours();

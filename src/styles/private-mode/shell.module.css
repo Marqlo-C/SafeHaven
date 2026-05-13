@@ -1,0 +1,163 @@
+.page {
+  --pm-background: oklch(0.97 0.018 80);
+  --pm-foreground: oklch(0.3 0.05 40);
+  --pm-card: oklch(0.985 0.012 80);
+  --pm-muted: oklch(0.93 0.02 80);
+  --pm-muted-foreground: oklch(0.5 0.04 50);
+  --pm-border: oklch(0.87 0.025 75);
+  --pm-accent: oklch(0.78 0.13 75);
+  --pm-accent-strong: oklch(0.32 0.06 40);
+  --pm-success: oklch(0.55 0.09 150);
+  --pm-radius-lg: 18px;
+  --pm-radius-xl: 22px;
+
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(238, 233, 222, 0.82);
+  color: var(--pm-foreground);
+  font-family: var(--font-sans);
+}
+
+.shell {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 900px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--pm-background);
+  border-inline: 1px solid var(--pm-border);
+}
+
+.header {
+  height: 56px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--pm-border);
+  flex-shrink: 0;
+}
+
+.headerSpacer,
+.exitButton {
+  width: 36px;
+  height: 36px;
+}
+
+.headerTitle {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.exitButton,
+.tabButton {
+  font-family: inherit;
+}
+
+.exitButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--pm-muted-foreground);
+  cursor: pointer;
+}
+
+.exitButton:hover,
+.exitButton:focus-visible {
+  background: var(--pm-muted);
+  color: var(--pm-foreground);
+}
+
+.exitIcon {
+  width: 18px;
+  height: 18px;
+}
+
+.content {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.panel {
+  height: 100%;
+}
+
+.panelActive {
+  display: block;
+}
+
+.panelHidden {
+  display: none;
+}
+
+.tabBar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 80px;
+  padding: 8px 8px 12px;
+  border-top: 1px solid var(--pm-border);
+  background: rgba(250, 248, 242, 0.95);
+  backdrop-filter: blur(14px);
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.tabButton {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--pm-muted-foreground);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tabButtonActive {
+  color: var(--pm-foreground);
+}
+
+.tabIcon {
+  width: 20px;
+  height: 20px;
+}
+
+.exitButton:focus-visible,
+.tabButton:focus-visible {
+  outline: 2px solid var(--pm-accent-strong);
+  outline-offset: 2px;
+}
+
+@media (max-width: 520px) {
+  .page {
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
+  .shell {
+    max-width: none;
+    max-height: none;
+    border-inline: 0;
+  }
+}

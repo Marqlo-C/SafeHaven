@@ -1,0 +1,381 @@
+.homePanel {
+  height: 100%;
+  overflow-y: auto;
+  padding: 16px 16px 112px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.homeIntro {
+  padding-top: 8px;
+}
+
+.homeGreeting {
+  color: var(--pm-muted-foreground);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.homeIntro h1 {
+  margin-top: 2px;
+  color: var(--pm-foreground);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.12;
+}
+
+.homeIntro p {
+  margin-top: 6px;
+  color: var(--pm-muted-foreground);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.homeSosCard,
+.actionCard,
+.othersDots button {
+  font-family: inherit;
+}
+
+.homeSosCard {
+  width: 100%;
+  padding: 20px;
+  border: 0;
+  border-radius: var(--pm-radius-xl);
+  background: linear-gradient(135deg, oklch(0.38 0.08 35), oklch(0.28 0.06 40));
+  color: oklch(0.95 0.04 80);
+  box-shadow: 0 10px 24px rgba(71, 52, 40, 0.12);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.homeSosIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--pm-accent);
+  color: oklch(0.25 0.05 40);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.homeSosIcon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.homeSosCopy {
+  min-width: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.homeSosCopy strong {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.homeSosCopy span {
+  font-size: 12px;
+  line-height: 1.35;
+  opacity: 0.85;
+}
+
+.homeChevron {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  opacity: 0.72;
+}
+
+.setupCard {
+  padding: 16px;
+  border: 1px solid var(--pm-border);
+  border-radius: var(--pm-radius-lg);
+  background: var(--pm-card);
+}
+
+.setupHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--pm-muted-foreground);
+  font-size: 13px;
+}
+
+.smallIcon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.miniGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.miniCard {
+  padding: 12px;
+  border-radius: 14px;
+  background: oklch(0.94 0.025 80);
+}
+
+.miniCard span,
+.actionHeading {
+  color: var(--pm-muted-foreground);
+  font-size: 11px;
+}
+
+.miniCard strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--pm-foreground);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.actionHeading {
+  margin: 0 0 8px 4px;
+  font-size: 13px;
+}
+
+.actionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.actionCard {
+  min-height: 144px;
+  padding: 16px;
+  border: 1px solid var(--pm-border);
+  border-radius: var(--pm-radius-lg);
+  background: var(--pm-card);
+  color: var(--pm-foreground);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.16s ease;
+}
+
+.actionCard:hover {
+  background: rgba(234, 228, 216, 0.48);
+}
+
+.actionIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: oklch(0.92 0.04 80);
+  color: oklch(0.4 0.08 45);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.actionCard strong {
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.actionCard > span:last-child {
+  color: var(--pm-muted-foreground);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.homeFooter {
+  margin-top: 2px;
+  color: var(--pm-muted-foreground);
+  text-align: center;
+  font-size: 12px;
+}
+
+.othersJournals {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.othersHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-inline: 4px;
+  color: var(--pm-muted-foreground);
+  font-size: 13px;
+}
+
+.othersHeader span:last-child {
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.othersCard {
+  position: relative;
+  min-height: 170px;
+  padding: 16px;
+  border: 1px solid var(--pm-border);
+  border-radius: 20px;
+  background: linear-gradient(135deg, oklch(0.95 0.03 80), oklch(0.93 0.05 70));
+  overflow: hidden;
+}
+
+.othersSlide {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  animation: othersSlideIn 0.45s ease-out;
+}
+
+.othersQuoteIcon {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: 20px;
+  height: 20px;
+  color: var(--pm-muted-foreground);
+  opacity: 0.5;
+}
+
+.othersPerson {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 28px;
+}
+
+.othersAvatarImage {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: block;
+  flex-shrink: 0;
+  background: oklch(0.88 0.06 80);
+}
+
+.othersPerson div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.othersPerson strong {
+  overflow: hidden;
+  color: var(--pm-foreground);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.othersPerson span {
+  overflow: hidden;
+  color: var(--pm-muted-foreground);
+  font-size: 11px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.othersCard p {
+  margin-top: 12px;
+  color: var(--pm-foreground);
+  font-size: 14px;
+  line-height: 1.58;
+}
+
+.othersStrength {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--pm-muted-foreground);
+  font-size: 12px;
+}
+
+.othersStrength svg {
+  color: oklch(0.56 0.13 35);
+}
+
+.othersDots {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.othersDots button {
+  width: 5px;
+  height: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: oklch(0.78 0.04 75);
+  cursor: pointer;
+  transition: width 0.18s ease, background-color 0.18s ease, opacity 0.18s ease;
+}
+
+.othersDots button.othersDotActive {
+  width: 14px;
+  background: oklch(0.4 0.08 45);
+  opacity: 1;
+}
+
+.tinyIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.homeSosCard:focus-visible,
+.actionCard:focus-visible,
+.othersDots button:focus-visible {
+  outline: 2px solid var(--pm-accent-strong);
+  outline-offset: 2px;
+}
+
+@keyframes othersSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 360px) {
+  .homePanel {
+    padding-inline: 12px;
+  }
+}
