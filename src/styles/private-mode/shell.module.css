@@ -68,14 +68,14 @@
   border: 0;
   border-radius: 50%;
   background: transparent;
-  color: var(--pm-muted-foreground);
+  color: oklch(0.48 0.22 25);
   cursor: pointer;
 }
 
 .exitButton:hover,
 .exitButton:focus-visible {
-  background: var(--pm-muted);
-  color: var(--pm-foreground);
+  background: oklch(0.93 0.04 25);
+  color: oklch(0.45 0.22 25);
 }
 
 .exitIcon {
