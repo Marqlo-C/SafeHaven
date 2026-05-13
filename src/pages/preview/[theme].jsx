@@ -1,6 +1,8 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import styles from '../../styles/AppPreview.module.css';
+import landingStyles from '../../styles/Landing.module.css';
 
 const APPS = {
   calculator: {
@@ -20,6 +22,9 @@ const APPS = {
       'Dark mode support',
     ],
     icon: '/resources/images/logos/calculator_icon.png',
+    appleTouchIcon: '/resources/images/logos/calculator_icon_192x192.png',
+    manifestUrl: '/manifests/calculator.json',
+    themeColor: '#1a1a2e',
   },
   news: {
     name: 'Daily News Reader',
@@ -38,6 +43,9 @@ const APPS = {
       'Customizable topics',
     ],
     icon: '/resources/images/logos/news_icon.png',
+    appleTouchIcon: '/resources/images/logos/news_icon_192x192.png',
+    manifestUrl: '/manifests/news.json',
+    themeColor: '#0d1b2a',
   },
   weather: {
     name: 'Weather Now',
@@ -56,11 +64,94 @@ const APPS = {
       'Widgets for home screen',
     ],
     icon: '/resources/images/logos/weather_icon.png',
+    appleTouchIcon: '/resources/images/logos/weather_icon_192x192.png',
+    manifestUrl: '/manifests/weather.json',
+    themeColor: '#0c2340',
   },
 };
 
+function InstallModal({ isOpen, onClose, onInstall, canInstall, platform, appName }) {
+  if (!isOpen) return null;
+  const isIOS = platform === 'ios';
+
+  return (
+    <div className={landingStyles.modalOverlay} onClick={onClose}>
+      <div className={landingStyles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <button className={landingStyles.closeBtn} onClick={onClose}>✕</button>
+        <div className={landingStyles.modalHeader}>
+          <h3 className={landingStyles.modalTitle}>Add to Home Screen</h3>
+        </div>
+        <div className={landingStyles.modalBody}>
+          {isIOS ? (
+            <>
+              <p>To install on your iPhone:</p>
+              <ol className={landingStyles.steps}>
+                <li>Tap the <strong>Share</strong> button in Safari.</li>
+                <li>Select <strong>Add to Home Screen</strong>.</li>
+                <li>Tap <strong>Add</strong>.</li>
+              </ol>
+              <p className={landingStyles.modalNote}>It will appear as a normal {appName.split(' ')[0]} icon.</p>
+            </>
+          ) : canInstall ? (
+            <>
+              <p>Install to your home screen so it appears as a standard {appName.split(' ')[0]} app icon.</p>
+            </>
+          ) : (
+            <>
+              <p>To install this app:</p>
+              <ol className={landingStyles.steps}>
+                <li>Tap the <strong>menu icon</strong> in your browser.</li>
+                <li>Select <strong>Install App</strong> or <strong>Add to Home Screen</strong>.</li>
+                <li>Confirm to add it.</li>
+              </ol>
+            </>
+          )}
+        </div>
+        {canInstall && !isIOS ? (
+          <button className={landingStyles.modalAction} onClick={onInstall}>Install Now</button>
+        ) : (
+          <button className={landingStyles.modalAction} onClick={onClose}>Got it</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AppPreview({ themeKey }) {
   const app = APPS[themeKey];
+
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [installed, setInstalled] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [platform, setPlatform] = useState('other');
+
+  useEffect(() => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) setPlatform('ios');
+
+    const onPrompt = (e) => { e.preventDefault(); setInstallPrompt(e); };
+    const onInstalled = () => { setInstalled(true); setInstallPrompt(null); setShowModal(false); };
+
+    window.addEventListener('beforeinstallprompt', onPrompt);
+    window.addEventListener('appinstalled', onInstalled);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onPrompt);
+      window.removeEventListener('appinstalled', onInstalled);
+    };
+  }, []);
+
+  const triggerInstall = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') { setInstallPrompt(null); setShowModal(false); }
+  };
+
+  const handleInstallClick = () => {
+    if (installPrompt) { triggerInstall(); } else { setShowModal(true); }
+  };
+
+  const showInstallOption = !installed && (installPrompt || platform === 'ios');
 
   return (
     <>
@@ -69,8 +160,22 @@ export default function AppPreview({ themeKey }) {
         <meta name="robots" content="noindex, nofollow" />
         <meta name="referrer" content="no-referrer" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        <meta name="theme-color" content={app.themeColor} />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-title" content={app.name} />
+        <link rel="manifest" href={app.manifestUrl} />
         <link rel="icon" href={app.icon} />
+        <link rel="apple-touch-icon" href={app.appleTouchIcon} />
       </Head>
+
+      <InstallModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onInstall={triggerInstall}
+        canInstall={!!installPrompt}
+        platform={platform}
+        appName={app.name}
+      />
 
       <div className={styles.page}>
         <header className={styles.header}>
@@ -125,8 +230,13 @@ export default function AppPreview({ themeKey }) {
             </ul>
           </section>
 
-          {/* CTA */}
+          {/* CTAs */}
           <div className={styles.ctaSection}>
+            {showInstallOption && (
+              <button type="button" className={styles.installBtn} onClick={handleInstallClick}>
+                Add to Home Screen
+              </button>
+            )}
             <Link href={`/login?returnTo=/app/${themeKey}`} className={styles.openBtn}>
               Open Private Safety Tools
             </Link>
