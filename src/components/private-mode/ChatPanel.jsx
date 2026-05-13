@@ -134,7 +134,7 @@ export default function ChatPanel({ displayName }) {
 
     loadFriends();
     return () => { cancelled = true; };
-  }, []);
+  }, [subTab]); // re-fetch whenever user opens Friends tab so new requests appear
 
   // Load messages from DB when opening a real friend chat
   useEffect(() => {
