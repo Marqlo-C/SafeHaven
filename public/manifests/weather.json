@@ -5,7 +5,7 @@
   "description": "Real-time weather forecasts and alerts for your area.",
   "start_url": "/app/weather",
   "scope": "/app/weather",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#0c2340",
   "theme_color": "#0c2340",
   "orientation": "portrait-primary",

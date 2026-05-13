@@ -5,7 +5,7 @@
   "description": "Stay informed with curated headlines from trusted sources.",
   "start_url": "/app/news",
   "scope": "/app/news",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#0d1b2a",
   "theme_color": "#0d1b2a",
   "orientation": "portrait-primary",

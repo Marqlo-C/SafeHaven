@@ -5,7 +5,7 @@
   "description": "A fast, reliable calculator for everyday math.",
   "start_url": "/app/calculator",
   "scope": "/app/calculator",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#1a1a2e",
   "theme_color": "#1a1a2e",
   "orientation": "portrait-primary",
