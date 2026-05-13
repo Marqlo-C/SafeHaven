@@ -27,32 +27,9 @@ const BOT_CHAT = {
   isBot: true,
 };
 
-const SEED_FRIENDS = [
-  { id: 'demo-f1', displayName: 'QuietRiver', emoji: 'QR', status: 'accepted', mutuals: 3, isTrusted: true },
-  { id: 'demo-f2', displayName: 'MorningLark', emoji: 'ML', status: 'accepted', mutuals: 1 },
-  { id: 'demo-f3', displayName: 'PaperKite', emoji: 'PK', status: 'accepted', isTrusted: true },
-  { id: 'demo-f4', displayName: 'BlueHarbor', emoji: 'BH', status: 'accepted' },
-  { id: 'demo-f5', displayName: 'SilverPine', emoji: 'SP', status: 'accepted' },
-  { id: 'demo-f6', displayName: 'EmberMoth', emoji: 'EM', status: 'accepted' },
-  { id: 'demo-f7', displayName: 'CedarBrook', emoji: 'CB', status: 'accepted' },
+const BOT_THREAD = [
+  { id: 'b1', from: 'them', text: 'Hi, I am SafeBot. I can help with grounding exercises, safety planning, or just listen. What is on your mind?', time: 'now' },
 ];
-
-const SEED_THREADS = {
-  bot: [
-    { id: 'b1', from: 'them', text: 'Hi, I am SafeBot. I can help with grounding exercises, safety planning, or just listen. What is on your mind?', time: 'now' },
-  ],
-  'demo-f1': [
-    { id: '1', from: 'them', text: 'Hey, glad you reached out. We are both anonymous here.', time: '9:40 PM' },
-    { id: '2', from: 'me', text: 'Thanks. I am not sure where to start.', time: '9:41 PM' },
-    { id: '3', from: 'them', text: 'I hear you. Take your time.', time: '9:41 PM' },
-  ],
-  'demo-f2': [{ id: '1', from: 'them', text: 'You are not alone in this.', time: '8:12 PM' }],
-  'demo-f3': [{ id: '1', from: 'them', text: 'I went through something similar last year.', time: 'Yesterday' }],
-  'demo-f4': [{ id: '1', from: 'them', text: 'The trusted contact toggle helped me make a plan.', time: 'Yesterday' }],
-  'demo-f5': [{ id: '1', from: 'them', text: 'I accepted your request. Still figuring things out but I\'m glad I did.', time: '6 days ago' }],
-  'demo-f6': [{ id: '1', from: 'them', text: 'Court is next week. I keep going over what I\'ll say.', time: '4 days ago' }],
-  'demo-f7': [{ id: '1', from: 'them', text: 'It\'s nice to know someone else gets it.', time: '7 days ago' }],
-};
 
 const MONGO_ID_RE = /^[a-f0-9]{24}$/i;
 const isRealId = (id) => MONGO_ID_RE.test(String(id));
@@ -86,13 +63,12 @@ export default function ChatPanel({ displayName }) {
   const myHandle = displayName || 'You';
 
   const [subTab, setSubTab] = useState('messages');
-  const [friends, setFriends] = useState(SEED_FRIENDS);
+  const [friends, setFriends] = useState([]);
   const [openId, setOpenId] = useState(null);
-  const [threads, setThreads] = useState(SEED_THREADS);
+  const [threads, setThreads] = useState({ bot: BOT_THREAD });
   const [draft, setDraft] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [loadingThread, setLoadingThread] = useState(false);
-  const replyTimer = useRef(null);
   const messagesEndRef = useRef(null);
   const loadedRef = useRef(new Set()); // tracks which real friend IDs have been fetched
 
@@ -104,8 +80,6 @@ export default function ChatPanel({ displayName }) {
       clearTranscript();
     }
   }, [transcript, clearTranscript]);
-
-  useEffect(() => () => window.clearTimeout(replyTimer.current), []);
 
   // Load real friend list
   useEffect(() => {
@@ -131,7 +105,7 @@ export default function ChatPanel({ displayName }) {
 
         if (!cancelled && nextFriends.length > 0) setFriends(nextFriends);
       } catch {
-        // keep seed friends
+        // keep empty list on error
       }
     }
 
@@ -219,15 +193,6 @@ export default function ChatPanel({ displayName }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text }),
       }).catch((err) => console.error('[Chat] Send error:', err));
-    } else {
-      // Seed/demo friend — simulate reply
-      window.clearTimeout(replyTimer.current);
-      replyTimer.current = window.setTimeout(() => {
-        setThreads((prev) => ({
-          ...prev,
-          [openId]: [...(prev[openId] || []), { id: String(Date.now() + 1), from: 'them', text: 'Thanks for sharing. I am listening.', time: 'now' }],
-        }));
-      }, 1000);
     }
   };
 
