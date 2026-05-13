@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Heart, Quote } from 'lucide-react';
+import { Check, Heart, Quote, UserPlus } from 'lucide-react';
 import styles from '../../styles/private-mode/home.module.css';
 
 const FALLBACK_JOURNALS = [
@@ -83,6 +83,8 @@ export default function OthersJournals() {
   const [journals, setJournals] = useState(() => applyLikedCache(FALLBACK_JOURNALS));
   const [activeIndex, setActiveIndex] = useState(4);
   const [paused, setPaused] = useState(false);
+  // handle → 'requested' | 'connected'
+  const [connectState, setConnectState] = useState({});
 
   // Always-current mirror of journals state — safe to read inside async callbacks
   const journalsRef = useRef(journals);
@@ -180,6 +182,33 @@ export default function OthersJournals() {
     }
   };
 
+  const handleConnect = async () => {
+    const entry = journalsRef.current[activeIndexRef.current];
+    if (!entry) return;
+    const { handle } = entry;
+    if (connectState[handle]) return;
+
+    setConnectState((prev) => ({ ...prev, [handle]: 'requested' }));
+
+    if (!REAL_ID_RE.test(entry.id)) return;
+
+    try {
+      const res = await fetch('/api/friends', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ anonymousDisplayName: handle }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setConnectState((prev) => { const s = { ...prev }; delete s[handle]; return s; });
+      } else if (data.friend?.status === 'accepted') {
+        setConnectState((prev) => ({ ...prev, [handle]: 'connected' }));
+      }
+    } catch {
+      setConnectState((prev) => { const s = { ...prev }; delete s[handle]; return s; });
+    }
+  };
+
   return (
     <section
       className={styles.othersJournals}
@@ -218,7 +247,7 @@ export default function OthersJournals() {
 
           <p>&quot;{active.text}&quot;</p>
 
-          <div ref={heartRef}>
+          <div ref={heartRef} className={styles.othersActions}>
             <button
               type="button"
               className={`${styles.othersStrength} ${active.likedByMe ? styles.othersStrengthLiked : ''}`}
@@ -233,6 +262,22 @@ export default function OthersJournals() {
               />
               <span>{active.hearts} sent strength</span>
             </button>
+
+            {connectState[active.handle] !== 'connected' && (
+              <button
+                type="button"
+                className={`${styles.othersConnect} ${connectState[active.handle] === 'requested' ? styles.othersConnectSent : ''}`}
+                onClick={handleConnect}
+                disabled={!!connectState[active.handle]}
+                aria-label={connectState[active.handle] === 'requested' ? 'Friend request sent' : `Connect with ${active.handle}`}
+              >
+                {connectState[active.handle] === 'requested'
+                  ? <Check className={styles.tinyIcon} aria-hidden="true" />
+                  : <UserPlus className={styles.tinyIcon} aria-hidden="true" />
+                }
+                <span>{connectState[active.handle] === 'requested' ? 'Requested' : 'Connect'}</span>
+              </button>
+            )}
           </div>
         </div>
 

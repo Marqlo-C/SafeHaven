@@ -310,8 +310,15 @@
   line-height: 1.58;
 }
 
-.othersStrength {
+.othersActions {
   margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.othersStrength {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -340,6 +347,38 @@
 
 .othersStrengthLiked svg {
   color: #9b3a2a;
+}
+
+.othersConnect {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--pm-muted-foreground);
+  font-size: 12px;
+  padding: 4px 8px 4px 6px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.othersConnect:hover:not(:disabled) {
+  background: oklch(0.92 0.04 80);
+}
+
+.othersConnect svg {
+  color: var(--pm-muted-foreground);
+}
+
+.othersConnect:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+
+.othersConnectSent svg {
+  color: var(--pm-muted-foreground);
 }
 
 .othersDots {
