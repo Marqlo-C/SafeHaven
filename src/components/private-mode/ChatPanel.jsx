@@ -33,7 +33,7 @@ const SEED_FRIENDS = [
   { id: 'demo-f3', displayName: 'PaperKite', emoji: 'PK', status: 'accepted', isTrusted: true },
   { id: 'demo-f4', displayName: 'BlueHarbor', emoji: 'BH', status: 'accepted' },
   { id: 'demo-f5', displayName: 'SilverPine', emoji: 'SP', status: 'incoming' },
-  { id: 'demo-f6', displayName: 'EmberMoth', emoji: 'EM', status: 'outgoing' },
+  { id: 'demo-f6', displayName: 'EmberMoth', emoji: 'EM', status: 'incoming' },
 ];
 
 const SEED_THREADS = {

@@ -310,24 +310,24 @@ async function seed() {
     }
   }
 
-  // demo_main → EmberMoth  (outgoing request from demo_main)
+  // EmberMoth → demo_main  (second incoming request to demo_main)
   const emberMothId = userMap['demo_embermoth'];
   if (emberMothId) {
     const pairKey = makePairKey(mainId, emberMothId);
     const existing = await Friend.findOne({ pairKey });
 
-    if (existing && existing.status === 'pending') {
-      console.log(`  Pending request demo_main → demo_embermoth already exists — skipping.`);
+    if (existing && existing.status === 'pending' && String(existing.requesterId) === String(emberMothId)) {
+      console.log(`  Pending request demo_embermoth → demo_main already exists — skipping.`);
     } else {
       if (existing) await Friend.findByIdAndDelete(existing._id);
       await Friend.create({
-        requesterId: mainId,
-        recipientId: emberMothId,
+        requesterId: emberMothId,
+        recipientId: mainId,
         pairKey,
         status: 'pending',
         noExpiry: true,
       });
-      console.log(`  Created pending request: demo_main → demo_embermoth`);
+      console.log(`  Created pending request: demo_embermoth → demo_main`);
     }
   }
 
