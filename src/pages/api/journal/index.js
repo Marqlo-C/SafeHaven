@@ -1,7 +1,7 @@
 const { requireAuth } = require('../../../lib/requireAuth');
 const { connectDB } = require('../../../lib/db');
 const { applySecurityHeaders } = require('../../../middleware/securityHeaders');
-const config = require('../../../config/config');
+const appConfig = require('../../../config/config');
 const JournalEntry = require('../../../models/JournalEntry');
 const { JournalPrivacyFeature } = require('../../../features/journal_privacy_feature');
 
@@ -16,7 +16,7 @@ export const config = {
 export default requireAuth(async (req, res) => {
   applySecurityHeaders(res);
 
-  if (!config.features.enable_journal) {
+  if (!appConfig.features.enable_journal) {
     return res.status(404).json({ error: 'Not found.' });
   }
 
@@ -30,7 +30,7 @@ export default requireAuth(async (req, res) => {
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit || '20', 10)));
     const skip  = (page - 1) * limit;
 
-    const privacyFilter = config.features.enable_journal_privacy 
+    const privacyFilter = appConfig.features.enable_journal_privacy
       ? JournalPrivacyFeature.getPrivacyFilter(session) 
       : {};
 
@@ -68,7 +68,7 @@ export default requireAuth(async (req, res) => {
       title: (title || '').slice(0, 200),
       content: content.trim(),
       incidentDate: incidentDate ? new Date(incidentDate) : null,
-      isPrivate: config.features.enable_journal_privacy ? Boolean(isPrivate) : false,
+      isPrivate: appConfig.features.enable_journal_privacy ? Boolean(isPrivate) : false,
       mediaData,
       mediaType,
       mediaName,
