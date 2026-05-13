@@ -93,6 +93,20 @@ export default function OthersJournals() {
   activeIndexRef.current = activeIndex;
 
   useEffect(() => {
+    fetch('/api/friends')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (!data) return;
+        const connected = {};
+        (data.friends || [])
+          .filter((f) => f.status === 'accepted')
+          .forEach((f) => { if (f.friend?.displayName) connected[f.friend.displayName] = 'connected'; });
+        if (Object.keys(connected).length > 0) setConnectState(connected);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     let mounted = true;
 
     async function loadSharedJournals() {
