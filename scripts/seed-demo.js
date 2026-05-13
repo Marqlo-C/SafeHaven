@@ -157,8 +157,7 @@ const DEMO_JOURNALS = [
   },
 ];
 
-// ── Demo chats (main user ↔ accepted friends only) ────────────────────────────
-// SilverPine and EmberMoth are pending requests — no chat history for them.
+// ── Demo chats (main user ↔ accepted friends) ─────────────────────────────────
 // Each entry: sender is 'main' or the demo username; minutesAgo counts back from now.
 
 const DEMO_CHATS = {
@@ -190,6 +189,27 @@ const DEMO_CHATS = {
     { sender: 'demo_blueharbor', text: "He keeps me going honestly.", minutesAgo: 4 * 24 * 60 + 45 },
     { sender: 'main', text: "That sounds like a very good dog.", minutesAgo: 4 * 24 * 60 + 30 },
     { sender: 'demo_blueharbor', text: "The best. His name is Chester.", minutesAgo: 4 * 24 * 60 },
+  ],
+
+  demo_silverpine: [
+    { sender: 'demo_silverpine', text: "I accepted your request. I wasn't sure at first but I'm glad I did.", minutesAgo: 6 * 24 * 60 + 20 },
+    { sender: 'main', text: "I'm really glad too. How are you doing?", minutesAgo: 6 * 24 * 60 + 10 },
+    { sender: 'demo_silverpine', text: "Still writing every day. Some days that's all I can do.", minutesAgo: 6 * 24 * 60 },
+    { sender: 'main', text: "That's enough. Keep going.", minutesAgo: 6 * 24 * 60 - 5 },
+  ],
+
+  demo_embermoth: [
+    { sender: 'demo_embermoth', text: "Court is next week. I keep going over what I'll say.", minutesAgo: 4 * 24 * 60 + 120 },
+    { sender: 'main', text: "You've been preparing. You know what you need to say.", minutesAgo: 4 * 24 * 60 + 100 },
+    { sender: 'demo_embermoth', text: "My advocate says the same thing. I just needed to hear it again.", minutesAgo: 4 * 24 * 60 + 80 },
+    { sender: 'main', text: "Anytime. I mean it.", minutesAgo: 4 * 24 * 60 + 60 },
+  ],
+
+  demo_cedarbrook: [
+    { sender: 'main', text: "Hey, saw your profile. Hope it's okay I reached out.", minutesAgo: 7 * 24 * 60 + 30 },
+    { sender: 'demo_cedarbrook', text: "Of course. It's nice to know someone else gets it.", minutesAgo: 7 * 24 * 60 + 15 },
+    { sender: 'main', text: "Completely. How long have you been on here?", minutesAgo: 7 * 24 * 60 },
+    { sender: 'demo_cedarbrook', text: "A few weeks. Still figuring things out but it helps.", minutesAgo: 7 * 24 * 60 - 10 },
   ],
 };
 
@@ -246,10 +266,8 @@ async function seed() {
     console.log(`  Created journal for ${j.username}`);
   }
 
-  // ── 3. Create friend relationships ─────────────────────────────────────────
-  // Accepted:  demo_main ↔ QuietRiver, MorningLark, PaperKite, BlueHarbor
-  // Incoming:  SilverPine → demo_main  (pending, noExpiry)
-  // Outgoing:  demo_main → EmberMoth   (pending, noExpiry)
+  // ── 3. Create accepted friend relationships ────────────────────────────────
+  // All 7 demo users are accepted friends with demo_main.
 
   const mainId = userMap['demo_main'];
   if (!mainId) {
@@ -258,7 +276,10 @@ async function seed() {
     return;
   }
 
-  const ACCEPTED_FRIENDS = ['demo_quietriver', 'demo_morninglark', 'demo_paperkite', 'demo_blueharbor'];
+  const ACCEPTED_FRIENDS = [
+    'demo_quietriver', 'demo_morninglark', 'demo_paperkite', 'demo_blueharbor',
+    'demo_silverpine', 'demo_embermoth', 'demo_cedarbrook',
+  ];
   const friendMap = {}; // demo_username → Friend._id
 
   for (const username of ACCEPTED_FRIENDS) {
@@ -275,7 +296,7 @@ async function seed() {
     }
 
     if (existing) {
-      // Wrong status (e.g. from a previous seed run) — fix it.
+      // Fix wrong status from a previous seed run.
       await Friend.findByIdAndDelete(existing._id);
     }
 
@@ -288,69 +309,6 @@ async function seed() {
     });
     friendMap[username] = friendship._id;
     console.log(`  Created accepted friendship: demo_main ↔ ${username}`);
-  }
-
-  // SilverPine → demo_main  (incoming request to demo_main)
-  const silverPineId = userMap['demo_silverpine'];
-  if (silverPineId) {
-    const pairKey = makePairKey(mainId, silverPineId);
-    const existing = await Friend.findOne({ pairKey });
-
-    if (existing && existing.status === 'pending') {
-      console.log(`  Pending request demo_silverpine → demo_main already exists — skipping.`);
-    } else {
-      if (existing) await Friend.findByIdAndDelete(existing._id);
-      await Friend.create({
-        requesterId: silverPineId,
-        recipientId: mainId,
-        pairKey,
-        status: 'pending',
-        noExpiry: true,
-      });
-      console.log(`  Created pending request: demo_silverpine → demo_main`);
-    }
-  }
-
-  // EmberMoth → demo_main  (second incoming request to demo_main)
-  const emberMothId = userMap['demo_embermoth'];
-  if (emberMothId) {
-    const pairKey = makePairKey(mainId, emberMothId);
-    const existing = await Friend.findOne({ pairKey });
-
-    if (existing && existing.status === 'pending' && String(existing.requesterId) === String(emberMothId)) {
-      console.log(`  Pending request demo_embermoth → demo_main already exists — skipping.`);
-    } else {
-      if (existing) await Friend.findByIdAndDelete(existing._id);
-      await Friend.create({
-        requesterId: emberMothId,
-        recipientId: mainId,
-        pairKey,
-        status: 'pending',
-        noExpiry: true,
-      });
-      console.log(`  Created pending request: demo_embermoth → demo_main`);
-    }
-  }
-
-  // demo_main → CedarBrook  (outgoing request from demo_main)
-  const cedarBrookId = userMap['demo_cedarbrook'];
-  if (cedarBrookId) {
-    const pairKey = makePairKey(mainId, cedarBrookId);
-    const existing = await Friend.findOne({ pairKey });
-
-    if (existing && existing.status === 'pending' && String(existing.requesterId) === String(mainId)) {
-      console.log(`  Pending request demo_main → demo_cedarbrook already exists — skipping.`);
-    } else {
-      if (existing) await Friend.findByIdAndDelete(existing._id);
-      await Friend.create({
-        requesterId: mainId,
-        recipientId: cedarBrookId,
-        pairKey,
-        status: 'pending',
-        noExpiry: true,
-      });
-      console.log(`  Created pending request: demo_main → demo_cedarbrook`);
-    }
   }
 
   // ── 4. Seed chat messages ───────────────────────────────────────────────────

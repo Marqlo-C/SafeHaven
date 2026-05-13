@@ -32,9 +32,9 @@ const SEED_FRIENDS = [
   { id: 'demo-f2', displayName: 'MorningLark', emoji: 'ML', status: 'accepted', mutuals: 1 },
   { id: 'demo-f3', displayName: 'PaperKite', emoji: 'PK', status: 'accepted', isTrusted: true },
   { id: 'demo-f4', displayName: 'BlueHarbor', emoji: 'BH', status: 'accepted' },
-  { id: 'demo-f5', displayName: 'SilverPine', emoji: 'SP', status: 'incoming' },
-  { id: 'demo-f6', displayName: 'EmberMoth', emoji: 'EM', status: 'incoming' },
-  { id: 'demo-f7', displayName: 'CedarBrook', emoji: 'CB', status: 'outgoing' },
+  { id: 'demo-f5', displayName: 'SilverPine', emoji: 'SP', status: 'accepted' },
+  { id: 'demo-f6', displayName: 'EmberMoth', emoji: 'EM', status: 'accepted' },
+  { id: 'demo-f7', displayName: 'CedarBrook', emoji: 'CB', status: 'accepted' },
 ];
 
 const SEED_THREADS = {
@@ -49,6 +49,9 @@ const SEED_THREADS = {
   'demo-f2': [{ id: '1', from: 'them', text: 'You are not alone in this.', time: '8:12 PM' }],
   'demo-f3': [{ id: '1', from: 'them', text: 'I went through something similar last year.', time: 'Yesterday' }],
   'demo-f4': [{ id: '1', from: 'them', text: 'The trusted contact toggle helped me make a plan.', time: 'Yesterday' }],
+  'demo-f5': [{ id: '1', from: 'them', text: 'I accepted your request. Still figuring things out but I\'m glad I did.', time: '6 days ago' }],
+  'demo-f6': [{ id: '1', from: 'them', text: 'Court is next week. I keep going over what I\'ll say.', time: '4 days ago' }],
+  'demo-f7': [{ id: '1', from: 'them', text: 'It\'s nice to know someone else gets it.', time: '7 days ago' }],
 };
 
 const MONGO_ID_RE = /^[a-f0-9]{24}$/i;
