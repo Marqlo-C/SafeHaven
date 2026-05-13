@@ -10,6 +10,17 @@ export default function SosPanel({ enabled }) {
   const [sentCount, setSentCount] = useState(0);
   const [lastLocation, setLastLocation] = useState(null);
   const [locationError, setLocationError] = useState('');
+  const [trustedCount, setTrustedCount] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/trusted-contacts')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (!data) return;
+        setTrustedCount((data.trustedContacts || []).length);
+      })
+      .catch(() => {});
+  }, []);
 
   const requestCurrentLocation = () => new Promise((resolve, reject) => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
@@ -150,7 +161,7 @@ export default function SosPanel({ enabled }) {
         <StatusCard
           icon={<Users className={styles.smallIcon} aria-hidden="true" />}
           label="Trusted Contacts"
-          value="2 contacts"
+          value={trustedCount === null ? '—' : `${trustedCount} contact${trustedCount === 1 ? '' : 's'}`}
         />
         <LocationCard on={locationOn} />
         <StatusCard

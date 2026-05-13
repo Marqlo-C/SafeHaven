@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import {
   BookLock,
   ChevronRight,
@@ -13,6 +14,18 @@ import styles from '../../styles/private-mode/home.module.css';
 export default function HomePanel({ onNavigate }) {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const [friendCount, setFriendCount] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/friends')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (!data) return;
+        const accepted = (data.friends || []).filter((f) => f.status === 'accepted').length;
+        setFriendCount(accepted);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div className={styles.homePanel}>
@@ -39,7 +52,7 @@ export default function HomePanel({ onNavigate }) {
           <span>Your safety setup</span>
         </div>
         <div className={styles.miniGrid}>
-          <Mini label="Contacts" value="2" />
+          <Mini label="Contacts" value={friendCount === null ? '—' : String(friendCount)} />
           <Mini label="Location" value="Off" />
           <Mini label="Backup" value="0" />
         </div>
