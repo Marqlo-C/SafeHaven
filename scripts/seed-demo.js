@@ -77,6 +77,7 @@ const DEMO_USERS = [
   { username: 'demo_silverpine',   displayName: 'SilverPine',   password: 'demo1234' },
   { username: 'demo_blueharbor',   displayName: 'BlueHarbor',   password: 'demo1234' },
   { username: 'demo_embermoth',    displayName: 'EmberMoth',    password: 'demo1234' },
+  { username: 'demo_cedarbrook',   displayName: 'CedarBrook',   password: 'demo1234' },
 ];
 
 // ── Demo journals ──────────────────────────────────────────────────────────────
@@ -328,6 +329,27 @@ async function seed() {
         noExpiry: true,
       });
       console.log(`  Created pending request: demo_embermoth → demo_main`);
+    }
+  }
+
+  // demo_main → CedarBrook  (outgoing request from demo_main)
+  const cedarBrookId = userMap['demo_cedarbrook'];
+  if (cedarBrookId) {
+    const pairKey = makePairKey(mainId, cedarBrookId);
+    const existing = await Friend.findOne({ pairKey });
+
+    if (existing && existing.status === 'pending' && String(existing.requesterId) === String(mainId)) {
+      console.log(`  Pending request demo_main → demo_cedarbrook already exists — skipping.`);
+    } else {
+      if (existing) await Friend.findByIdAndDelete(existing._id);
+      await Friend.create({
+        requesterId: mainId,
+        recipientId: cedarBrookId,
+        pairKey,
+        status: 'pending',
+        noExpiry: true,
+      });
+      console.log(`  Created pending request: demo_main → demo_cedarbrook`);
     }
   }
 

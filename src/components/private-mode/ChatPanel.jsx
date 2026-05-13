@@ -34,6 +34,7 @@ const SEED_FRIENDS = [
   { id: 'demo-f4', displayName: 'BlueHarbor', emoji: 'BH', status: 'accepted' },
   { id: 'demo-f5', displayName: 'SilverPine', emoji: 'SP', status: 'incoming' },
   { id: 'demo-f6', displayName: 'EmberMoth', emoji: 'EM', status: 'incoming' },
+  { id: 'demo-f7', displayName: 'CedarBrook', emoji: 'CB', status: 'outgoing' },
 ];
 
 const SEED_THREADS = {
