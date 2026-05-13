@@ -60,9 +60,27 @@ const FALLBACK_JOURNALS = [
 ];
 
 const REAL_ID_RE = /^[0-9a-fA-F]{24}$/;
+const LIKED_KEY = 'sh_liked_journals';
+
+function readLikedCache() {
+  try { return JSON.parse(localStorage.getItem(LIKED_KEY) || '{}'); } catch { return {}; }
+}
+
+function writeLikedCache(id, liked) {
+  try {
+    const curr = readLikedCache();
+    if (liked) curr[id] = true; else delete curr[id];
+    localStorage.setItem(LIKED_KEY, JSON.stringify(curr));
+  } catch { /* private browsing may block */ }
+}
+
+function applyLikedCache(journals) {
+  const cache = readLikedCache();
+  return journals.map((j) => ({ ...j, likedByMe: cache[j.id] ?? j.likedByMe }));
+}
 
 export default function OthersJournals() {
-  const [journals, setJournals] = useState(FALLBACK_JOURNALS);
+  const [journals, setJournals] = useState(() => applyLikedCache(FALLBACK_JOURNALS));
   const [activeIndex, setActiveIndex] = useState(4);
   const [paused, setPaused] = useState(false);
 
@@ -77,7 +95,13 @@ export default function OthersJournals() {
         const incoming = Array.isArray(data.entries) ? data.entries : [];
         if (!mounted || incoming.length === 0) return;
 
-        setJournals(incoming.map(normalizeJournal).filter(Boolean));
+        const normalized = incoming.map(normalizeJournal).filter(Boolean);
+        // Server is authoritative for likedByMe on real entries; also sync cache
+        const withCache = normalized.map((j) => {
+          if (j.likedByMe) writeLikedCache(j.id, true);
+          return { ...j, likedByMe: j.likedByMe || (readLikedCache()[j.id] ?? false) };
+        });
+        setJournals(withCache);
         setActiveIndex(0);
       } catch {
         // Keep the seeded examples until community entries exist.
@@ -110,35 +134,38 @@ export default function OthersJournals() {
 
   const handleHeart = async (e) => {
     e.stopPropagation();
+    e.preventDefault();
 
     const entry = journals[activeIndex];
+    const nowLiked = !entry.likedByMe;
 
-    // Optimistic update
+    // Optimistic update + cache
+    writeLikedCache(entry.id, nowLiked);
     setJournals((prev) =>
       prev.map((j) =>
         j.id === entry.id
-          ? { ...j, hearts: j.likedByMe ? j.hearts - 1 : j.hearts + 1, likedByMe: !j.likedByMe }
+          ? { ...j, hearts: nowLiked ? j.hearts + 1 : Math.max(0, j.hearts - 1), likedByMe: nowLiked }
           : j
       )
     );
 
-    // Only persist for real DB entries
     if (!REAL_ID_RE.test(entry.id)) return;
 
     try {
       const res = await fetch(`/api/journal/${entry.id}/heart`, { method: 'POST' });
       if (!res.ok) throw new Error('failed');
       const data = await res.json();
-      // Sync authoritative count from server
+      writeLikedCache(entry.id, data.liked);
       setJournals((prev) =>
         prev.map((j) => (j.id === entry.id ? { ...j, hearts: data.hearts, likedByMe: data.liked } : j))
       );
     } catch {
-      // Revert optimistic update
+      // Revert
+      writeLikedCache(entry.id, !nowLiked);
       setJournals((prev) =>
         prev.map((j) =>
           j.id === entry.id
-            ? { ...j, hearts: j.likedByMe ? j.hearts - 1 : j.hearts + 1, likedByMe: !j.likedByMe }
+            ? { ...j, hearts: nowLiked ? Math.max(0, j.hearts - 1) : j.hearts + 1, likedByMe: !nowLiked }
             : j
         )
       );
@@ -183,6 +210,8 @@ export default function OthersJournals() {
 
           <p>&quot;{active.text}&quot;</p>
 
+          {/* Stop-propagation wrapper keeps heart click from advancing the card */}
+          <div onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
             className={`${styles.othersStrength} ${active.likedByMe ? styles.othersStrengthLiked : ''}`}
@@ -197,6 +226,7 @@ export default function OthersJournals() {
             />
             <span>{active.hearts} sent strength</span>
           </button>
+          </div>
         </div>
 
         <div className={styles.othersDots} aria-label="Shared journal pages">

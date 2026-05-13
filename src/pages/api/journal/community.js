@@ -17,7 +17,11 @@ export default requireAuth(async (req, res) => {
   await connectDB();
 
   const entries = await JournalEntry
-    .find({ isPrivate: false, userId: { $ne: new mongoose.Types.ObjectId(userId) } })
+    .find({
+      isPrivate: false,
+      userId: { $ne: new mongoose.Types.ObjectId(userId) },
+      $or: [{ mediaData: null }, { mediaData: { $exists: false } }],
+    })
     .sort({ createdAt: -1 })
     .limit(limit)
     .populate('userId', 'anonymousDisplayName')
