@@ -6,6 +6,7 @@
   "start_url": "/app/weather",
   "scope": "/app/weather",
   "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
   "background_color": "#0c2340",
   "theme_color": "#0c2340",
   "orientation": "portrait-primary",
@@ -32,7 +33,13 @@
       "src": "/resources/images/logos/weather_icon_512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/resources/images/logos/weather_icon_512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

@@ -6,6 +6,7 @@
   "start_url": "/app/calculator",
   "scope": "/app/calculator",
   "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
   "background_color": "#1a1a2e",
   "theme_color": "#1a1a2e",
   "orientation": "portrait-primary",
@@ -32,7 +33,13 @@
       "src": "/resources/images/logos/calculator_icon_512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/resources/images/logos/calculator_icon_512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
