@@ -16,17 +16,19 @@ export default requireAuth(async (req, res) => {
 
   await connectDB();
 
-  const entries = await JournalEntry
-    .find({
-      isPrivate: false,
-      userId: { $ne: new mongoose.Types.ObjectId(userId) },
-      $or: [{ mediaData: null }, { mediaData: { $exists: false } }],
-    })
-    .sort({ createdAt: -1 })
-    .limit(limit)
-    .populate('userId', 'anonymousDisplayName')
-    .select('content createdAt hearts likedBy userId')
-    .lean();
+  const entries = await JournalEntry.aggregate([
+    {
+      $match: {
+        isPrivate: false,
+        userId: { $ne: new mongoose.Types.ObjectId(userId) },
+        $or: [{ mediaData: null }, { mediaData: { $exists: false } }],
+      },
+    },
+    { $sample: { size: limit } },
+    { $project: { content: 1, createdAt: 1, hearts: 1, likedBy: 1, userId: 1 } },
+  ]);
+
+  await JournalEntry.populate(entries, { path: 'userId', select: 'anonymousDisplayName' });
 
   const normalized = entries.map((entry) => ({
     id: String(entry._id),
