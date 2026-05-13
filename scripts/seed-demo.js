@@ -1,7 +1,8 @@
 /**
- * Seed script — creates fake users and community journal entries for demo.
+ * Seed script — creates fake users, community journal entries, friend
+ * relationships, and chat messages for demo.
  * Run with:  node scripts/seed-demo.js
- * Safe to re-run: skips users/entries that already exist by username.
+ * Safe to re-run: skips users/entries that already exist.
  */
 
 require('dotenv').config();
@@ -39,10 +40,34 @@ const journalSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+const friendSchema = new mongoose.Schema({
+  requesterId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  recipientId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  pairKey: { type: String, required: true, unique: true },
+  status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
+  createdAt: { type: Date, default: Date.now, immutable: true },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+const chatMessageSchema = new mongoose.Schema({
+  friendId: { type: mongoose.Schema.Types.ObjectId, ref: 'Friend', required: true },
+  senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  message: { type: String, required: true, trim: true, maxlength: 2000 },
+  createdAt: { type: Date, default: Date.now, immutable: true },
+});
+
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 const JournalEntry = mongoose.models.JournalEntry || mongoose.model('JournalEntry', journalSchema);
+const Friend = mongoose.models.Friend || mongoose.model('Friend', friendSchema);
+const ChatMessage = mongoose.models.ChatMessage || mongoose.model('ChatMessage', chatMessageSchema);
 
-// ── Demo data ─────────────────────────────────────────────────────────────────
+function makePairKey(a, b) {
+  return [String(a), String(b)].sort().join(':');
+}
+
+// ── Demo users ─────────────────────────────────────────────────────────────────
+
+const DEMO_MAIN = { username: 'demo_main', displayName: 'SoftFern', password: 'demo1234' };
 
 const DEMO_USERS = [
   { username: 'demo_quietriver',   displayName: 'QuietRiver',   password: 'demo1234' },
@@ -52,6 +77,8 @@ const DEMO_USERS = [
   { username: 'demo_blueharbor',   displayName: 'BlueHarbor',   password: 'demo1234' },
   { username: 'demo_embermoth',    displayName: 'EmberMoth',    password: 'demo1234' },
 ];
+
+// ── Demo journals ──────────────────────────────────────────────────────────────
 
 const DEMO_JOURNALS = [
   {
@@ -128,15 +155,68 @@ const DEMO_JOURNALS = [
   },
 ];
 
+// ── Demo chats (main user ↔ each demo user) ───────────────────────────────────
+// Each entry: sender is 'main' or the demo username; minutesAgo counts back from now.
+
+const DEMO_CHATS = {
+  demo_quietriver: [
+    { sender: 'demo_quietriver', text: "Hi. I saw your journal. You seem to get it.", minutesAgo: 2 * 24 * 60 + 30 },
+    { sender: 'main', text: "I do. It took me a long time to get here too.", minutesAgo: 2 * 24 * 60 + 20 },
+    { sender: 'demo_quietriver', text: "I hid a bag like you wrote. First step feels huge.", minutesAgo: 2 * 24 * 60 + 10 },
+    { sender: 'main', text: "It is huge. You did something incredibly brave. How are you holding up?", minutesAgo: 2 * 24 * 60 + 5 },
+    { sender: 'demo_quietriver', text: "Scared. But a little lighter.", minutesAgo: 2 * 24 * 60 },
+  ],
+
+  demo_morninglark: [
+    { sender: 'main', text: "I saw your post about your doctor believing you. That must have been such a relief.", minutesAgo: 24 * 60 + 45 },
+    { sender: 'demo_morninglark', text: "It made everything feel real somehow. Like I wasn't imagining it.", minutesAgo: 24 * 60 + 30 },
+    { sender: 'main', text: "You weren't. Not even close.", minutesAgo: 24 * 60 + 15 },
+    { sender: 'demo_morninglark', text: "Thank you. That means more than you know.", minutesAgo: 24 * 60 },
+  ],
+
+  demo_paperkite: [
+    { sender: 'demo_paperkite', text: "One year out today. Still feels surreal.", minutesAgo: 3 * 24 * 60 + 20 },
+    { sender: 'main', text: "Congratulations. Truly. That took everything.", minutesAgo: 3 * 24 * 60 + 10 },
+    { sender: 'demo_paperkite', text: "Some days are still hard. But I have my apartment. My own keys.", minutesAgo: 3 * 24 * 60 + 5 },
+    { sender: 'main', text: "Your own keys. That's everything.", minutesAgo: 3 * 24 * 60 },
+  ],
+
+  demo_silverpine: [
+    { sender: 'main', text: "Are you okay? Your last entry stayed with me.", minutesAgo: 5 * 24 * 60 + 60 },
+    { sender: 'demo_silverpine', text: "Still here. Still writing. That counts for something I think.", minutesAgo: 5 * 24 * 60 + 30 },
+    { sender: 'main', text: "It counts for a lot. Please reach out anytime.", minutesAgo: 5 * 24 * 60 + 10 },
+    { sender: 'demo_silverpine', text: "I will. It helps knowing someone reads it.", minutesAgo: 5 * 24 * 60 },
+  ],
+
+  demo_blueharbor: [
+    { sender: 'demo_blueharbor', text: "The shelter let me bring my dog. I almost didn't go because of him.", minutesAgo: 4 * 24 * 60 + 90 },
+    { sender: 'main', text: "I am so glad you went. Both of you.", minutesAgo: 4 * 24 * 60 + 60 },
+    { sender: 'demo_blueharbor', text: "He keeps me going honestly.", minutesAgo: 4 * 24 * 60 + 45 },
+    { sender: 'main', text: "That sounds like a very good dog.", minutesAgo: 4 * 24 * 60 + 30 },
+    { sender: 'demo_blueharbor', text: "The best. His name is Chester.", minutesAgo: 4 * 24 * 60 },
+  ],
+
+  demo_embermoth: [
+    { sender: 'demo_embermoth', text: "Court is today. I'm terrified.", minutesAgo: 3 * 24 * 60 + 240 },
+    { sender: 'main', text: "You've prepared for this. You've got this.", minutesAgo: 3 * 24 * 60 + 220 },
+    { sender: 'demo_embermoth', text: "What if I freeze up?", minutesAgo: 3 * 24 * 60 + 210 },
+    { sender: 'main', text: "Your advocate will be right there. You don't have to do it alone.", minutesAgo: 3 * 24 * 60 + 200 },
+    { sender: 'demo_embermoth', text: "It went okay. My voice didn't shake.", minutesAgo: 3 * 24 * 60 + 60 },
+    { sender: 'main', text: "I knew it. I am so proud of you.", minutesAgo: 3 * 24 * 60 },
+  ],
+};
+
 // ── Seed function ─────────────────────────────────────────────────────────────
 
 async function seed() {
   await mongoose.connect(MONGODB_URI, { bufferCommands: false });
   console.log('Connected to MongoDB.');
 
-  const userMap = {};
+  // ── 1. Create / load all users ──────────────────────────────────────────────
+  const userMap = {}; // username → _id
 
-  for (const u of DEMO_USERS) {
+  const allUsers = [DEMO_MAIN, ...DEMO_USERS];
+  for (const u of allUsers) {
     const existing = await User.findOne({ username: u.username });
     if (existing) {
       console.log(`  User ${u.username} already exists — skipping.`);
@@ -153,14 +233,15 @@ async function seed() {
     console.log(`  Created user: ${u.username} (${u.displayName})`);
   }
 
-  let created = 0;
+  // ── 2. Create journal entries ───────────────────────────────────────────────
+  let journalsCreated = 0;
   for (const j of DEMO_JOURNALS) {
     const userId = userMap[j.username];
     if (!userId) continue;
 
     const existing = await JournalEntry.findOne({ userId, content: j.content });
     if (existing) {
-      console.log(`  Entry for ${j.username} already exists — skipping.`);
+      console.log(`  Journal for ${j.username} already exists — skipping.`);
       continue;
     }
 
@@ -174,11 +255,71 @@ async function seed() {
       createdAt,
       updatedAt: createdAt,
     });
-    created++;
+    journalsCreated++;
     console.log(`  Created journal for ${j.username}`);
   }
 
-  console.log(`\nDone. ${created} new journal entries created.`);
+  // ── 3. Create accepted friend relationships between main and each demo user ──
+  const mainId = userMap['demo_main'];
+  if (!mainId) {
+    console.error('  demo_main user not found — skipping friend/chat seeding.');
+    await mongoose.disconnect();
+    return;
+  }
+
+  const friendMap = {}; // demo_username → Friend._id
+
+  for (const u of DEMO_USERS) {
+    const otherId = userMap[u.username];
+    if (!otherId) continue;
+
+    const pairKey = makePairKey(mainId, otherId);
+    const existing = await Friend.findOne({ pairKey });
+    if (existing) {
+      console.log(`  Friendship demo_main ↔ ${u.username} already exists — skipping.`);
+      friendMap[u.username] = existing._id;
+      continue;
+    }
+
+    const friendship = await Friend.create({
+      requesterId: mainId,
+      recipientId: otherId,
+      pairKey,
+      status: 'accepted',
+    });
+    friendMap[u.username] = friendship._id;
+    console.log(`  Created friendship: demo_main ↔ ${u.username}`);
+  }
+
+  // ── 4. Seed chat messages ───────────────────────────────────────────────────
+  let msgsCreated = 0;
+  for (const [username, messages] of Object.entries(DEMO_CHATS)) {
+    const friendId = friendMap[username];
+    if (!friendId) continue;
+
+    const otherId = userMap[username];
+    if (!otherId) continue;
+
+    for (const m of messages) {
+      const senderId = m.sender === 'main' ? mainId : otherId;
+      const createdAt = new Date(Date.now() - m.minutesAgo * 60 * 1000);
+
+      const existing = await ChatMessage.findOne({ friendId, senderId, message: m.text });
+      if (existing) {
+        console.log(`  Chat message already exists — skipping.`);
+        continue;
+      }
+
+      await ChatMessage.create({ friendId, senderId, message: m.text, createdAt });
+      msgsCreated++;
+    }
+    console.log(`  Seeded ${messages.length} messages for demo_main ↔ ${username}`);
+  }
+
+  console.log(`\nDone.`);
+  console.log(`  ${journalsCreated} new journal entries`);
+  console.log(`  ${Object.keys(friendMap).length} friend relationships`);
+  console.log(`  ${msgsCreated} new chat messages`);
   await mongoose.disconnect();
 }
 
