@@ -198,7 +198,7 @@ export default function LandingPage() {
         <footer className={styles.footer}>
           <div className={styles.footerContent}>
             <div className={`${styles.brand} ${styles.footerBrand}`}>
-              <img src="/resources/images/logos/safe_haven_logo.png" alt="" className={styles.logo} />
+              <img src="/resources/images/logos/safe_harbor_logo.png" alt="" className={styles.logo} />
               SafeHaven
             </div>
             <p className={styles.footerDisclaimer}>
