@@ -27,7 +27,7 @@ const THEMES = {
     themeKey: 'calculator',
     appName: 'Calculator Pro',
     manifestUrl: '/manifests/calculator.json',
-    themeColor: '#1a1a2e',
+    themeColor: '#000000',
     appleTouchIcon: '/resources/images/logos/calculator_icon_192x192.png',
   },
   news: {
