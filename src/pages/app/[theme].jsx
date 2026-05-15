@@ -34,7 +34,7 @@ const THEMES = {
     themeKey: 'news',
     appName: 'Daily News Reader',
     manifestUrl: '/manifests/news.json',
-    themeColor: '#0d1b2a',
+    themeColor: '#e5e5eb',
     appleTouchIcon: '/resources/images/logos/news_icon_192x192.png',
   },
   weather: {
