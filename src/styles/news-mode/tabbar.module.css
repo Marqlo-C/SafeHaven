@@ -1,5 +1,5 @@
 .tabBar {
-  position: absolute;
+  position: fixed;
   left: 16px;
   right: 16px;
   bottom: calc(env(safe-area-inset-bottom) + 18px);
@@ -7,7 +7,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: transform 0.26s ease;
 }
 
 .tabBarCollapsed {
@@ -91,7 +90,7 @@
   white-space: nowrap;
 }
 
-/* ── Search circle — same glass treatment ── */
+/* ── Search circle — glassier, more transparent ── */
 .searchCircleBtn {
   flex: 0 0 auto;
   width: 56px;
@@ -99,12 +98,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 0.5px solid rgba(255, 255, 255, 0.7);
+  border: 0.5px solid rgba(255, 255, 255, 0.5);
+  border-right-color: rgba(255, 255, 255, 0.92);
+  border-bottom-color: rgba(255, 255, 255, 0.72);
   border-radius: 50%;
-  background: rgba(252, 252, 252, 0.36);
-  -webkit-backdrop-filter: saturate(100%) blur(5px);
-  backdrop-filter: saturate(100%) blur(5px);
+  background: rgba(252, 252, 252, 0.22);
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
+  backdrop-filter: saturate(140%) blur(10px);
   box-shadow:
+    inset -2px -1px 5px rgba(255, 255, 255, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
     0 4px 20px rgba(0, 0, 0, 0.08),
     0 1px 4px rgba(0, 0, 0, 0.05);
   color: #3a3a3c;

@@ -3,8 +3,8 @@ export const BackspaceIcon = () => (
        stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
        aria-hidden="true">
     <path d="M20 5H8c-.53 0-1.04.26-1.37.68L2 12l4.63 6.32c.33.43.84.68 1.37.68H20a2 2 0 002-2V7a2 2 0 00-2-2z" />
-    <line x1="12.5" y1="9.5" x2="17.5" y2="14.5" />
-    <line x1="17.5" y1="9.5" x2="12.5" y2="14.5" />
+    <line x1="11.5" y1="9.5" x2="16.5" y2="14.5" />
+    <line x1="16.5" y1="9.5" x2="11.5" y2="14.5" />
   </svg>
 );
 

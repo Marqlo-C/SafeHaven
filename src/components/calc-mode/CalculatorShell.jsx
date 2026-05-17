@@ -11,7 +11,7 @@ export default function CalculatorCover() {
   const [showHistory, setShowHistory] = useState(false);
 
   const {
-    op, isScientific, is2nd,
+    isScientific, is2nd,
     history, clearHistory,
     liveExpression, liveResultFormatted, fontSize,
     handleStdClick, handleSciClick,
@@ -68,7 +68,6 @@ export default function CalculatorCover() {
 
         <StdKeypad
           isScientific={isScientific}
-          op={op}
           onStdClick={handleStdClick}
           onBackDown={handleBackDown}
           onBackUp={handleBackUp}

@@ -38,35 +38,35 @@ export default function NewsShell() {
   useEffect(() => {
     const controller = new AbortController();
 
-    async function loadLiveHeadlines() {
+    async function fetchTab(tab) {
       try {
-        const res = await fetch(`/api/news/headlines?tab=${activeTab}`, {
+        const res = await fetch(`/api/news/headlines?tab=${tab}`, {
           credentials: 'same-origin',
           signal: controller.signal,
         });
         if (!res.ok) {
-          setLoadingTabs((t) => ({ ...t, [activeTab]: false }));
+          setLoadingTabs((t) => ({ ...t, [tab]: false }));
           return;
         }
         const data = await res.json();
-        const next = normalizeLiveArticles(activeTab, data, {
+        const next = normalizeLiveArticles(tab, data, {
           heroStories: HERO_STORIES,
           storySections: STORY_SECTIONS,
           liveSectionTitles: LIVE_SECTION_TITLES,
           thumbnailFallbacks: THUMBNAIL_FALLBACKS,
         });
-        setLiveContent((c) => ({ ...c, [activeTab]: next || c[activeTab] }));
-        setLoadingTabs((t) => ({ ...t, [activeTab]: false }));
+        setLiveContent((c) => ({ ...c, [tab]: next || c[tab] }));
+        setLoadingTabs((t) => ({ ...t, [tab]: false }));
       } catch (err) {
         if (err?.name !== 'AbortError') {
-          setLoadingTabs((t) => ({ ...t, [activeTab]: false }));
+          setLoadingTabs((t) => ({ ...t, [tab]: false }));
         }
       }
     }
 
-    loadLiveHeadlines();
+    TABS.forEach((t) => fetchTab(t.id));
     return () => controller.abort();
-  }, [activeTab]);
+  }, []);
 
   useEffect(() => {
     if (!hero?.image) return;
