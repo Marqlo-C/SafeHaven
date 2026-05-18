@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import styles from '../../styles/news-mode/newsshell.module.css';
-import { TABS, HERO_STORIES, STORY_SECTIONS, LIVE_SECTION_TITLES, THUMBNAIL_FALLBACKS, FEED_FILTERS } from './newsData';
+import { TABS, HERO_STORIES, STORY_SECTIONS, LIVE_SECTION_TITLES, THUMBNAIL_FALLBACKS, FEED_FILTERS, FILTER_KEYWORDS } from './newsData';
 import { normalizeLiveArticles } from '../../utils/newsUtils';
-import { extractAccentColor } from '../../utils/colorExtract';
 import FeedHeader from './FeedHeader';
 import HeroStory from './HeroStory';
 import StorySection from './StorySection';
@@ -22,19 +21,27 @@ export default function NewsShell() {
   const [scrolled, setScrolled] = useState(false);
   const [scrollOffset, setScrollOffset] = useState(0);
   const [atBottom, setAtBottom] = useState(false);
-  const [accentColor, setAccentColor] = useState(null);
   const [activeFilter, setActiveFilter] = useState('All');
   const previousScrollTop = useRef(0);
 
   const isLoading = loadingTabs[activeTab] !== false;
   const hero = liveContent[activeTab]?.hero || (!isLoading ? HERO_STORIES[activeTab] : null);
   const sections = liveContent[activeTab]?.sections || (!isLoading ? STORY_SECTIONS[activeTab] : []);
-  const filters = liveContent[activeTab]?.filters || FEED_FILTERS[activeTab] || ['All'];
+  const filters = FEED_FILTERS[activeTab] || ['All'];
 
   const navTitle = useMemo(() => {
     const active = TABS.find((t) => t.id === activeTab);
     return active?.navLabel || 'For You';
   }, [activeTab]);
+
+  const allArticles = useMemo(() => {
+    return TABS.flatMap((t) => {
+      const tabHero = liveContent[t.id]?.hero || HERO_STORIES[t.id];
+      const tabSections = liveContent[t.id]?.sections || STORY_SECTIONS[t.id] || [];
+      const stories = tabSections.flatMap((s) => s.stories || []);
+      return [tabHero, ...stories].filter(Boolean);
+    });
+  }, [liveContent]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -69,10 +76,6 @@ export default function NewsShell() {
     return () => controller.abort();
   }, []);
 
-  useEffect(() => {
-    if (!hero?.image) return;
-    extractAccentColor(hero.image).then((rgb) => setAccentColor(rgb));
-  }, [hero?.image]);
 
   const handleScroll = (e) => {
     const el = e.currentTarget;
@@ -86,6 +89,8 @@ export default function NewsShell() {
   const switchTab = (id) => {
     setActiveTab(id);
     setActiveFilter('All');
+    setSelectedArticle(null);
+    setOverlay(null);
     previousScrollTop.current = 0;
   };
 
@@ -94,15 +99,7 @@ export default function NewsShell() {
       <div className={styles.appShell}>
         <div className={styles.screen}>
 
-          {accentColor && (
-            <div
-              className={styles.accentGlow}
-              aria-hidden="true"
-              style={{ background: `linear-gradient(to bottom, rgba(${accentColor},0.65) 0%, rgba(${accentColor},0.30) 50%, transparent 100%)` }}
-            />
-          )}
-
-          <header className={styles.navBar}>
+<header className={styles.navBar}>
             <button className={styles.navButton} type="button" aria-label="Open menu" onClick={() => setOverlay('menu')}>
               <span className={styles.menuIcon} aria-hidden="true">
                 <span /><span /><span />
@@ -117,6 +114,18 @@ export default function NewsShell() {
           <div className={styles.feed} onScroll={handleScroll}>
             <FeedHeader title={navTitle} />
 
+            <FilterRow
+              filters={filters}
+              active={activeFilter}
+              onSelect={setActiveFilter}
+            />
+
+            {activeTab === 'today' && (
+              <div className={styles.forYouHeader}>
+                <p className={styles.forYouTitle}>For You</p>
+              </div>
+            )}
+
             {hero && (
               <HeroStory
                 hero={hero}
@@ -125,28 +134,36 @@ export default function NewsShell() {
               />
             )}
 
-            <FilterRow
-              filters={filters}
-              active={activeFilter}
-              onSelect={setActiveFilter}
-            />
-
             <div className={styles.content}>
-              {sections
-                .map((section) => ({
-                  ...section,
-                  stories: activeFilter === 'All'
-                    ? section.stories
-                    : section.stories.filter((s) => s.categories?.includes(activeFilter)),
-                }))
-                .filter((section) => section.stories.length > 0)
-                .map((section) => (
+              {(() => {
+                if (activeFilter === 'All') {
+                  return sections.map((section) => (
+                    <StorySection key={section.title} section={section} onOpenStory={setSelectedArticle} />
+                  ));
+                }
+                const keywords = FILTER_KEYWORDS[activeTab]?.[activeFilter] || [];
+                const matched = sections
+                  .flatMap((s) => s.stories)
+                  .filter((story) => {
+                    const text = ((story.headline || story.title || '') + ' ' + (story.description || '')).toLowerCase();
+                    return keywords.some((kw) => text.includes(kw));
+                  });
+                if (matched.length === 0) {
+                  return (
+                    <div className={styles.emptyFilter}>
+                      <p>No {activeFilter} stories right now.</p>
+                      <p>Check back soon or try another topic.</p>
+                    </div>
+                  );
+                }
+                return (
                   <StorySection
-                    key={section.title}
-                    section={section}
+                    key={activeFilter}
+                    section={{ title: activeFilter, stories: matched }}
                     onOpenStory={setSelectedArticle}
                   />
-                ))}
+                );
+              })()}
             </div>
           </div>
 
@@ -158,7 +175,7 @@ export default function NewsShell() {
             onTabChange={switchTab}
           />
 
-          {overlay === 'search'  && <SearchOverlay  onClose={() => setOverlay(null)} />}
+          {overlay === 'search'  && <SearchOverlay  onClose={() => setOverlay(null)} articles={allArticles} onOpenArticle={(a) => { setSelectedArticle(a); setOverlay(null); }} />}
           {overlay === 'menu'    && <MenuOverlay    onClose={() => setOverlay(null)} />}
           {overlay === 'profile' && <ProfileOverlay onClose={() => setOverlay(null)} />}
           {selectedArticle && (

@@ -1,6 +1,6 @@
 export const TABS = [
-  { id: 'today',  label: 'Today',  navLabel: 'For You' },
-  { id: 'world',  label: 'World+', navLabel: 'World+'  },
+  { id: 'today',  label: 'News+',  navLabel: 'For You' },
+  { id: 'world',  label: 'World',  navLabel: 'World'   },
   { id: 'sports', label: 'Sports', navLabel: 'Sports'  },
 ];
 
@@ -33,18 +33,18 @@ export const STORY_SECTIONS = {
     {
       title: 'Top Stories',
       stories: [
-        { source: 'The New York Times', headline: 'Tech Giants Face New Antitrust Rules Across EU and US Markets',     color: 'linear-gradient(135deg, #2c4a7c 0%, #1a2f4f 100%)' },
-        { source: 'Reuters',            headline: 'Markets Hit Record Highs as Fed Signals Extended Rate Pause',       color: 'linear-gradient(135deg, #1a4a1a 0%, #0d2e0d 100%)' },
-        { source: 'BBC News',           headline: 'Space Tourism Takes Off After First Civilian Orbit Mission',        color: 'linear-gradient(135deg, #4a1a4a 0%, #2e0d2e 100%)' },
-        { source: 'The Guardian',       headline: 'Breakthrough in Cancer Research Offers New Treatment Hope',         color: 'linear-gradient(135deg, #7c2c2c 0%, #4f1a1a 100%)' },
+        { source: 'The New York Times', author: 'David McCabe',    headline: 'Tech Giants Face New Antitrust Rules Across EU and US Markets',     color: 'linear-gradient(135deg, #2c4a7c 0%, #1a2f4f 100%)' },
+        { source: 'Reuters',            author: 'Andrea Shalal',   headline: 'Markets Hit Record Highs as Fed Signals Extended Rate Pause',       color: 'linear-gradient(135deg, #1a4a1a 0%, #0d2e0d 100%)' },
+        { source: 'BBC News',           author: 'Jonathan Amos',   headline: 'Space Tourism Takes Off After First Civilian Orbit Mission',        color: 'linear-gradient(135deg, #4a1a4a 0%, #2e0d2e 100%)' },
+        { source: 'The Guardian',       author: 'Hannah Devlin',   headline: 'Breakthrough in Cancer Research Offers New Treatment Hope',         color: 'linear-gradient(135deg, #7c2c2c 0%, #4f1a1a 100%)' },
       ],
     },
     {
       title: 'For You',
       stories: [
-        { source: 'Wired',       headline: 'The New AI Models Reshaping How Teams Work and Create',           color: 'linear-gradient(135deg, #4a3a00 0%, #2e2400 100%)' },
-        { source: 'The Verge',   headline: 'Display Technology Points to a Brighter Device Future',           color: 'linear-gradient(135deg, #4a1a00 0%, #2e0d00 100%)' },
-        { source: 'TechCrunch', headline: 'Energy Storage Startup Raises New Round for Grid Batteries',       color: 'linear-gradient(135deg, #1a4a4a 0%, #0d2e2e 100%)' },
+        { source: 'Wired',       author: 'Steven Levy',     headline: 'The New AI Models Reshaping How Teams Work and Create',           color: 'linear-gradient(135deg, #4a3a00 0%, #2e2400 100%)' },
+        { source: 'The Verge',   author: 'Nilay Patel',     headline: 'Display Technology Points to a Brighter Device Future',           color: 'linear-gradient(135deg, #4a1a00 0%, #2e0d00 100%)' },
+        { source: 'TechCrunch', author: 'Mary Ann Azevedo', headline: 'Energy Storage Startup Raises New Round for Grid Batteries',       color: 'linear-gradient(135deg, #1a4a4a 0%, #0d2e2e 100%)' },
       ],
     },
     {
@@ -110,9 +110,27 @@ export const STORY_SECTIONS = {
 };
 
 export const FEED_FILTERS = {
-  today:  ['All', 'Top Stories', 'For You', 'Following'],
-  world:  ['All', 'World Headlines', 'Politics', 'Analysis'],
-  sports: ['All', 'Top Sports News', 'NBA', 'Soccer'],
+  today:  ['All', 'Tech', 'Science', 'Economy'],
+  world:  ['All', 'Politics', 'Trade', 'Security'],
+  sports: ['All', 'NBA', 'Soccer', 'Olympics'],
+};
+
+export const FILTER_KEYWORDS = {
+  today: {
+    Tech:     ['tech', 'ai', 'digital', 'software', 'cyber', 'data', 'app', 'device', 'display'],
+    Science:  ['science', 'research', 'study', 'climate', 'space', 'health', 'cancer', 'energy', 'ocean'],
+    Economy:  ['market', 'econom', 'trade', 'rate', 'inflation', 'stock', 'fund', 'startup', 'raises'],
+  },
+  world: {
+    Politics: ['election', 'politic', 'vote', 'government', 'president', 'minister', 'senate', 'coalition', 'parliament'],
+    Trade:    ['trade', 'econom', 'market', 'tariff', 'sanction', 'agreement', 'summit', 'deal'],
+    Security: ['security', 'military', 'defense', 'conflict', 'war', 'attack', 'nuclear', 'diplomat', 'talks'],
+  },
+  sports: {
+    NBA:      ['nba', 'basketball', 'playoff', 'all-star', 'draft', 'rookie', 'court'],
+    Soccer:   ['soccer', 'football', 'league', 'fifa', 'champions', 'transfer', 'world cup', 'premier'],
+    Olympics: ['olympic', 'athlete', 'record', 'medal', 'tournament', 'championship', 'final'],
+  },
 };
 
 export const LIVE_SECTION_TITLES = {

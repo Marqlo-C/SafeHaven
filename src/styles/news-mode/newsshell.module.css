@@ -162,4 +162,55 @@
   width: 100%;
   background: #e5e5eb;
   padding: 0 0 calc(env(safe-area-inset-bottom) + 92px);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.forYouHeader {
+  text-align: center;
+  padding: 20px 20px 12px;
+}
+
+.forYouTitle {
+  margin: 0 0 8px;
+  font-family: "HelveticaNeue-CondensedBold", "HelveticaNeue-CondensedBlack", "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  font-stretch: ultra-condensed;
+  font-size: 38px;
+  font-weight: 700;
+  transform: scaleX(0.82);
+  letter-spacing: 0.5px;
+  color: #3a3a3c;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.forYouSub {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #000;
+  text-transform: uppercase;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.emptyFilter {
+  padding: 48px 24px;
+  text-align: center;
+  color: #8e8e93;
+}
+
+.emptyFilter p {
+  margin: 0 0 6px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.emptyFilter p:first-child {
+  color: #3a3a3c;
+  font-size: 17px;
+  font-weight: 600;
 }

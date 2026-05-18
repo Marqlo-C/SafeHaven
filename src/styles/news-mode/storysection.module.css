@@ -1,36 +1,13 @@
 .storySection {
-  margin: 12px 16px 0;
-  background: #fff;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.8),
-    0 4px 12px rgba(0,0,0,0.08),
-    0 16px 36px rgba(0,0,0,0.05);
+  margin: 0 16px;
 }
 
+/* ── Section header ── */
 .sectionHeader {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  padding: 14px 16px 8px;
-  background: linear-gradient(to bottom, rgba(255,255,255,0.9) 0%, #fff 100%);
-}
-
-.sectionMeta {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-
-.sectionLabel {
-  color: #FF3B30;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  line-height: 1;
+  padding: 16px 0 8px;
 }
 
 .sectionTitle {
@@ -43,91 +20,152 @@
 }
 
 .seeAllBtn {
-  flex: 0 0 auto;
   padding: 0;
   border: 0;
   background: transparent;
   color: #FF3B30;
   font-size: 15px;
-  font-weight: 400;
+  font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
 }
 
-.storyRow {
+/* ── Individual story card ── */
+.storyCard {
   width: 100%;
-  min-height: 76px;
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  flex-direction: column;
+  margin-bottom: 12px;
   border: 0;
-  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
-  background: transparent;
-  color: inherit;
+  border-radius: 16px;
+  background: #fff;
   cursor: pointer;
   text-align: left;
-  transition: background 0.1s ease;
-}
-
-.storyRow:hover,
-.storyRow:active { background: rgba(0, 0, 0, 0.04); }
-
-.storyRow:focus-visible {
-  outline: 3px solid rgba(255, 59, 48, 0.4);
-  outline-offset: 2px;
-}
-
-.thumbnail {
-  width: 64px;
-  height: 64px;
-  flex: 0 0 64px;
   overflow: hidden;
-  border-radius: 10px;
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.07),
+    0 12px 32px rgba(0,0,0,0.04);
+  transition: opacity 0.1s ease;
+}
+
+.storyCard:last-child { margin-bottom: 0; }
+.storyCard:active { opacity: 0.85; }
+
+.cardImage {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  order: 2;
-  border: 0.5px solid rgba(0, 0, 0, 0.06);
 }
 
-.thumbnailImage { border: 0.5px solid rgba(0, 0, 0, 0.06); }
-
-.thumbnailSvg {
-  width: 100%;
-  height: 100%;
-  fill: rgba(0, 0, 0, 0.16);
-}
-
-.storyCopy {
-  min-width: 0;
+.cardBody {
   display: flex;
-  flex: 1;
   flex-direction: column;
-  order: 1;
+  padding: 12px 16px 4px;
 }
 
-.storySource {
-  margin-bottom: 4px;
-  color: #FF3B30;
-  font-size: 11px;
+.newsPlusBar {
+  display: block;
+  margin: -12px -16px 10px;
+  padding: 8px 16px 8px 8px;
+  background: rgba(0, 0, 0, 0.09);
+}
+
+.newsPlus {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #D44464;
+  color: #fff;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  line-height: 1.2;
   text-transform: uppercase;
+  line-height: 1.4;
 }
 
-.storyHeadline {
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 5px;
+}
+
+.cardSourceRow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.cardSourceIcon {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.cardSource {
+  color: #3a3a3c;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.cardMetaDot {
+  color: #8e8e93;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.cardAuthor {
+  color: #8e8e93;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardSourceLogo {
+  display: block;
+  height: 16px;
+  width: auto;
+  max-width: 110px;
+  object-fit: contain;
+  object-position: left center;
+  margin-bottom: 6px;
+}
+
+.cardHeadline {
   display: -webkit-box;
   overflow: hidden;
   color: #000;
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.32;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: -0.3px;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
 
+.dots {
+  display: block;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  color: #c7c7cc;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  line-height: 1;
+  text-align: right;
+}
+
 @media (max-width: 360px) {
-  .storyHeadline { font-size: 14px; }
+  .cardHeadline { font-size: 17px; }
 }

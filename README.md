@@ -152,6 +152,7 @@ HackDavis 2026/
     ├── utils/
     │   ├── calcUtils.js       ← Pure calculator math helpers.
     │   ├── newsUtils.js       ← Article normalization, background-image helper.
+    │   ├── sourceBrands.js    ← Publisher brand map (color + domain) used by story cards and article overlay.
     │   └── colorExtract.js    ← Canvas-based dominant color extraction from images.
     ├── components/
     │   ├── PanicExit.jsx
@@ -374,14 +375,19 @@ Full-featured iOS-style calculator built in React. Supports standard arithmetic 
 - `SciPad` — sin, cos, tan, log, √, π, e, etc.
 - `HistoryPanel` — slide-up list of past calculations
 
-### News (`/app/news`)
+### News (`/app/news`) — Kiwi News
 
-Apple News-style reader with live headlines from NewsAPI.ai. All three tabs (For You, World+, Sports) are fetched in parallel on mount. Falls back to curated static stories when the API key is not set.
+Apple News-style reader branded as **Kiwi News**. All three tabs (News+, World, Sports) are fetched in parallel on mount. Falls back to curated static stories when the API key is not set.
 
 **Key behaviors:**
-- Hero story image used for canvas-based accent color tinting of the background.
+- Each tab header shows a custom kiwi-fruit SVG icon, a "🥝 News+" eyebrow, the tab title, and a SUBSCRIBER EDITION circular badge.
+- Today tab shows a condensed "FOR YOU" heading above the hero story.
+- Filter chips: frosted glass, single row, one chip per category — tapping filters stories by keyword across all sections.
+- Search overlay: live full-text search across every fetched article from all tabs; tap a result to open the article reader.
+- Story cards show color-coded publisher name + favicon icon + author attribution.
 - Article overlay: full-bleed image background, sticky title bar, frosted glass content module. Inner scroll only engages after the title sticks to the top bar (two-phase scroll).
-- Filter chips between hero and sections actually filter story sections by title.
+- Profile overlay shows Guest User only (account features not yet implemented).
+- Menu overlay shows app version info only.
 
 **Components:** `NewsShell`, `FeedHeader`, `HeroStory`, `FilterRow`, `StorySection`, `TabBar`, `ArticleOverlay`, `OverlayHeader`, `SearchOverlay`, `MenuOverlay`, `ProfileOverlay`
 
@@ -566,7 +572,7 @@ Applied via `next.config.js`:
 - [ ] Home page loads & links work
 - [ ] Login/Register flow completes
 - [ ] Calculator (standard + scientific) fully functional
-- [ ] News loads with live headlines, filters work, article overlay two-phase scroll works
+- [ ] Kiwi News loads with live headlines, tab filters work, search returns results, article overlay two-phase scroll works
 - [ ] Weather cover loads
 - [ ] SOS button activates private mode
 - [ ] Journal entries save with attachments
@@ -577,6 +583,6 @@ Applied via `next.config.js`:
 
 ---
 
-**Last Updated:** May 16, 2026
-**Version:** 1.1.0
+**Last Updated:** May 17, 2026
+**Version:** 1.2.0
 **Maintainer:** SafeHaven Team

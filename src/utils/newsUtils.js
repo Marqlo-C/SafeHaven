@@ -22,10 +22,24 @@ export function normalizeLiveArticles(tab, data, { heroStories, storySections, l
 
   if (stories.length === 0) return null;
 
-  // Build dynamic filter chips from categories across all live articles
-  const allCategories = [lead, ...stories].flatMap((a) => a.categories || []);
-  const uniqueCategories = [...new Set(allCategories)].slice(0, 6);
-  const filters = uniqueCategories.length > 0 ? ['All', ...uniqueCategories] : null;
+  // Group stories into sections by their top category so filter chips are backed by real content.
+  // Stories with no category go into the default section for this tab.
+  const defaultTitle = liveSectionTitles[tab] || 'Top Stories';
+  const sectionMap = {};
+  stories.forEach((story) => {
+    const title = story.categories?.[0] || defaultTitle;
+    if (!sectionMap[title]) sectionMap[title] = [];
+    sectionMap[title].push(story);
+  });
+
+  // Always put the default section first
+  const orderedTitles = [
+    defaultTitle,
+    ...Object.keys(sectionMap).filter((t) => t !== defaultTitle),
+  ].filter((t) => sectionMap[t]);
+
+  const sections = orderedTitles.map((title) => ({ title, stories: sectionMap[title] }));
+  const filters = sections.length > 1 ? ['All', ...orderedTitles] : null;
 
   return {
     hero: {
@@ -35,7 +49,7 @@ export function normalizeLiveArticles(tab, data, { heroStories, storySections, l
       source: lead.source || fallbackHero.source,
       image: lead.image || fallbackHero.image,
     },
-    sections: [{ title: liveSectionTitles[tab] || 'Top Stories', stories }],
+    sections,
     filters,
   };
 }
