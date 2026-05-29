@@ -65,14 +65,12 @@ export function usePrivacyMode({ onLogout } = {}) {
       if (document.visibilityState === 'hidden') {
         sessionStorage.clear();
         postToSW({ type: 'PURGE_CACHE' });
-        navigator.sendBeacon('/api/auth/logout');
-        onLogout?.();
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [onLogout]);
+  }, []);
 }
 
 /**

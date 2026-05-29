@@ -527,6 +527,7 @@
 
 .momentHeader {
   width: 100%;
+  padding-right: 44px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -582,10 +583,12 @@
 }
 
 .momentDots {
+  position: absolute;
+  top: 14px;
+  right: 14px;
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-top: auto;
 }
 
 .momentDot {

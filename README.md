@@ -179,7 +179,7 @@ HackDavis 2026/
     │   ├── securityHeaders.js ← Sets security headers (CSP, X-Frame-Options, etc.).
     │   └── rateLimit.js       ← Rate limiting for API endpoints.
     ├── hooks/
-    │   ├── usePrivacyMode.js  ← App mode state (calculator/news/weather/private).
+    │   ├── usePrivacyMode.js  ← Privacy hardening: SW cleanup, history lock, panic helpers.
     │   ├── useCalculator.js   ← Calculator state machine (std + sci modes).
     │   ├── useChat.js         ← Chat message state and Socket.io integration.
     │   ├── useSpeechToText.js ← Web Speech API integration for voice input.
@@ -218,7 +218,7 @@ HackDavis 2026/
     │   │   └── WeatherModeShell.jsx ← Weather cover page.
     │   └── private-mode/
     │       ├── PrivateModeShell.jsx ← Main sanctuary. Tab navigation between panels.
-    │       ├── HomePanel.jsx    ← Quick links, location toggle, emergency resources.
+    │       ├── HomePanel.jsx    ← Quick links, persistent location toggle, emergency resources.
     │       ├── JournalPanel.jsx ← Evidence journal entry creation with media.
     │       ├── ChatPanel.jsx    ← Main chat orchestrator (friend + bot messaging). Delegates to sub-components:
     │       │   ├── ChatThreadView.jsx ← Open thread display (messages + header)
@@ -256,7 +256,9 @@ HackDavis 2026/
     │       ├── sos/           ← emergency SOS broadcast
     │       ├── stt/           ← speech-to-text
     │       ├── tts/           ← text-to-speech
-    │       └── users/         ← user search + friend requests
+    │       └── users/
+    │           ├── search.js      ← anonymous display-name search
+    │           └── preferences.js ← account preferences, including saved location-sharing state
     └── styles/
         ├── globals.css        ← Global resets, base typography, theme colors.
         ├── Marketing.module.css ← Landing page styles.
@@ -281,7 +283,7 @@ HackDavis 2026/
         │   └── weathercover.module.css
         └── private-mode/
             ├── shell.module.css          ← Private mode tab navigation
-            ├── home.module.css           ← Home panel (resources + location toggle)
+            ├── home.module.css           ← Home panel, location toggle, daily moment card
             ├── chat-panel.module.css     ← Chat panel wrapper (tab navigation)
             ├── chat-thread-view.module.css ← Open thread display (messages + header)
             ├── message-composer.module.css ← Text input + send/mic controls
@@ -660,8 +662,10 @@ Survivors can opt-in to share their location with trusted contacts for emergency
 | GET | `/api/geolocation` | Retrieve your saved latest location or `null` |
 | POST | `/api/geolocation` | Update your location (timestamps older than 5 min rejected) |
 | DELETE | `/api/geolocation` | Clear saved location completely |
+| GET | `/api/users/preferences` | Retrieve account preferences, including saved location-sharing state |
+| PATCH | `/api/users/preferences` | Persist account preferences such as `locationSharingEnabled` |
 
-**Privacy:** Only the most recent location is stored—no movement history. Locations are only shared when you explicitly enable it in settings or send an SOS alert to trusted contacts.
+**Privacy:** Only the most recent location is stored—no movement history. The location-sharing toggle is saved to the user account so it can resume across logins, but live coordinates are still collected only after the browser grants location permission. Visibility changes purge local session storage and service-worker caches without logging the user out; panic exit, back-to-cover, and page unload still clear the auth session.
 
 ---
 
