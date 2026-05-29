@@ -150,9 +150,9 @@ function LocationMini({ on, onToggle }) {
       <span>Location</span>
       <div className={styles.miniToggleRow}>
         <div className={`${styles.miniToggle} ${on ? styles.miniToggleOn : ''}`} aria-hidden="true">
-          <span />
+          <span className={styles.miniToggleThumb} />
+          <span className={`${styles.miniToggleText} ${on ? styles.miniToggleTextOn : ''}`}>{on ? 'On' : 'Off'}</span>
         </div>
-        <span className={`${styles.miniToggleLabel} ${on ? styles.miniToggleLabelOn : ''}`}>{on ? 'On' : 'Off'}</span>
       </div>
     </button>
   );
