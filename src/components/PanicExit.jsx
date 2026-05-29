@@ -111,8 +111,8 @@ export default function PanicExit({ showButton = true }) {
       title="Quick exit"
       style={{
         position: 'fixed',
-        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 4px)',
-        right: 'calc(env(safe-area-inset-right, 0px) + 4px)',
+        bottom: '20px',
+        right: '20px',
         zIndex: 9999,
         border: 'none',
         background: 'transparent',
