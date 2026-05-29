@@ -159,38 +159,39 @@ HackDavis 2026/
     │   ├── sosService.js
     │   └── pwaService.js
     ├── models/
-    │   ├── User.js
-    │   ├── JournalEntry.js
-    │   ├── Bookmark.js
-    │   ├── ChatMessage.js
-    │   ├── Friend.js
-    │   ├── TrustedContact.js
-    │   └── UserLocation.js
+    │   ├── User.js            ← User account with password hash, duress mode.
+    │   ├── JournalEntry.js    ← Evidence journal entries with media attachments.
+    │   ├── Bookmark.js        ← Saved articles, links, and resources.
+    │   ├── ChatMessage.js     ← Friend-to-friend chat messages.
+    │   ├── Friend.js          ← Friend connection and requests.
+    │   ├── TrustedContact.js  ← Trusted contacts for SOS alerts.
+    │   └── UserLocation.js    ← Latest GPS location for sharing and SOS.
     ├── lib/
-    │   ├── db.js              ← Cached Mongoose connection.
-    │   ├── withAuth.js        ← getServerSideProps wrapper.
-    │   ├── withOptionalAuth.js
-    │   ├── requireAuth.js     ← API route auth guard.
-    │   ├── gridfs.js
-    │   ├── multerHelper.js
-    │   ├── socketServer.js
-    │   └── openrouter.js      ← OpenRouter API client for AI chat
+    │   ├── db.js              ← Cached Mongoose connection singleton.
+    │   ├── withAuth.js        ← getServerSideProps wrapper for auth-required pages.
+    │   ├── withOptionalAuth.js ← getServerSideProps wrapper for optional auth pages.
+    │   ├── requireAuth.js     ← API route auth guard middleware.
+    │   ├── gridfs.js          ← MongoDB GridFS helper for file uploads.
+    │   ├── multerHelper.js    ← Multer configuration for file handling.
+    │   ├── socketServer.js    ← Socket.io server initialization.
+    │   └── openrouter.js      ← OpenRouter API client for AI chat (Google Gemma)
     ├── middleware/
-    │   └── securityHeaders.js
+    │   ├── securityHeaders.js ← Sets security headers (CSP, X-Frame-Options, etc.).
+    │   └── rateLimit.js       ← Rate limiting for API endpoints.
     ├── hooks/
-    │   ├── usePrivacyMode.js
+    │   ├── usePrivacyMode.js  ← App mode state (calculator/news/weather/private).
     │   ├── useCalculator.js   ← Calculator state machine (std + sci modes).
-    │   ├── useChat.js
-    │   ├── useSpeechToText.js
-    │   └── useGeolocation.js
+    │   ├── useChat.js         ← Chat message state and Socket.io integration.
+    │   ├── useSpeechToText.js ← Web Speech API integration for voice input.
+    │   └── useGeolocation.js  ← Geolocation API and state management.
     ├── utils/
     │   ├── calcUtils.js       ← Pure calculator math helpers.
     │   ├── newsUtils.js       ← Article normalization, background-image helper.
     │   ├── sourceBrands.js    ← Publisher brand map (color + domain) used by story cards and article overlay.
     │   └── colorExtract.js    ← Canvas-based dominant color extraction from images.
     ├── components/
-    │   ├── PanicExit.jsx
-    │   ├── PrivateModeButton.jsx
+    │   ├── PanicExit.jsx      ← Escape key, swipe, and corner button exit triggers.
+    │   ├── PrivateModeButton.jsx ← Discreet orange corner button for app access.
     │   ├── calc-mode/
     │   │   ├── CalculatorShell.jsx  ← Root calc cover; owns mode/history state.
     │   │   ├── CalculatorDisplay.jsx
@@ -215,25 +216,24 @@ HackDavis 2026/
     │   ├── weather-mode/
     │   │   └── WeatherModeShell.jsx ← Weather cover page.
     │   └── private-mode/
-    │       ├── PrivateModeShell.jsx
-    │       ├── HomePanel.jsx
-    │       ├── JournalPanel.jsx
-    │       ├── ChatPanel.jsx
-    │       ├── AidPanel.jsx
-    │       ├── SosPanel.jsx
-    │       ├── MapboxMap.jsx
-    │       ├── MomentForYou.jsx
-    │       └── OthersJournals.jsx
+    │       ├── PrivateModeShell.jsx ← Main sanctuary. Tab navigation between panels.
+    │       ├── HomePanel.jsx    ← Quick links, location toggle, emergency resources.
+    │       ├── JournalPanel.jsx ← Evidence journal entry creation with media.
+    │       ├── ChatPanel.jsx    ← Friend-to-friend real-time messaging.
+    │       ├── AidPanel.jsx     ← Resource directory (shelters, legal aid, hotlines).
+    │       ├── SosPanel.jsx     ← Emergency SOS alert to trusted contacts + location.
+    │       ├── MapboxMap.jsx    ← Map display for resource discovery.
+    │       ├── MomentForYou.jsx ← Daily affirmation rotation for self-care.
+    │       └── OthersJournals.jsx ← Community journal with anonymized entries.
     ├── pages/
-    │   ├── _app.jsx
-    │   ├── index.jsx          ← Marketing landing page.
-    │   ├── login.jsx
-    │   ├── downloads.jsx
-    │   ├── dev-test.jsx       ← ⚠ DEV ONLY — delete before shipping.
+    │   ├── _app.jsx           ← App wrapper. Global styles, auth context, providers.
+    │   ├── index.jsx          ← Marketing landing page. Public-facing homepage.
+    │   ├── login.jsx          ← Auth form (register + login).
+    │   ├── downloads.jsx      ← PWA installation guide.
     │   ├── preview/
-    │   │   └── [theme].jsx    ← Unauthenticated preview of each cover app.
+    │   │   └── [theme].jsx    ← Unauthenticated preview of each cover app (calculator/news/weather).
     │   ├── app/
-    │   │   └── [theme].jsx    ← Auth-gated app shell.
+    │   │   └── [theme].jsx    ← Auth-gated app shell. Routes to correct cover based on theme param.
     │   └── api/
     │       ├── auth/          ← register, login, logout
     │       ├── journal/       ← CRUD + attachments + community + heart
@@ -247,13 +247,13 @@ HackDavis 2026/
     │       ├── sos/           ← emergency SOS broadcast
     │       ├── stt/           ← speech-to-text
     │       ├── tts/           ← text-to-speech
-    │       └── users/         ← user search
+    │       └── users/         ← user search + friend requests
     └── styles/
-        ├── globals.css
-        ├── Marketing.module.css
-        ├── CoverPages.module.css
-        ├── Login.module.css
-        ├── AppPreview.module.css
+        ├── globals.css        ← Global resets, base typography, theme colors.
+        ├── Marketing.module.css ← Landing page styles.
+        ├── CoverPages.module.css ← Shared styles for cover apps.
+        ├── Login.module.css   ← Auth form styles.
+        ├── AppPreview.module.css ← Preview page styles.
         ├── calc-mode/
         │   ├── calculatorshell.module.css
         │   ├── calculatordisplay.module.css
