@@ -15,8 +15,8 @@ export default function Button({ onClick }) {
       onClick={onClick}
       style={{
         position: 'fixed',
-        bottom: '20px',
-        left: '20px',
+        bottom: '12px',
+        left: '12px',
         zIndex: 9998,
         width: '20px',
         height: '20px',

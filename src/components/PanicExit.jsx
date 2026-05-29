@@ -111,8 +111,8 @@ export default function PanicExit({ showButton = true }) {
       title="Quick exit"
       style={{
         position: 'fixed',
-        bottom: '20px',
-        right: '20px',
+        bottom: '14px',
+        right: '14px',
         zIndex: 9999,
         border: 'none',
         background: 'transparent',
@@ -123,10 +123,7 @@ export default function PanicExit({ showButton = true }) {
         justifyContent: 'center',
         userSelect: 'none',
         WebkitTapHighlightColor: 'transparent',
-        touchAction: 'manipulation',
-        padding: '10px',
-        minWidth: '44px',
-        minHeight: '44px',
+        padding: 0,
       }}
     >
       <RedLockIcon size={24} />

@@ -253,7 +253,7 @@ export default function AppShell({
         <style>{`html,body{background:${pageThemeColor}!important;height:100%;overflow:hidden}`}</style>
         <meta name="robots" content="noindex, nofollow" />
         <meta name="referrer" content="no-referrer" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
       </Head>
 
       <main style={{ background: pageThemeColor }}>

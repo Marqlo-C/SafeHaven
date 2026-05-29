@@ -76,7 +76,7 @@ export default function LoginPage() {
     <>
       <Head>
         <title>{mode === 'login' ? 'Sign in' : 'Create account'}</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
         <meta name="robots" content="noindex, nofollow" />
         <meta name="referrer" content="no-referrer" />
         <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
