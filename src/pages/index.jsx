@@ -527,15 +527,23 @@ export default function LandingPage() {
                       <ShieldIcon className={styles.buttonIconCta} />
                       Get Started Privately
                     </Link>
-                    <span className={styles.secondaryText}>Encrypted - Invisible - Free Forever</span>
+                    <span className={styles.secondaryText}>
+                      Encrypted <span className={styles.bullet}>•</span> Invisible <span className={styles.bullet}>•</span> Free Forever
+                    </span>
                   </div>
                 </div>
               <div className={styles.heroPhonesCol}>
                 <div className={styles.heroPhonesWrap}>
                   <div className={styles.heroPhone}>
+                    <div className="side-btn" />
+                    <div className="side-btn side-btn-lower" />
+                    <div className="side-btn-power" />
                     <Phone>{<HomeScreen />}</Phone>
                   </div>
                   <div className={`${styles.heroPhone} ${styles.heroPhoneTilted}`}>
+                    <div className="side-btn" />
+                    <div className="side-btn side-btn-lower" />
+                    <div className="side-btn-power" />
                     <Phone>{<CalculatorScreen />}</Phone>
                   </div>
                 </div>
