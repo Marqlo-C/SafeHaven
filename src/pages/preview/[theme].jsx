@@ -1,7 +1,8 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { Home, Siren, Bot, Users, BookLock, MapPin } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { ChevronDown, Home, Siren, Bot, Users, BookLock, MapPin } from 'lucide-react';
 import { Phone } from '../../components/marketing/index-phone';
 import { CalculatorScreen, CalculatorSciScreen, HomeScreen, SosScreen, ChatScreen, FriendsScreen, SafeBotScreen, JournalScreen, AidScreen, AidOverviewScreen } from '../../components/marketing/index-screens';
 import styles from '../../styles/AppPreview.module.css';
@@ -86,6 +87,51 @@ const SCREEN_SETS = {
   ],
 };
 
+function MotionScreenCard({ Component, label, pointer, layoutTick }) {
+  const itemRef = useRef(null);
+  const y = useMotionValue(0);
+  const scale = useMotionValue(0.96);
+  const smoothY = useSpring(y, { stiffness: 360, damping: 28, mass: 0.8 });
+  const smoothScale = useSpring(scale, { stiffness: 360, damping: 28, mass: 0.8 });
+  const [zIndex, setZIndex] = useState(1);
+
+  useEffect(() => {
+    const item = itemRef.current;
+    if (!item || !pointer.inside || pointer.x == null || pointer.y == null) {
+      y.set(0);
+      scale.set(0.96);
+      setZIndex(3);
+      return;
+    }
+
+    const rect = item.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const distanceX = Math.abs(pointer.x - centerX);
+    const distanceY = Math.abs(pointer.y - centerY);
+    const proximity = Math.max(0, 1 - Math.hypot(distanceX / 170, distanceY / 220));
+
+    y.set(-proximity * 30);
+    scale.set(0.96 + proximity * 0.1);
+    setZIndex(Math.round(10 + proximity * 40));
+  }, [pointer.x, pointer.y, pointer.inside, layoutTick, y, scale]);
+
+  return (
+    <motion.div
+      className={styles.screenItem}
+      ref={itemRef}
+      style={{ y: smoothY, scale: smoothScale, zIndex }}
+    >
+      <div className={styles.phoneScaleWrap}>
+        <div className={styles.phoneScale}>
+          <Phone><Component /></Phone>
+        </div>
+      </div>
+      <p className={styles.screenLabel}>{label}</p>
+    </motion.div>
+  );
+}
+
 function InstallModal({ isOpen, onClose, onInstall, canInstall, platform, appName }) {
   if (!isOpen) return null;
   const isIOS = platform === 'ios';
@@ -136,11 +182,15 @@ function InstallModal({ isOpen, onClose, onInstall, canInstall, platform, appNam
 export default function AppPreview({ themeKey }) {
   const app = APPS[themeKey];
   const screens = SCREEN_SETS[themeKey] || [];
+  const screensTrackRef = useRef(null);
+  const detailsRef = useRef(null);
 
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installed, setInstalled] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [platform, setPlatform] = useState('other');
+  const [pointer, setPointer] = useState({ x: null, y: null, inside: false });
+  const [layoutTick, setLayoutTick] = useState(0);
 
   useEffect(() => {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -156,6 +206,23 @@ export default function AppPreview({ themeKey }) {
       window.removeEventListener('appinstalled', onInstalled);
     };
   }, []);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setLayoutTick((tick) => tick + 1);
+    };
+
+    const track = screensTrackRef.current;
+    if (!track) return undefined;
+
+    track.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+
+    return () => {
+      track.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [screens.length]);
 
   const triggerInstall = async () => {
     if (!installPrompt) return;
@@ -196,48 +263,55 @@ export default function AppPreview({ themeKey }) {
       />
 
       <div className={styles.page}>
-        <div className={`${styles.heroBand} ${themeKey === 'calculator' ? styles.heroBandBg : ''}`}>
+        <div className={`${styles.heroBand} ${styles.heroBandBg}`}>
           <header className={styles.header}>
             <Link href="/" className={styles.brand}>
               <img src={LOGO_SRC} alt="" className={styles.logo} />
               SafeHaven
             </Link>
-            <Link href="/downloads" className={styles.backLink}>← Back</Link>
+            <Link href="/downloads" className={styles.backLink}>Choose Different Cover</Link>
           </header>
-
-          {/* App identity row — left-aligned at header margin */}
-          <div className={styles.appHeroWrap}>
-            <div className={styles.appHero}>
-              <img src={app.icon} alt="" className={styles.appIcon} />
-              <div className={styles.appMeta}>
-                <h1 className={styles.appName}>{app.name}</h1>
-                {app.tagline && <p className={styles.appTagline}>{app.tagline}</p>}
-              </div>
-            </div>
-          </div>
 
           {/* Phone mockup gallery */}
           {screens.length > 0 && (
             <div className={styles.screensSection}>
-              <div className={styles.screensTrack}>
+              <div
+                className={styles.screensTrack}
+                ref={screensTrackRef}
+                onMouseMove={(event) => {
+                  setPointer({ x: event.clientX, y: event.clientY, inside: true });
+                }}
+                onMouseLeave={() => {
+                  setPointer({ x: null, y: null, inside: false });
+                }}
+              >
                 <div className={styles.screensScroll}>
-                  {screens.map(({ Component, label }) => (
-                    <div className={styles.screenItem} key={label}>
-                      <div className={styles.phoneScaleWrap}>
-                        <div className={styles.phoneScale}>
-                          <Phone><Component /></Phone>
-                        </div>
-                      </div>
-                      <p className={styles.screenLabel}>{label}</p>
-                    </div>
-                  ))}
+                  {screens.map(({ Component, label }, index) => {
+                    return (
+                      <MotionScreenCard
+                        key={label}
+                        Component={Component}
+                        label={label}
+                        pointer={pointer}
+                        layoutTick={layoutTick}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             </div>
           )}
+          <button
+            type="button"
+            className={styles.scrollCue}
+            aria-label="View app details"
+            onClick={() => detailsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          >
+            <ChevronDown size={22} strokeWidth={2.4} />
+          </button>
         </div>
 
-        <main className={styles.main}>
+        <main className={styles.main} ref={detailsRef}>
           {/* Cover app pitch */}
           <section className={styles.section}>
             <h2 className={styles.pitchTitle}>SafeHaven: A Private Sanctuary, Built into Your Daily Tools</h2>

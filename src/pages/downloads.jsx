@@ -100,12 +100,6 @@ export default function Downloads() {
           </section>
         </main>
 
-        <footer className={styles.footer}>
-          <p className={styles.footerNote}>
-            <strong>If you are in immediate danger</strong>, please use a safe device to call
-            emergency services or the National Hotline at <strong>1-800-799-7233</strong>.
-          </p>
-        </footer>
       </div>
     </>
   );
