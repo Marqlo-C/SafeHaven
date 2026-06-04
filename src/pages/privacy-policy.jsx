@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import { MorphingIcon } from '../components/marketing/index-icons';
 
 export default function PrivacyPolicy() {
   return (
@@ -11,7 +12,7 @@ export default function PrivacyPolicy() {
       <div style={{ minHeight: '100dvh', background: 'var(--color-bg, #faf8f5)', color: 'var(--color-foreground, #2a241f)', fontFamily: 'var(--font-sans, Inter, sans-serif)' }}>
         <header style={{ padding: '32px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-border, #e8e0d4)' }}>
           <Link href="/" style={{ fontWeight: 800, fontSize: 20, letterSpacing: '-0.05em', color: 'var(--color-foreground, #2a241f)', display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-            <img src="/resources/images/logos/safe_harbor_logo.png" alt="" style={{ height: 43, borderRadius: 8 }} />
+            <MorphingIcon small />
             SafeHaven
           </Link>
           <Link href="/" style={{ background: 'rgba(252, 250, 247, 0.5)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(232, 223, 212, 0.6)', padding: '10px 22px', borderRadius: 999, fontSize: 13, fontWeight: 600, color: 'var(--color-foreground, #2a241f)', textDecoration: 'none' }}>← Home</Link>

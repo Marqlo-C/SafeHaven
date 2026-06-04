@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { useEffect, useRef } from 'react';
+import { Cloud } from 'lucide-react';
 import { ShieldIcon, GhostIcon, ChatIcon, ExitIcon, FilledLockIcon, CloudIcon, MorphingIcon } from '../components/marketing/index-icons';
 import { Phone, MobileSlideshow } from '../components/marketing/index-phone';
 import { HomeScreen, CalculatorScreen } from '../components/marketing/index-screens';
@@ -81,12 +82,12 @@ export default function LandingPage() {
       <div className={styles.page}>
         <header className={styles.header}>
           <div className={styles.brand}>
-            <img src={LOGO_SRC} alt="" className={styles.logo} />
+            <MorphingIcon small />
             SafeHaven
           </div>
           <nav className={styles.nav}>
             <Link href="/downloads" className={styles.navButton}>
-              <ShieldIcon className={styles.buttonIcon} />
+              <Cloud className={styles.buttonIcon} />
               Get Protected
             </Link>
           </nav>
@@ -99,8 +100,7 @@ export default function LandingPage() {
             <div className={styles.orbThree} />
             <div className={styles.heroSplit}>
               <div className={styles.heroTextCol}>
-                <MorphingIcon />
-                <div className={styles.badge}>Your private journey starts here</div>
+                <div className={styles.badge}>You are not alone.</div>
                 <h1 className={styles.heroTitle}>
                   Safety, <br />
                   <span className={styles.textGradient}>beautifully disguised.</span>
@@ -228,7 +228,7 @@ export default function LandingPage() {
         <footer className={styles.footer}>
           <div className={styles.footerContent}>
             <div className={`${styles.brand} ${styles.footerBrand}`}>
-              <img src={LOGO_SRC} alt="" className={styles.logo} />
+              <MorphingIcon small />
               SafeHaven
             </div>
             <p className={styles.footerDisclaimer}>

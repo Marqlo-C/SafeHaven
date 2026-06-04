@@ -94,7 +94,17 @@ export const ClockIcon = () => (
   </svg>
 );
 
-export function MorphingIcon() {
+export function MorphingIcon({ small = false }) {
+  if (small) {
+    return (
+      <div className={styles.morphingIconContainerSm}>
+        <Calculator className={styles.morphingIconSm} />
+        <Newspaper className={styles.morphingIconSm} />
+        <CloudSun className={styles.morphingIconSm} />
+        <Shield className={styles.morphingIconSm} />
+      </div>
+    );
+  }
   return (
     <div className={styles.morphingIconContainer}>
       <div className={styles.morphingGlow} />

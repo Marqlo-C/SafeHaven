@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { ChevronDown, Home, Siren, Bot, Users, BookLock, MapPin } from 'lucide-react';
 import { Phone } from '../../components/marketing/index-phone';
+import { MorphingIcon } from '../../components/marketing/index-icons';
 import { WeatherScreen, CalculatorScreen, CalculatorSciScreen, NewsPlusScreen, WorldNewsScreen, SportsNewsScreen, NewsSearchScreen, NewsArticleScreen, HomeScreen, SosScreen, ChatScreen, FriendsScreen, SafeBotScreen, JournalScreen, AidScreen, AidOverviewScreen } from '../../components/marketing/index-screens';
 import styles from '../../styles/AppPreview.module.css';
 import landingStyles from '../../styles/CoverPages.module.css';
@@ -289,7 +290,7 @@ export default function AppPreview({ themeKey }) {
         <div className={`${styles.heroBand} ${styles.heroBandBg}`}>
           <header className={styles.header}>
             <Link href="/" className={styles.brand}>
-              <img src={LOGO_SRC} alt="" className={styles.logo} />
+              <MorphingIcon small />
               SafeHaven
             </Link>
             <Link href="/downloads" className={styles.backLink}>

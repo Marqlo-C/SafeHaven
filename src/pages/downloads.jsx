@@ -2,6 +2,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { MorphingIcon } from '../components/marketing/index-icons';
 import styles from '../styles/downloads.module.css';
 
 const LOGO_SRC = '/resources/images/logos/safe_harbor_logo.png';
@@ -144,7 +145,7 @@ export default function Downloads() {
       <div className={styles.page}>
         <header className={styles.header}>
           <Link href="/" className={styles.brand}>
-            <img src={LOGO_SRC} alt="" className={styles.logo} />
+            <MorphingIcon small />
             SafeHaven
           </Link>
           <nav>
