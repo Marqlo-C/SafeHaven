@@ -2,7 +2,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
-import { ChevronDown, Home, Siren, Bot, Users, BookLock, MapPin } from 'lucide-react';
+import { ChevronDown, Home, Siren, Bot, Users, BookLock, MapPin, VenetianMask } from 'lucide-react';
 import { Phone } from '../../components/marketing/index-phone';
 import { MorphingIcon } from '../../components/marketing/index-icons';
 import { WeatherScreen, CalculatorScreen, CalculatorSciScreen, NewsPlusScreen, WorldNewsScreen, SportsNewsScreen, NewsSearchScreen, NewsArticleScreen, HomeScreen, SosScreen, ChatScreen, FriendsScreen, SafeBotScreen, JournalScreen, AidScreen, AidOverviewScreen } from '../../components/marketing/index-screens';
@@ -294,8 +294,14 @@ export default function AppPreview({ themeKey }) {
               SafeHaven
             </Link>
             <Link href="/downloads" className={styles.backLink}>
-              <span className={styles.labelFull}>Choose Different Cover</span>
-              <span className={styles.labelShort}>Go Back</span>
+              <span className={styles.labelFull}>
+                <VenetianMask className={styles.buttonIcon} aria-hidden="true" />
+                Choose Another Disguise
+              </span>
+              <span className={styles.labelShort}>
+                <VenetianMask className={styles.buttonIcon} aria-hidden="true" />
+                Back to Disguises
+              </span>
             </Link>
           </header>
 

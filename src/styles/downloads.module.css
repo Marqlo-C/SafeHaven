@@ -71,8 +71,19 @@
   border-radius: 8px;
 }
 
-.labelFull { display: inline; }
+.labelFull {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
 .labelShort { display: none; }
+
+.buttonIcon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
 
 .navButton {
   font-family: var(--font-ui);
@@ -116,8 +127,10 @@
 .heroContent {
   position: relative;
   z-index: 1;
-  max-width: 720px;
+  width: 100%;
+  max-width: none;
   margin: 0 auto;
+  transform: translateY(-72px);
 }
 
 .sectionLabel {
@@ -133,12 +146,17 @@
 
 .heroTitle {
   font-family: var(--font-heading);
-  font-size: clamp(42px, 8vw, 76px);
+  font-size: clamp(44px, 10.8vw, 94px);
   font-weight: 800;
   line-height: 1.0;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   margin: 0 0 22px;
   color: #fff;
+  white-space: nowrap;
+}
+
+.heroTitleMobile {
+  display: none;
 }
 
 .textGradient {
@@ -146,12 +164,14 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
-  padding-bottom: 0.08em;
-  margin-bottom: -0.08em;
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
+  -webkit-text-stroke: 1.5px rgba(252, 250, 247, 0.45);
+  paint-order: stroke fill;
 }
 
 .heroSubtitle {
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.65;
   color: rgba(255, 255, 255, 0.78);
   margin: 0 auto;
@@ -163,10 +183,11 @@
 .appGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  max-width: 1040px;
+  gap: 36px;
+  max-width: 2400px;
   margin: 0 auto;
-  padding: 0 48px 80px;
+  padding: 0 24px 80px;
+  transform: translateY(-24px);
   overflow: visible;
 }
 
@@ -181,7 +202,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  min-height: 244px;
+  min-height: 0;
   background:
     linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(252, 250, 247, 0.72)),
     rgba(252, 250, 247, 0.82);
@@ -189,7 +210,7 @@
   backdrop-filter: blur(22px);
   border: 1px solid rgba(255, 255, 255, 0.62);
   border-radius: 24px;
-  padding: 16px;
+  padding: 34px 34px 14px;
   text-decoration: none;
   color: var(--color-foreground);
   transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
@@ -253,116 +274,36 @@
 .coverPreview {
   position: relative;
   z-index: 1;
-  height: 142px;
-  border-radius: 18px;
+  width: calc(100% + 68px);
+  height: 382px;
+  margin: -34px -34px 0;
+  border-radius: 24px 24px 18px 18px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.7);
-  background: #fff;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.82), transparent 34%),
+    linear-gradient(145deg, rgba(238, 228, 216, 0.74), rgba(213, 188, 166, 0.46));
   box-shadow: 0 14px 28px rgba(54, 46, 40, 0.12);
 }
 
-.calcPreview {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 16px;
-  background: linear-gradient(160deg, #151515, #2c2c30);
-}
-
-.calcPreviewDisplay {
-  align-self: flex-end;
-  color: #fff;
-  font-size: 28px;
-  font-weight: 300;
-}
-
-.calcPreviewKeys {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 7px;
-}
-
-.calcPreviewKeys span {
-  height: 21px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  background: rgba(255, 255, 255, 0.18);
-  color: rgba(255, 255, 255, 0.86);
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.newsPreview {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 16px;
-  background:
-    linear-gradient(to top, rgba(0, 0, 0, 0.86), rgba(0, 0, 0, 0.18)),
-    linear-gradient(135deg, #0f172a, #2563eb 58%, #f97316);
-}
-
-.newsPreviewBrand {
-  color: #ff7a30;
-  font-size: 11px;
-  font-weight: 900;
-  margin-bottom: 6px;
-}
-
-.newsPreview strong {
-  max-width: 220px;
-  color: #fff;
-  font-size: 18px;
-  line-height: 1.08;
-}
-
-.newsPreview div {
-  display: flex;
-  gap: 7px;
-  margin-top: 12px;
-}
-
-.newsPreview div span {
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 4px 8px;
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.weatherPreview {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 18px;
-  background: linear-gradient(155deg, #1174b8 0%, #51a9d8 48%, #c8e6ef 100%);
-  color: #fff;
-}
-
-.weatherPreviewSun {
+.coverPreview::before {
+  content: '';
   position: absolute;
-  top: 22px;
-  right: 24px;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: #ffd166;
-  box-shadow: 0 0 34px rgba(255, 209, 102, 0.64);
+  inset: 0;
+  background: linear-gradient(180deg, transparent 48%, rgba(34, 30, 24, 0.18));
+  pointer-events: none;
+  z-index: 2;
 }
 
-.weatherPreviewTemp {
-  font-size: 54px;
-  font-weight: 200;
-  line-height: 0.9;
-}
-
-.weatherPreview small {
-  margin-top: 8px;
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 12px;
-  font-weight: 700;
+.coverPhoneScale {
+  position: absolute;
+  left: 50%;
+  top: 18px;
+  width: 282px;
+  height: 600px;
+  transform: translateX(-50%) scale(0.66);
+  transform-origin: top center;
+  z-index: 1;
 }
 
 .cardFooter {
@@ -370,10 +311,10 @@
   z-index: 1;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 12px;
-  margin-top: auto;
-  padding-top: 12px;
+  margin-top: 10px;
+  padding-top: 8px;
   border-top: 1px solid rgba(54, 46, 40, 0.09);
 }
 
@@ -381,13 +322,7 @@
   color: var(--color-muted);
   font-size: 11px;
   line-height: 1.3;
-}
-
-.cardFooter strong {
-  flex-shrink: 0;
-  color: var(--color-accent);
-  font-size: 12px;
-  font-weight: 800;
+  text-align: center;
 }
 
 /* ── Responsive ───────────────────────────────────────────────────────────── */
@@ -407,7 +342,7 @@
   }
 
   .hero {
-    padding: clamp(92px, 13vh, 128px) 48px clamp(30px, 4vh, 48px);
+    padding: clamp(92px, 13vh, 128px) 48px 0;
     flex-shrink: 0;
   }
 
@@ -416,27 +351,36 @@
   }
 
   .heroTitle {
-    font-size: clamp(42px, 6vw, 64px);
+    font-size: clamp(44px, 10.8vw, 94px);
     margin-bottom: 16px;
   }
 
   .heroSubtitle {
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.5;
     max-width: 880px;
   }
 
   .appGrid {
-    padding: 0 48px clamp(28px, 4vh, 44px);
+    padding: 0 24px clamp(28px, 4vh, 44px);
+    transform: translateY(-36px);
   }
 
   .appCard {
-    padding: 24px 24px 22px;
+    padding: 38px 38px 14px;
     border-radius: 24px;
+    min-height: 0;
   }
 
   .coverPreview {
-    height: 128px;
+    width: calc(100% + 76px);
+    height: 360px;
+    margin: -38px -38px 0;
+  }
+
+  .coverPhoneScale {
+    top: 18px;
+    transform: translateX(-50%) scale(0.63);
   }
 
   .cardTop {
@@ -475,23 +419,35 @@
   }
 
   .appCardMotion {
-    flex: 0 0 min(82vw, 360px);
+    flex: 0 0 min(94vw, 740px);
+    padding: 12px 8px 18px;
     scroll-snap-align: center;
   }
 
   .appCard {
-    padding: 24px;
-    min-height: 252px;
+    padding: 38px 38px 16px;
+    min-height: 0;
   }
 
   .coverPreview {
-    height: 136px;
+    width: calc(100% + 76px);
+    height: 352px;
+    margin: -38px -38px 0;
+  }
+
+  .coverPhoneScale {
+    top: 18px;
+    transform: translateX(-50%) scale(0.62);
   }
 }
 
 @media (max-width: 600px) {
   .labelFull { display: none; }
-  .labelShort { display: inline; }
+  .labelShort {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
 
   .navButton {
     font-size: 15px;
@@ -503,8 +459,12 @@
   }
 
   .hero {
-    padding: 116px 24px 60px;
+    padding: 116px 24px 12px;
     text-align: left;
+  }
+
+  .heroContent {
+    transform: translateY(-40px);
   }
 
   .sectionLabel {
@@ -512,28 +472,51 @@
   }
 
   .heroTitle {
-    font-size: 76px;
+    font-size: 68px;
+    white-space: normal;
+  }
+
+  .heroTitleDesktop {
+    display: none;
+  }
+
+  .heroTitleMobile {
+    display: block;
+  }
+
+  .textGradient {
+    display: block;
   }
 
   .heroSubtitle {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .appGrid {
-    padding: 0 16px 56px;
-    scroll-padding-inline: 16px;
+    padding: 0 22px 56px;
+    scroll-padding-inline: 22px;
+    transform: translateY(-28px);
   }
 
   .appCardMotion {
-    flex-basis: min(84vw, 328px);
+    flex-basis: min(78vw, 340px);
+    padding: 10px 8px 16px;
   }
 
   .appCard {
-    min-height: 240px;
+    padding: 28px 28px 12px;
+    min-height: 0;
   }
 
   .coverPreview {
-    height: 124px;
+    width: calc(100% + 56px);
+    height: 338px;
+    margin: -28px -28px 0;
+  }
+
+  .coverPhoneScale {
+    top: 14px;
+    transform: translateX(-50%) scale(0.72);
   }
 
 }

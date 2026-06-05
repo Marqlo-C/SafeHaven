@@ -82,8 +82,19 @@
   border-radius: 8px;
 }
 
-.labelFull { display: inline; }
+.labelFull {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
 .labelShort { display: none; }
+
+.buttonIcon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
 
 .backLink {
   font-family: var(--font-ui);
@@ -777,7 +788,11 @@
 
 @media (max-width: 760px) {
   .labelFull { display: none; }
-  .labelShort { display: inline; }
+  .labelShort {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
 
   .header {
     padding: 20px 24px;

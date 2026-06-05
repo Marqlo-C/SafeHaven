@@ -2,7 +2,10 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { Home } from 'lucide-react';
 import { MorphingIcon } from '../components/marketing/index-icons';
+import { Phone } from '../components/marketing/index-phone';
+import { CalculatorScreen, NewsPlusScreen, WeatherScreen } from '../components/marketing/index-screens';
 import styles from '../styles/downloads.module.css';
 
 const LOGO_SRC = '/resources/images/logos/safe_harbor_logo.png';
@@ -12,56 +15,31 @@ const APPS = [
     theme: 'calculator',
     name: 'Calculator Pro',
     icon: '/resources/images/logos/calculator_icon.png',
-    preview: 'calculator',
+    Preview: CalculatorScreen,
     installAs: 'Calculator Pro',
   },
   {
     theme: 'news',
     name: 'Daily News Reader',
     icon: '/resources/images/logos/news_icon.png',
-    preview: 'news',
+    Preview: NewsPlusScreen,
     installAs: 'Daily News Reader',
   },
   {
     theme: 'weather',
     name: 'Weather Now',
     icon: '/resources/images/logos/weather_icon.png',
-    preview: 'weather',
+    Preview: WeatherScreen,
     installAs: 'Weather Now',
   },
 ];
 
-function CardPreview({ type }) {
-  if (type === 'calculator') {
-    return (
-      <div className={`${styles.coverPreview} ${styles.calcPreview}`}>
-        <span className={styles.calcPreviewDisplay}>1,240</span>
-        <div className={styles.calcPreviewKeys}>
-          {['AC', '%', '÷', '7', '8', '9', '4', '5', '6'].map((key) => <span key={key}>{key}</span>)}
-        </div>
-      </div>
-    );
-  }
-
-  if (type === 'news') {
-    return (
-      <div className={`${styles.coverPreview} ${styles.newsPreview}`}>
-        <span className={styles.newsPreviewBrand}>News+</span>
-        <strong>Global markets rise as technology shares lead</strong>
-        <div>
-          <span>World</span>
-          <span>Sports</span>
-          <span>Search</span>
-        </div>
-      </div>
-    );
-  }
-
+function CardPreview({ Preview }) {
   return (
-    <div className={`${styles.coverPreview} ${styles.weatherPreview}`}>
-      <span className={styles.weatherPreviewSun} />
-      <span className={styles.weatherPreviewTemp}>72&deg;</span>
-      <small>Sunny now</small>
+    <div className={styles.coverPreview}>
+      <div className={styles.coverPhoneScale}>
+        <Phone><Preview /></Phone>
+      </div>
     </div>
   );
 }
@@ -102,13 +80,12 @@ function MotionAppCard({ app, pointer, layoutTick }) {
       style={{ y: smoothY, scale: smoothScale, zIndex }}
     >
       <Link href={`/preview/${app.theme}`} className={styles.appCard}>
-        <CardPreview type={app.preview} />
+        <CardPreview Preview={app.Preview} />
         <div className={styles.cardTop}>
           <img src={app.icon} alt="" className={styles.cardIcon} />
         </div>
         <div className={styles.cardFooter}>
           <span>Installs as {app.installAs}</span>
-          <strong>Preview cover</strong>
         </div>
       </Link>
     </motion.div>
@@ -150,8 +127,14 @@ export default function Downloads() {
           </Link>
           <nav>
             <Link href="/" className={styles.navButton}>
-              <span className={styles.labelFull}>Back to Home</span>
-              <span className={styles.labelShort}>Go Home</span>
+              <span className={styles.labelFull}>
+                <Home className={styles.buttonIcon} aria-hidden="true" />
+                Back to Home
+              </span>
+              <span className={styles.labelShort}>
+                <Home className={styles.buttonIcon} aria-hidden="true" />
+                Back to Home
+              </span>
             </Link>
           </nav>
         </header>
@@ -159,9 +142,11 @@ export default function Downloads() {
         <main className={styles.main}>
           <section className={styles.hero}>
             <div className={styles.heroContent}>
-              <span className={styles.sectionLabel}>Choose your cover</span>
-              <h1 className={styles.heroTitle}>
-                Select your <br />
+              <h1 className={`${styles.heroTitle} ${styles.heroTitleDesktop}`}>
+                Select your&nbsp;<span className={styles.textGradient}>disguise.</span>
+              </h1>
+              <h1 className={`${styles.heroTitle} ${styles.heroTitleMobile}`}>
+                Select your
                 <span className={styles.textGradient}>disguise.</span>
               </h1>
               <p className={styles.heroSubtitle}>
