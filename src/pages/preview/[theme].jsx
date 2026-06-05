@@ -36,7 +36,7 @@ const APPS = {
     name: 'Daily News Reader',
     tagline: 'This interface is a fully encrypted vault designed for the moments you need it most. Masked as a news reader so your safety is never compromised.',
     description:
-      "You shouldn't have to choose between your safety and your privacy. SafeHaven gives you both — hidden inside a news reader. Anyone who opens it sees a legitimate app with real live headlines. There is nothing here to find — unless you want there to be.",
+      "You shouldn't have to compromise your safety for the sake of privacy. SafeHaven provides a secure, hidden sanctuary that blends perfectly into your device, disguised as a standard news reader. To everyone else, it's just a place to follow the headlines. To you, it's a lifeline.",
     icon: '/resources/images/logos/news_icon.png',
     appleTouchIcon: '/resources/images/logos/news_icon_192x192.png',
     manifestUrl: '/manifests/news.json',
@@ -47,7 +47,7 @@ const APPS = {
     name: 'Weather Now',
     tagline: 'This interface is a fully encrypted vault designed for the moments you need it most. Masked as a weather app so your safety is never compromised.',
     description:
-      "You shouldn't have to choose between your safety and your privacy. SafeHaven gives you both — hidden inside a weather app. Simple. Everyday. The kind of app no one looks twice at. There is nothing here to find — unless you want there to be.",
+      "You shouldn't have to compromise your safety for the sake of privacy. SafeHaven provides a secure, hidden sanctuary that blends perfectly into your device, disguised as a standard weather app. To everyone else, it's just a tool for checking the forecast. To you, it's a lifeline.",
     icon: '/resources/images/logos/weather_icon.png',
     appleTouchIcon: '/resources/images/logos/weather_icon_192x192.png',
     manifestUrl: '/manifests/weather.json',
@@ -300,7 +300,7 @@ export default function AppPreview({ themeKey }) {
               </span>
               <span className={styles.labelShort}>
                 <VenetianMask className={styles.buttonIcon} aria-hidden="true" />
-                Back to Disguises
+                Back
               </span>
             </Link>
           </header>

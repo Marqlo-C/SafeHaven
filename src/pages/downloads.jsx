@@ -133,7 +133,7 @@ export default function Downloads() {
               </span>
               <span className={styles.labelShort}>
                 <Home className={styles.buttonIcon} aria-hidden="true" />
-                Back to Home
+                Home
               </span>
             </Link>
           </nav>
